@@ -1,0 +1,6 @@
+# Unreal generated / runtime folders
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+*.log

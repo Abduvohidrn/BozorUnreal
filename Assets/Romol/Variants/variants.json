@@ -1,0 +1,44 @@
+[
+  {
+    "name": "01_Kok_Moychechak",
+    "label": "KO'K  /  MOYCHECHAK",
+    "blend": "01_Kok_Moychechak.blend",
+    "base_color": "T_Romol_01_Kok_Moychechak.png",
+    "material": "M_Romol_01_Kok_Moychechak"
+  },
+  {
+    "name": "02_Zumrad_Atirgul",
+    "label": "ZUMRAD  /  ATIRGUL",
+    "blend": "02_Zumrad_Atirgul.blend",
+    "base_color": "T_Romol_02_Zumrad_Atirgul.png",
+    "material": "M_Romol_02_Zumrad_Atirgul"
+  },
+  {
+    "name": "03_Qora_Oltin",
+    "label": "QORA  /  OLTIN GUL",
+    "blend": "03_Qora_Oltin.blend",
+    "base_color": "T_Romol_03_Qora_Oltin.png",
+    "material": "M_Romol_03_Qora_Oltin"
+  },
+  {
+    "name": "04_Sutrang_Lola",
+    "label": "SUTRANG  /  LOLA",
+    "blend": "04_Sutrang_Lola.blend",
+    "base_color": "T_Romol_04_Sutrang_Lola.png",
+    "material": "M_Romol_04_Sutrang_Lola"
+  },
+  {
+    "name": "05_Binafsha_Yulduz",
+    "label": "BINAFSHA  /  YULDUZGUL",
+    "blend": "05_Binafsha_Yulduz.blend",
+    "base_color": "T_Romol_05_Binafsha_Yulduz.png",
+    "material": "M_Romol_05_Binafsha_Yulduz"
+  },
+  {
+    "name": "06_Bordo_Chinnigul",
+    "label": "BORDO  /  CHINNIGUL",
+    "blend": "06_Bordo_Chinnigul.blend",
+    "base_color": "T_Romol_06_Bordo_Chinnigul.png",
+    "material": "M_Romol_06_Bordo_Chinnigul"
+  }
+]

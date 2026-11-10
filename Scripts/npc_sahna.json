@@ -1,0 +1,4541 @@
+{
+ "npcs": [
+  {
+   "name": "BozorNpc_267",
+   "label": "Sotuvchi_01",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    500.0,
+    -430.5,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.027
+  },
+  {
+   "name": "BozorNpc_268",
+   "label": "Sotuvchi_02",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    900.0,
+    -430.5,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_XaridorAyol_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 1.013
+  },
+  {
+   "name": "BozorNpc_269",
+   "label": "Sotuvchi_03",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1300.0,
+    -430.5,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_casual_02_a",
+   "scale": 0.977
+  },
+  {
+   "name": "BozorNpc_270",
+   "label": "Sotuvchi_04",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2000.0,
+    -425.4,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 0.974
+  },
+  {
+   "name": "BozorNpc_271",
+   "label": "Sotuvchi_05",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2400.0,
+    -425.4,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.003
+  },
+  {
+   "name": "BozorNpc_272",
+   "label": "Sotuvchi_06",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2860.0,
+    -430.5,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_waiter_02",
+   "scale": 1.01
+  },
+  {
+   "name": "BozorNpc_273",
+   "label": "Sotuvchi_07",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    500.0,
+    -778.9,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 1.006
+  },
+  {
+   "name": "BozorNpc_274",
+   "label": "Sotuvchi_08",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    400.0,
+    -778.9,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.004
+  },
+  {
+   "name": "BozorNpc_275",
+   "label": "Sotuvchi_09",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    925.0,
+    -769.6,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 0.983
+  },
+  {
+   "name": "BozorNpc_276",
+   "label": "Sotuvchi_10",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1300.0,
+    -773.7,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_waiter_02",
+   "scale": 1.025
+  },
+  {
+   "name": "BozorNpc_277",
+   "label": "Sotuvchi_11",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2000.0,
+    -746.8,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_casual_02_a",
+   "scale": 1.012
+  },
+  {
+   "name": "BozorNpc_278",
+   "label": "Sotuvchi_12",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 3,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2400.0,
+    -769.5,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.99
+  },
+  {
+   "name": "BozorNpc_279",
+   "label": "Sotuvchi_13",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2800.0,
+    -773.7,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 0.998
+  },
+  {
+   "name": "BozorNpc_280",
+   "label": "Sotuvchi_14",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    500.0,
+    430.5,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 0.979
+  },
+  {
+   "name": "BozorNpc_281",
+   "label": "Sotuvchi_15",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    900.0,
+    430.5,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_casual_02_a",
+   "scale": 0.971
+  },
+  {
+   "name": "BozorNpc_282",
+   "label": "Sotuvchi_16",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 2,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1000.0,
+    430.5,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.009
+  },
+  {
+   "name": "BozorNpc_283",
+   "label": "Sotuvchi_17",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1300.0,
+    430.5,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 0.979
+  },
+  {
+   "name": "BozorNpc_284",
+   "label": "Sotuvchi_18",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2000.0,
+    550.4,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_XaridorAyol_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 0.977
+  },
+  {
+   "name": "BozorNpc_285",
+   "label": "Sotuvchi_19",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 2,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2460.0,
+    425.4,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_waiter_02",
+   "scale": 0.989
+  },
+  {
+   "name": "BozorNpc_286",
+   "label": "Sotuvchi_20",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2740.0,
+    430.5,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 0.99
+  },
+  {
+   "name": "BozorNpc_287",
+   "label": "Sotuvchi_21",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    500.0,
+    778.9,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.005
+  },
+  {
+   "name": "BozorNpc_288",
+   "label": "Sotuvchi_22",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 3,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    900.0,
+    774.6,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 0.986
+  },
+  {
+   "name": "BozorNpc_289",
+   "label": "Sotuvchi_23",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1000.0,
+    774.6,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_casual_02_a",
+   "scale": 0.999
+  },
+  {
+   "name": "BozorNpc_290",
+   "label": "Sotuvchi_24",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1300.0,
+    773.7,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 1.022
+  },
+  {
+   "name": "BozorNpc_291",
+   "label": "Sotuvchi_25",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2000.0,
+    740.9,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 1.029
+  },
+  {
+   "name": "BozorNpc_292",
+   "label": "Sotuvchi_26",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2400.0,
+    769.5,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_waiter_02",
+   "scale": 0.996
+  },
+  {
+   "name": "BozorNpc_293",
+   "label": "Sotuvchi_27",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2300.0,
+    769.5,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_casual_02_a",
+   "scale": 1.004
+  },
+  {
+   "name": "BozorNpc_294",
+   "label": "Sotuvchi_28",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2800.0,
+    773.7,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.016
+  },
+  {
+   "name": "BozorNpc_295",
+   "label": "Sotuvchi_29",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 2,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3429.4,
+    -540.6,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_waiter_02",
+   "scale": 0.993
+  },
+  {
+   "name": "BozorNpc_296",
+   "label": "Sotuvchi_30",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3679.4,
+    -540.6,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_waiter_02",
+   "scale": 0.984
+  },
+  {
+   "name": "BozorNpc_297",
+   "label": "Sotuvchi_31",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3929.4,
+    -540.6,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_XaridorAyol_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 1.019
+  },
+  {
+   "name": "BozorNpc_298",
+   "label": "Sotuvchi_32",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 3,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    4179.4,
+    -540.6,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 0.981
+  },
+  {
+   "name": "BozorNpc_299",
+   "label": "Sotuvchi_33",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3570.0,
+    -1465.0,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.013
+  },
+  {
+   "name": "BozorNpc_300",
+   "label": "Sotuvchi_34",
+   "role": "SOTUVCHI",
+   "female": false,
+   "walk_style": 2,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3570.0,
+    -990.0,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_clerk_01",
+   "scale": 1.026
+  },
+  {
+   "name": "BozorNpc_301",
+   "label": "Sotuvchi_35",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 3,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    4090.0,
+    -990.0,
+    90.0
+   ],
+   "yaw": 90.0,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 1.014
+  },
+  {
+   "name": "BozorNpc_302",
+   "label": "Sotuvchi_36",
+   "role": "SOTUVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3840.6,
+    700.6,
+    90.0
+   ],
+   "yaw": -90.0,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 0.997
+  },
+  {
+   "name": "BozorNpc_303",
+   "label": "Xaridor_01",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 94.59687805175781,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    4118.4,
+    -54.6,
+    92.5
+   ],
+   "yaw": -92.1,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 1.022
+  },
+  {
+   "name": "BozorNpc_304",
+   "label": "Xaridor_02",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 119.27729797363281,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1735.5,
+    1039.2,
+    92.5
+   ],
+   "yaw": 88.7,
+   "body": "SKM_MH_TalabaYigit_BodyMesh",
+   "kiyim": "SK_ma_sport_01_c",
+   "scale": 0.99
+  },
+  {
+   "name": "BozorNpc_305",
+   "label": "Xaridor_03",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 111.15461730957031,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1676.9,
+    -28.2,
+    92.5
+   ],
+   "yaw": 41.2,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_casual_02_c",
+   "scale": 1.016
+  },
+  {
+   "name": "BozorNpc_306",
+   "label": "Xaridor_04",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 96.62797546386719,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3994.0,
+    -42.4,
+    92.5
+   ],
+   "yaw": 105.8,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 0.994
+  },
+  {
+   "name": "BozorNpc_307",
+   "label": "Xaridor_05",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 101.93543243408203,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    657.8,
+    -1109.5,
+    92.5
+   ],
+   "yaw": 24.7,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_casual_jacket_01_a",
+   "scale": 0.974
+  },
+  {
+   "name": "BozorNpc_308",
+   "label": "Xaridor_06",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 90.99070739746094,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2212.2,
+    38.5,
+    92.5
+   ],
+   "yaw": -50.0,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 0.981
+  },
+  {
+   "name": "BozorNpc_309",
+   "label": "Xaridor_07",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 108.48002624511719,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    323.4,
+    -77.4,
+    92.5
+   ],
+   "yaw": 15.0,
+   "body": "SKM_MH_YoshDehqon_BodyMesh",
+   "kiyim": "SK_ma_casual_02_b",
+   "scale": 0.983
+  },
+  {
+   "name": "BozorNpc_310",
+   "label": "Xaridor_08",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 103.27105712890625,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1524.2,
+    -999.1,
+    92.5
+   ],
+   "yaw": 146.8,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_casual_02_c",
+   "scale": 0.997
+  },
+  {
+   "name": "BozorNpc_311",
+   "label": "Xaridor_09",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 3,
+   "speed": 68.23592376708984,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2700.3,
+    -2.9,
+    92.5
+   ],
+   "yaw": -112.7,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.979
+  },
+  {
+   "name": "BozorNpc_312",
+   "label": "Xaridor_10",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 3,
+   "speed": 68.44860076904297,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3726.7,
+    -649.8,
+    92.5
+   ],
+   "yaw": 174.4,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 0.975
+  },
+  {
+   "name": "BozorNpc_313",
+   "label": "Xaridor_11",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 105.62828826904297,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2618.2,
+    -969.1,
+    92.5
+   ],
+   "yaw": -113.8,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_casual_jacket_01_b",
+   "scale": 1.004
+  },
+  {
+   "name": "BozorNpc_314",
+   "label": "Xaridor_12",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 3,
+   "speed": 76.32180786132812,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1753.3,
+    656.1,
+    92.5
+   ],
+   "yaw": 111.2,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.978
+  },
+  {
+   "name": "BozorNpc_315",
+   "label": "Xaridor_13",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 2,
+   "speed": 89.66943359375,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    4148.4,
+    -92.5,
+    92.5
+   ],
+   "yaw": -78.7,
+   "body": "SKM_MH_DehqonOta_BodyMesh",
+   "kiyim": "SK_ma_business_01_b",
+   "scale": 0.985
+  },
+  {
+   "name": "BozorNpc_316",
+   "label": "Xaridor_14",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 116.11322021484375,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1053.7,
+    22.2,
+    92.5
+   ],
+   "yaw": 69.7,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_sport_01_a",
+   "scale": 0.99
+  },
+  {
+   "name": "BozorNpc_317",
+   "label": "Xaridor_15",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 114.85169219970703,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3971.0,
+    -60.0,
+    92.5
+   ],
+   "yaw": 29.1,
+   "body": "SKM_MH_TalabaYigit_BodyMesh",
+   "kiyim": "SK_ma_casual_02_b",
+   "scale": 0.981
+  },
+  {
+   "name": "BozorNpc_318",
+   "label": "Xaridor_16",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 84.04110717773438,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2460.7,
+    1066.9,
+    92.5
+   ],
+   "yaw": 77.4,
+   "body": "SKM_MH_XaridorAyol_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 0.99
+  },
+  {
+   "name": "BozorNpc_319",
+   "label": "Guruh00_Boshliq",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 94.14119720458984,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2549.9,
+    1063.9,
+    92.5
+   ],
+   "yaw": -121.1,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 0.982
+  },
+  {
+   "name": "BozorNpc_320",
+   "label": "Guruh00_Hamroh1",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 94.14119720458984,
+   "leader": "Guruh00_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2601.3,
+    1033.0,
+    92.5
+   ],
+   "yaw": -121.1,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 0.983
+  },
+  {
+   "name": "BozorNpc_321",
+   "label": "Guruh00_Hamroh2",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 94.14119720458984,
+   "leader": "Guruh00_Boshliq",
+   "slot": 2,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2498.5,
+    1094.9,
+    92.5
+   ],
+   "yaw": -121.1,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 0.978
+  },
+  {
+   "name": "BozorNpc_322",
+   "label": "Guruh01_Boshliq",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 83.92549896240234,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1553.2,
+    650.8,
+    92.5
+   ],
+   "yaw": -51.0,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 0.996
+  },
+  {
+   "name": "BozorNpc_323",
+   "label": "Guruh01_Hamroh1",
+   "role": "HAMROH",
+   "female": false,
+   "walk_style": 0,
+   "speed": 83.92549896240234,
+   "leader": "Guruh01_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1599.8,
+    688.6,
+    92.5
+   ],
+   "yaw": -51.0,
+   "body": "SKM_MH_TalabaYigit_BodyMesh",
+   "kiyim": "SK_ma_sport_01_a",
+   "scale": 0.992
+  },
+  {
+   "name": "BozorNpc_324",
+   "label": "Guruh02_Boshliq",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 3,
+   "speed": 83.03672790527344,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3542.9,
+    52.0,
+    92.5
+   ],
+   "yaw": 89.6,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 0.97
+  },
+  {
+   "name": "BozorNpc_325",
+   "label": "Guruh02_Hamroh1",
+   "role": "HAMROH",
+   "female": false,
+   "walk_style": 0,
+   "speed": 83.03672790527344,
+   "leader": "Guruh02_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3482.9,
+    52.4,
+    92.5
+   ],
+   "yaw": 89.6,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_casual_02_c",
+   "scale": 0.982
+  },
+  {
+   "name": "BozorNpc_326",
+   "label": "Guruh03_Boshliq",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 87.3968276977539,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    4066.6,
+    73.7,
+    92.5
+   ],
+   "yaw": 33.2,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 0.977
+  },
+  {
+   "name": "BozorNpc_327",
+   "label": "Guruh03_Hamroh1",
+   "role": "HAMROH",
+   "female": false,
+   "walk_style": 2,
+   "speed": 87.3968276977539,
+   "leader": "Guruh03_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    4033.7,
+    123.9,
+    92.5
+   ],
+   "yaw": 33.2,
+   "body": "SKM_MH_DehqonOta_BodyMesh",
+   "kiyim": "SK_ma_business_01_b",
+   "scale": 0.98
+  },
+  {
+   "name": "BozorNpc_328",
+   "label": "Guruh04_Boshliq",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 97.40665435791016,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3991.1,
+    81.9,
+    92.5
+   ],
+   "yaw": -73.3,
+   "body": "SKM_MH_YoshDehqon_BodyMesh",
+   "kiyim": "SK_ma_sport_01_c",
+   "scale": 0.998
+  },
+  {
+   "name": "BozorNpc_329",
+   "label": "Guruh04_Hamroh1",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 97.40665435791016,
+   "leader": "Guruh04_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    4048.6,
+    99.1,
+    92.5
+   ],
+   "yaw": -73.3,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_sport_02_a",
+   "scale": 0.998
+  },
+  {
+   "name": "BozorNpc_330",
+   "label": "Guruh05_Boshliq",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 96.15105438232422,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    627.0,
+    -110.9,
+    92.5
+   ],
+   "yaw": 161.9,
+   "body": "SKM_MH_KochaSavdogari_BodyMesh",
+   "kiyim": "SK_ma_casual_02_c",
+   "scale": 0.97
+  },
+  {
+   "name": "BozorNpc_331",
+   "label": "Guruh05_Hamroh1",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 96.15105438232422,
+   "leader": "Guruh05_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    608.4,
+    -167.9,
+    92.5
+   ],
+   "yaw": 161.9,
+   "body": "SKM_MH_XaridorAyol_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 1.017
+  },
+  {
+   "name": "BozorNpc_332",
+   "label": "Guruh06_Boshliq",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 92.55655670166016,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2370.3,
+    84.5,
+    92.5
+   ],
+   "yaw": 89.0,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 1.01
+  },
+  {
+   "name": "BozorNpc_333",
+   "label": "Guruh06_Hamroh1",
+   "role": "HAMROH",
+   "female": false,
+   "walk_style": 2,
+   "speed": 92.55655670166016,
+   "leader": "Guruh06_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2310.3,
+    85.6,
+    92.5
+   ],
+   "yaw": 89.0,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_business_01_b",
+   "scale": 0.977
+  },
+  {
+   "name": "BozorNpc_334",
+   "label": "Guruh07_Boshliq",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 83.3211669921875,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1632.8,
+    590.4,
+    92.5
+   ],
+   "yaw": -114.7,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 0.984
+  },
+  {
+   "name": "BozorNpc_335",
+   "label": "Guruh07_Hamroh1",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 83.3211669921875,
+   "leader": "Guruh07_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1687.3,
+    565.3,
+    92.5
+   ],
+   "yaw": -114.7,
+   "body": "SKM_MH_XaridorAyol_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 1.008
+  },
+  {
+   "name": "BozorNpc_336",
+   "label": "Guruh08_Boshliq",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 105.66336822509766,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1912.5,
+    -1063.2,
+    92.5
+   ],
+   "yaw": -162.9,
+   "body": "SKM_MH_YoshDehqon_BodyMesh",
+   "kiyim": "SK_ma_sport_01_c",
+   "scale": 0.989
+  },
+  {
+   "name": "BozorNpc_337",
+   "label": "Guruh08_Hamroh1",
+   "role": "HAMROH",
+   "female": false,
+   "walk_style": 2,
+   "speed": 105.66336822509766,
+   "leader": "Guruh08_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1930.1,
+    -1120.5,
+    92.5
+   ],
+   "yaw": -162.9,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_business_01_b",
+   "scale": 1.027
+  },
+  {
+   "name": "BozorNpc_338",
+   "label": "Guruh08_Hamroh2",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 3,
+   "speed": 105.66336822509766,
+   "leader": "Guruh08_Boshliq",
+   "slot": 2,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1894.9,
+    -1005.8,
+    92.5
+   ],
+   "yaw": -162.9,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 1.013
+  },
+  {
+   "name": "BozorNpc_339",
+   "label": "Guruh09_Boshliq",
+   "role": "XARIDOR",
+   "female": true,
+   "walk_style": 1,
+   "speed": 80.79206085205078,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2070.7,
+    87.5,
+    92.5
+   ],
+   "yaw": 67.0,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.972
+  },
+  {
+   "name": "BozorNpc_340",
+   "label": "Guruh09_Hamroh1",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 80.79206085205078,
+   "leader": "Guruh09_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2015.5,
+    111.0,
+    92.5
+   ],
+   "yaw": 67.0,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 0.984
+  },
+  {
+   "name": "BozorNpc_341",
+   "label": "Guruh10_Boshliq",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 2,
+   "speed": 109.1847152709961,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1763.0,
+    8.8,
+    92.5
+   ],
+   "yaw": -119.9,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_casual_jacket_01_a",
+   "scale": 1.029
+  },
+  {
+   "name": "BozorNpc_342",
+   "label": "Guruh10_Hamroh1",
+   "role": "HAMROH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 109.1847152709961,
+   "leader": "Guruh10_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1815.0,
+    -21.1,
+    92.5
+   ],
+   "yaw": -119.9,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 1.01
+  },
+  {
+   "name": "BozorNpc_343",
+   "label": "Guruh10_Hamroh2",
+   "role": "HAMROH",
+   "female": false,
+   "walk_style": 0,
+   "speed": 109.1847152709961,
+   "leader": "Guruh10_Boshliq",
+   "slot": 2,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1711.0,
+    38.7,
+    92.5
+   ],
+   "yaw": -119.9,
+   "body": "SKM_MH_YoshDehqon_BodyMesh",
+   "kiyim": "SK_ma_sport_01_a",
+   "scale": 1.02
+  },
+  {
+   "name": "BozorNpc_344",
+   "label": "Guruh11_Boshliq",
+   "role": "XARIDOR",
+   "female": false,
+   "walk_style": 0,
+   "speed": 108.86750030517578,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1467.6,
+    -8.7,
+    92.5
+   ],
+   "yaw": -115.0,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_casual_02_a",
+   "scale": 1.024
+  },
+  {
+   "name": "BozorNpc_345",
+   "label": "Guruh11_Hamroh1",
+   "role": "HAMROH",
+   "female": false,
+   "walk_style": 0,
+   "speed": 108.86750030517578,
+   "leader": "Guruh11_Boshliq",
+   "slot": 1,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1522.0,
+    -34.0,
+    92.5
+   ],
+   "yaw": -115.0,
+   "body": "SKM_MH_TalabaYigit_BodyMesh",
+   "kiyim": "SK_ma_casual_02_b",
+   "scale": 1.001
+  },
+  {
+   "name": "BozorNpc_346",
+   "label": "Yolovchi_01",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 109.11289978027344,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2121.6,
+    -1018.8,
+    92.5
+   ],
+   "yaw": -147.9,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 1.007
+  },
+  {
+   "name": "BozorNpc_347",
+   "label": "Yolovchi_02",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 3,
+   "speed": 94.20934295654297,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1464.7,
+    -39.8,
+    92.5
+   ],
+   "yaw": 131.0,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.994
+  },
+  {
+   "name": "BozorNpc_348",
+   "label": "Yolovchi_03",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 108.97258758544922,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2371.8,
+    1.0,
+    92.5
+   ],
+   "yaw": 151.8,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 1.019
+  },
+  {
+   "name": "BozorNpc_349",
+   "label": "Yolovchi_04",
+   "role": "YOLOVCHI",
+   "female": false,
+   "walk_style": 2,
+   "speed": 106.50547790527344,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1922.4,
+    1056.2,
+    92.5
+   ],
+   "yaw": -120.6,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_business_01_b",
+   "scale": 0.999
+  },
+  {
+   "name": "BozorNpc_350",
+   "label": "Yolovchi_05",
+   "role": "YOLOVCHI",
+   "female": false,
+   "walk_style": 0,
+   "speed": 139.9368133544922,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    3715.1,
+    -34.3,
+    92.5
+   ],
+   "yaw": -135.8,
+   "body": "SKM_MH_TalabaYigit_BodyMesh",
+   "kiyim": "SK_ma_casual_jacket_01_a",
+   "scale": 1.025
+  },
+  {
+   "name": "BozorNpc_351",
+   "label": "Yolovchi_06",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 107.58224487304688,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2653.5,
+    -1000.1,
+    92.5
+   ],
+   "yaw": -134.7,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 0.98
+  },
+  {
+   "name": "BozorNpc_352",
+   "label": "Yolovchi_07",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 115.20915985107422,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    1617.0,
+    4.5,
+    92.5
+   ],
+   "yaw": -21.9,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.989
+  },
+  {
+   "name": "BozorNpc_353",
+   "label": "Yolovchi_08",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 108.40331268310547,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    328.4,
+    1126.7,
+    92.5
+   ],
+   "yaw": -24.2,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_sport_02_a",
+   "scale": 1.018
+  },
+  {
+   "name": "BozorNpc_354",
+   "label": "Yolovchi_09",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 106.54557800292969,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    2660.5,
+    0.3,
+    92.5
+   ],
+   "yaw": 123.2,
+   "body": "SKM_MH_Bosh_02_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 1.001
+  },
+  {
+   "name": "BozorNpc_355",
+   "label": "Yolovchi_10",
+   "role": "YOLOVCHI",
+   "female": true,
+   "walk_style": 1,
+   "speed": 106.51712036132812,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": false,
+   "pos": [
+    901.4,
+    -1115.3,
+    92.5
+   ],
+   "yaw": -35.1,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.984
+  },
+  {
+   "name": "BozorNpc_356",
+   "label": "Hammol_11",
+   "role": "HAMMOL",
+   "female": false,
+   "walk_style": 0,
+   "speed": 142.5716094970703,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": true,
+   "pos": [
+    2000.2,
+    88.5,
+    92.5
+   ],
+   "yaw": 100.7,
+   "body": "SKM_MH_AravakashYigit_BodyMesh",
+   "kiyim": "SK_ma_sport_01_c",
+   "scale": 1.018
+  },
+  {
+   "name": "BozorNpc_357",
+   "label": "Hammol_12",
+   "role": "HAMMOL",
+   "female": false,
+   "walk_style": 0,
+   "speed": 133.3506317138672,
+   "leader": null,
+   "slot": 0,
+   "talk": -1,
+   "cart": true,
+   "pos": [
+    1955.6,
+    -1049.6,
+    92.5
+   ],
+   "yaw": 83.0,
+   "body": "SKM_MH_AravakashYigit_BodyMesh",
+   "kiyim": "SK_ma_construction_worker_01",
+   "scale": 1.023
+  },
+  {
+   "name": "BozorNpc_358",
+   "label": "Suhbatdosh_02",
+   "role": "SUHBATDOSH",
+   "female": true,
+   "walk_style": 3,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 0,
+   "cart": false,
+   "pos": [
+    2054.8,
+    -1155.4,
+    92.5
+   ],
+   "yaw": -175.2,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_casual_02_a",
+   "scale": 0.974
+  },
+  {
+   "name": "BozorNpc_359",
+   "label": "Suhbatdosh_03",
+   "role": "SUHBATDOSH",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 0,
+   "cart": false,
+   "pos": [
+    1945.3,
+    -1154.0,
+    92.5
+   ],
+   "yaw": -6.2,
+   "body": "SKM_MH_TalabaYigit_BodyMesh",
+   "kiyim": "SK_ma_sport_01_a",
+   "scale": 0.983
+  },
+  {
+   "name": "BozorNpc_360",
+   "label": "Suhbatdosh_05",
+   "role": "SUHBATDOSH",
+   "female": false,
+   "walk_style": 2,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 2,
+   "cart": false,
+   "pos": [
+    3274.7,
+    -224.6,
+    92.5
+   ],
+   "yaw": -174.3,
+   "body": "SKM_MH_KeksaOtaxon_BodyMesh",
+   "kiyim": "SK_ma_business_01_b",
+   "scale": 1.013
+  },
+  {
+   "name": "BozorNpc_361",
+   "label": "Suhbatdosh_06",
+   "role": "SUHBATDOSH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 2,
+   "cart": false,
+   "pos": [
+    3182.2,
+    -190.0,
+    92.5
+   ],
+   "yaw": -46.6,
+   "body": "SKM_MH_Onaxon_BodyMesh",
+   "kiyim": "SK_fe_casual_02_c",
+   "scale": 1.008
+  },
+  {
+   "name": "BozorNpc_362",
+   "label": "Suhbatdosh_07",
+   "role": "SUHBATDOSH",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 2,
+   "cart": false,
+   "pos": [
+    3194.2,
+    -278.6,
+    92.5
+   ],
+   "yaw": 62.0,
+   "body": "SKM_MH_ZamonaviyXaridor_BodyMesh",
+   "kiyim": "SK_ma_casual_jacket_01_a",
+   "scale": 1.001
+  },
+  {
+   "name": "BozorNpc_363",
+   "label": "Suhbatdosh_09",
+   "role": "SUHBATDOSH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 3,
+   "cart": false,
+   "pos": [
+    1005.0,
+    1156.1,
+    92.5
+   ],
+   "yaw": -176.0,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_casual_02_b",
+   "scale": 0.983
+  },
+  {
+   "name": "BozorNpc_364",
+   "label": "Suhbatdosh_10",
+   "role": "SUHBATDOSH",
+   "female": true,
+   "walk_style": 1,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 3,
+   "cart": false,
+   "pos": [
+    896.1,
+    1144.7,
+    92.5
+   ],
+   "yaw": 11.3,
+   "body": "SKM_MH_YoshSotuvchiQiz_BodyMesh",
+   "kiyim": "SK_fe_clerk_01",
+   "scale": 1.007
+  },
+  {
+   "name": "BozorNpc_365",
+   "label": "Suhbatdosh_12",
+   "role": "SUHBATDOSH",
+   "female": false,
+   "walk_style": 0,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 1,
+   "cart": false,
+   "pos": [
+    -65.0,
+    -238.4,
+    92.5
+   ],
+   "yaw": -178.3,
+   "body": "SKM_MH_OrtaYoshliSotuvchi_BodyMesh",
+   "kiyim": "SK_ma_casual_02_c",
+   "scale": 1.026
+  },
+  {
+   "name": "BozorNpc_366",
+   "label": "Suhbatdosh_13",
+   "role": "SUHBATDOSH",
+   "female": true,
+   "walk_style": 3,
+   "speed": 85.0,
+   "leader": null,
+   "slot": 0,
+   "talk": 1,
+   "cart": false,
+   "pos": [
+    -174.6,
+    -246.4,
+    92.5
+   ],
+   "yaw": 6.7,
+   "body": "SKM_MH_KeksaMomo_BodyMesh",
+   "kiyim": "SK_fe_clerk_02",
+   "scale": 0.971
+  }
+ ],
+ "queues": [
+  {
+   "i": 0,
+   "points": [
+    [
+     400.0,
+     -185.6,
+     2.5
+    ],
+    [
+     330.0,
+     -185.6,
+     2.5
+    ],
+    [
+     260.0,
+     -185.6,
+     2.5
+    ],
+    [
+     190.0,
+     -185.6,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_01",
+   "stall": 0
+  },
+  {
+   "i": 1,
+   "points": [
+    [
+     600.0,
+     -179.4,
+     2.5
+    ],
+    [
+     600.0,
+     -109.4,
+     2.5
+    ],
+    [
+     600.0,
+     -39.4,
+     2.5
+    ],
+    [
+     600.0,
+     30.6,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_01",
+   "stall": 0
+  },
+  {
+   "i": 2,
+   "points": [
+    [
+     800.0,
+     -181.8,
+     2.5
+    ],
+    [
+     800.0,
+     -111.8,
+     2.5
+    ],
+    [
+     800.0,
+     -41.8,
+     2.5
+    ],
+    [
+     800.0,
+     28.2,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_02",
+   "stall": 1
+  },
+  {
+   "i": 3,
+   "points": [
+    [
+     1000.0,
+     -178.6,
+     2.5
+    ],
+    [
+     1000.0,
+     -108.6,
+     2.5
+    ],
+    [
+     1000.0,
+     -38.6,
+     2.5
+    ],
+    [
+     1000.0,
+     31.4,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_02",
+   "stall": 1
+  },
+  {
+   "i": 4,
+   "points": [
+    [
+     1200.0,
+     -191.7,
+     2.5
+    ],
+    [
+     1200.0,
+     -121.7,
+     2.5
+    ],
+    [
+     1200.0,
+     -51.7,
+     2.5
+    ],
+    [
+     1200.0,
+     18.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_03",
+   "stall": 2
+  },
+  {
+   "i": 5,
+   "points": [
+    [
+     1400.0,
+     -173.4,
+     2.5
+    ],
+    [
+     1470.0,
+     -173.4,
+     2.5
+    ],
+    [
+     1540.0,
+     -173.4,
+     2.5
+    ],
+    [
+     1610.0,
+     -173.4,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_03",
+   "stall": 2
+  },
+  {
+   "i": 6,
+   "points": [
+    [
+     1900.0,
+     -193.7,
+     2.5
+    ],
+    [
+     1830.0,
+     -193.7,
+     2.5
+    ],
+    [
+     1760.0,
+     -193.7,
+     2.5
+    ],
+    [
+     1690.0,
+     -193.7,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_04",
+   "stall": 3
+  },
+  {
+   "i": 7,
+   "points": [
+    [
+     2100.0,
+     -193.7,
+     2.5
+    ],
+    [
+     2100.0,
+     -123.7,
+     2.5
+    ],
+    [
+     2100.0,
+     -53.7,
+     2.5
+    ],
+    [
+     2100.0,
+     16.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_04",
+   "stall": 3
+  },
+  {
+   "i": 8,
+   "points": [
+    [
+     2300.0,
+     -193.7,
+     2.5
+    ],
+    [
+     2300.0,
+     -123.7,
+     2.5
+    ],
+    [
+     2300.0,
+     -53.7,
+     2.5
+    ],
+    [
+     2300.0,
+     16.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_05",
+   "stall": 4
+  },
+  {
+   "i": 9,
+   "points": [
+    [
+     2500.0,
+     -193.7,
+     2.5
+    ],
+    [
+     2500.0,
+     -123.7,
+     2.5
+    ],
+    [
+     2500.0,
+     -53.7,
+     2.5
+    ],
+    [
+     2500.0,
+     16.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_05",
+   "stall": 4
+  },
+  {
+   "i": 10,
+   "points": [
+    [
+     2700.0,
+     -249.5,
+     2.5
+    ],
+    [
+     2700.0,
+     -179.5,
+     2.5
+    ],
+    [
+     2700.0,
+     -109.5,
+     2.5
+    ],
+    [
+     2700.0,
+     -39.5,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_06",
+   "stall": 5
+  },
+  {
+   "i": 11,
+   "points": [
+    [
+     2900.0,
+     -249.5,
+     2.5
+    ],
+    [
+     2970.0,
+     -249.5,
+     2.5
+    ],
+    [
+     3040.0,
+     -249.5,
+     2.5
+    ],
+    [
+     3110.0,
+     -249.5,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_06",
+   "stall": 5
+  },
+  {
+   "i": 12,
+   "points": [
+    [
+     400.0,
+     -945.0,
+     2.5
+    ],
+    [
+     330.0,
+     -945.0,
+     2.5
+    ],
+    [
+     260.0,
+     -945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_08",
+   "stall": 6
+  },
+  {
+   "i": 13,
+   "points": [
+    [
+     600.0,
+     -945.0,
+     2.5
+    ],
+    [
+     600.0,
+     -1015.0,
+     2.5
+    ],
+    [
+     600.0,
+     -1085.0,
+     2.5
+    ],
+    [
+     600.0,
+     -1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_07",
+   "stall": 6
+  },
+  {
+   "i": 14,
+   "points": [
+    [
+     800.0,
+     -975.4,
+     2.5
+    ],
+    [
+     800.0,
+     -1045.4,
+     2.5
+    ],
+    [
+     800.0,
+     -1115.4,
+     2.5
+    ],
+    [
+     800.0,
+     -1185.4,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_09",
+   "stall": 7
+  },
+  {
+   "i": 15,
+   "points": [
+    [
+     1000.0,
+     -945.4,
+     2.5
+    ],
+    [
+     1000.0,
+     -1015.4,
+     2.5
+    ],
+    [
+     1000.0,
+     -1085.4,
+     2.5
+    ],
+    [
+     1000.0,
+     -1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_09",
+   "stall": 7
+  },
+  {
+   "i": 16,
+   "points": [
+    [
+     1200.0,
+     -946.3,
+     2.5
+    ],
+    [
+     1200.0,
+     -1016.2,
+     2.5
+    ],
+    [
+     1200.0,
+     -1086.3,
+     2.5
+    ],
+    [
+     1200.0,
+     -1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_10",
+   "stall": 8
+  },
+  {
+   "i": 17,
+   "points": [
+    [
+     1400.0,
+     -945.0,
+     2.5
+    ],
+    [
+     1470.0,
+     -945.0,
+     2.5
+    ],
+    [
+     1540.0,
+     -945.0,
+     2.5
+    ],
+    [
+     1610.0,
+     -945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_10",
+   "stall": 8
+  },
+  {
+   "i": 18,
+   "points": [
+    [
+     1900.0,
+     -945.0,
+     2.5
+    ],
+    [
+     1830.0,
+     -945.0,
+     2.5
+    ],
+    [
+     1760.0,
+     -945.0,
+     2.5
+    ],
+    [
+     1690.0,
+     -945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_11",
+   "stall": 9
+  },
+  {
+   "i": 19,
+   "points": [
+    [
+     2100.0,
+     -945.0,
+     2.5
+    ],
+    [
+     2100.0,
+     -1015.0,
+     2.5
+    ],
+    [
+     2100.0,
+     -1085.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_11",
+   "stall": 9
+  },
+  {
+   "i": 20,
+   "points": [
+    [
+     2300.0,
+     -950.5,
+     2.5
+    ],
+    [
+     2284.8,
+     -1005.2,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_12",
+   "stall": 10
+  },
+  {
+   "i": 21,
+   "points": [
+    [
+     2500.0,
+     -950.5,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_12",
+   "stall": 10
+  },
+  {
+   "i": 22,
+   "points": [
+    [
+     2700.0,
+     -946.3,
+     2.5
+    ],
+    [
+     2700.0,
+     -1016.2,
+     2.5
+    ],
+    [
+     2700.0,
+     -1086.3,
+     2.5
+    ],
+    [
+     2700.0,
+     -1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_13",
+   "stall": 11
+  },
+  {
+   "i": 23,
+   "points": [
+    [
+     2900.0,
+     -945.0,
+     2.5
+    ],
+    [
+     2970.0,
+     -945.0,
+     2.5
+    ],
+    [
+     3040.0,
+     -945.0,
+     2.5
+    ],
+    [
+     3110.0,
+     -945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_13",
+   "stall": 11
+  },
+  {
+   "i": 24,
+   "points": [
+    [
+     400.0,
+     195.3,
+     2.5
+    ],
+    [
+     330.0,
+     195.3,
+     2.5
+    ],
+    [
+     260.0,
+     195.3,
+     2.5
+    ],
+    [
+     190.0,
+     195.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_14",
+   "stall": 12
+  },
+  {
+   "i": 25,
+   "points": [
+    [
+     600.0,
+     186.5,
+     2.5
+    ],
+    [
+     600.0,
+     116.5,
+     2.5
+    ],
+    [
+     600.0,
+     46.5,
+     2.5
+    ],
+    [
+     600.0,
+     -23.5,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_14",
+   "stall": 12
+  },
+  {
+   "i": 26,
+   "points": [
+    [
+     800.0,
+     191.6,
+     2.5
+    ],
+    [
+     800.0,
+     121.6,
+     2.5
+    ],
+    [
+     800.0,
+     51.6,
+     2.5
+    ],
+    [
+     800.0,
+     -18.4,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_15",
+   "stall": 13
+  },
+  {
+   "i": 27,
+   "points": [
+    [
+     1000.0,
+     188.7,
+     2.5
+    ],
+    [
+     1000.0,
+     118.7,
+     2.5
+    ],
+    [
+     1000.0,
+     48.7,
+     2.5
+    ],
+    [
+     1000.0,
+     -21.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_16",
+   "stall": 13
+  },
+  {
+   "i": 28,
+   "points": [
+    [
+     1200.0,
+     201.8,
+     2.5
+    ],
+    [
+     1200.0,
+     131.8,
+     2.5
+    ],
+    [
+     1200.0,
+     61.8,
+     2.5
+    ],
+    [
+     1200.0,
+     -8.2,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_17",
+   "stall": 14
+  },
+  {
+   "i": 29,
+   "points": [
+    [
+     1400.0,
+     176.9,
+     2.5
+    ],
+    [
+     1400.0,
+     106.9,
+     2.5
+    ],
+    [
+     1400.0,
+     36.9,
+     2.5
+    ],
+    [
+     1400.0,
+     -33.1,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_17",
+   "stall": 14
+  },
+  {
+   "i": 30,
+   "points": [
+    [
+     1900.0,
+     193.7,
+     2.5
+    ],
+    [
+     1900.0,
+     123.7,
+     2.5
+    ],
+    [
+     1900.0,
+     53.7,
+     2.5
+    ],
+    [
+     1900.0,
+     -16.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_18",
+   "stall": 15
+  },
+  {
+   "i": 31,
+   "points": [
+    [
+     2100.0,
+     193.7,
+     2.5
+    ],
+    [
+     2100.0,
+     123.7,
+     2.5
+    ],
+    [
+     2100.0,
+     53.7,
+     2.5
+    ],
+    [
+     2100.0,
+     -16.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_18",
+   "stall": 15
+  },
+  {
+   "i": 32,
+   "points": [
+    [
+     2300.0,
+     193.7,
+     2.5
+    ],
+    [
+     2300.0,
+     123.7,
+     2.5
+    ],
+    [
+     2300.0,
+     53.7,
+     2.5
+    ],
+    [
+     2300.0,
+     -16.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_19",
+   "stall": 16
+  },
+  {
+   "i": 33,
+   "points": [
+    [
+     2500.0,
+     193.7,
+     2.5
+    ],
+    [
+     2500.0,
+     123.7,
+     2.5
+    ],
+    [
+     2500.0,
+     53.7,
+     2.5
+    ],
+    [
+     2500.0,
+     -16.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_19",
+   "stall": 16
+  },
+  {
+   "i": 34,
+   "points": [
+    [
+     2700.0,
+     249.5,
+     2.5
+    ],
+    [
+     2700.0,
+     179.5,
+     2.5
+    ],
+    [
+     2700.0,
+     109.5,
+     2.5
+    ],
+    [
+     2700.0,
+     39.5,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_20",
+   "stall": 17
+  },
+  {
+   "i": 35,
+   "points": [
+    [
+     2900.0,
+     249.5,
+     2.5
+    ],
+    [
+     2970.0,
+     249.5,
+     2.5
+    ],
+    [
+     3040.0,
+     249.5,
+     2.5
+    ],
+    [
+     3110.0,
+     249.5,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_20",
+   "stall": 17
+  },
+  {
+   "i": 36,
+   "points": [
+    [
+     400.0,
+     945.0,
+     2.5
+    ],
+    [
+     330.0,
+     945.0,
+     2.5
+    ],
+    [
+     260.0,
+     945.0,
+     2.5
+    ],
+    [
+     190.0,
+     945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_21",
+   "stall": 18
+  },
+  {
+   "i": 37,
+   "points": [
+    [
+     600.0,
+     945.0,
+     2.5
+    ],
+    [
+     600.0,
+     1015.0,
+     2.5
+    ],
+    [
+     600.0,
+     1085.0,
+     2.5
+    ],
+    [
+     600.0,
+     1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_21",
+   "stall": 18
+  },
+  {
+   "i": 38,
+   "points": [
+    [
+     801.5,
+     977.7,
+     2.5
+    ],
+    [
+     801.5,
+     1047.7,
+     2.5
+    ],
+    [
+     801.5,
+     1117.7,
+     2.5
+    ],
+    [
+     801.5,
+     1187.7,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_22",
+   "stall": 19
+  },
+  {
+   "i": 39,
+   "points": [
+    [
+     1000.0,
+     945.4,
+     2.5
+    ],
+    [
+     1000.0,
+     1015.4,
+     2.5
+    ],
+    [
+     1000.0,
+     1085.4,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_23",
+   "stall": 19
+  },
+  {
+   "i": 40,
+   "points": [
+    [
+     1200.0,
+     946.3,
+     2.5
+    ],
+    [
+     1200.0,
+     1016.2,
+     2.5
+    ],
+    [
+     1200.0,
+     1086.3,
+     2.5
+    ],
+    [
+     1200.0,
+     1156.3,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_24",
+   "stall": 20
+  },
+  {
+   "i": 41,
+   "points": [
+    [
+     1400.0,
+     945.0,
+     2.5
+    ],
+    [
+     1470.0,
+     945.0,
+     2.5
+    ],
+    [
+     1540.0,
+     945.0,
+     2.5
+    ],
+    [
+     1610.0,
+     945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_24",
+   "stall": 20
+  },
+  {
+   "i": 42,
+   "points": [
+    [
+     1900.0,
+     945.0,
+     2.5
+    ],
+    [
+     1830.0,
+     945.0,
+     2.5
+    ],
+    [
+     1760.0,
+     945.0,
+     2.5
+    ],
+    [
+     1690.0,
+     945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_25",
+   "stall": 21
+  },
+  {
+   "i": 43,
+   "points": [
+    [
+     2100.0,
+     945.0,
+     2.5
+    ],
+    [
+     2100.0,
+     1015.0,
+     2.5
+    ],
+    [
+     2100.0,
+     1085.0,
+     2.5
+    ],
+    [
+     2100.0,
+     1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_25",
+   "stall": 21
+  },
+  {
+   "i": 44,
+   "points": [
+    [
+     2300.0,
+     950.5,
+     2.5
+    ],
+    [
+     2300.0,
+     1020.5,
+     2.5
+    ],
+    [
+     2300.0,
+     1090.5,
+     2.5
+    ],
+    [
+     2300.0,
+     1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_27",
+   "stall": 22
+  },
+  {
+   "i": 45,
+   "points": [
+    [
+     2500.0,
+     950.5,
+     2.5
+    ],
+    [
+     2500.0,
+     1020.5,
+     2.5
+    ],
+    [
+     2500.0,
+     1090.5,
+     2.5
+    ],
+    [
+     2500.0,
+     1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_26",
+   "stall": 22
+  },
+  {
+   "i": 46,
+   "points": [
+    [
+     2700.0,
+     946.3,
+     2.5
+    ],
+    [
+     2700.0,
+     1016.2,
+     2.5
+    ],
+    [
+     2700.0,
+     1086.3,
+     2.5
+    ],
+    [
+     2700.0,
+     1155.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_28",
+   "stall": 23
+  },
+  {
+   "i": 47,
+   "points": [
+    [
+     2900.0,
+     945.0,
+     2.5
+    ],
+    [
+     2970.0,
+     945.0,
+     2.5
+    ],
+    [
+     3040.0,
+     945.0,
+     2.5
+    ],
+    [
+     3110.0,
+     945.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_28",
+   "stall": 23
+  },
+  {
+   "i": 48,
+   "points": [
+    [
+     3440.0,
+     -260.0,
+     2.5
+    ],
+    [
+     3510.0,
+     -260.0,
+     2.5
+    ],
+    [
+     3580.0,
+     -260.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_29",
+   "stall": 24
+  },
+  {
+   "i": 49,
+   "points": [
+    [
+     3690.0,
+     -260.0,
+     2.5
+    ],
+    [
+     3760.0,
+     -260.0,
+     2.5
+    ],
+    [
+     3830.0,
+     -260.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_30",
+   "stall": 25
+  },
+  {
+   "i": 50,
+   "points": [
+    [
+     3940.0,
+     -260.0,
+     2.5
+    ],
+    [
+     4010.0,
+     -260.0,
+     2.5
+    ],
+    [
+     4080.0,
+     -260.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_31",
+   "stall": 26
+  },
+  {
+   "i": 51,
+   "points": [
+    [
+     4190.0,
+     -260.0,
+     2.5
+    ],
+    [
+     4260.0,
+     -260.0,
+     2.5
+    ],
+    [
+     4330.0,
+     -260.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_32",
+   "stall": 27
+  },
+  {
+   "i": 52,
+   "points": [
+    [
+     3580.0,
+     -1065.0,
+     2.5
+    ],
+    [
+     3650.0,
+     -1065.0,
+     2.5
+    ],
+    [
+     3720.0,
+     -1065.0,
+     2.5
+    ],
+    [
+     3790.0,
+     -1065.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_33",
+   "stall": 28
+  },
+  {
+   "i": 53,
+   "points": [
+    [
+     3580.0,
+     -635.0,
+     2.5
+    ],
+    [
+     3650.0,
+     -635.0,
+     2.5
+    ],
+    [
+     3720.0,
+     -635.0,
+     2.5
+    ],
+    [
+     3790.0,
+     -635.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_34",
+   "stall": 29
+  },
+  {
+   "i": 54,
+   "points": [
+    [
+     4100.0,
+     -635.0,
+     2.5
+    ],
+    [
+     4170.0,
+     -635.0,
+     2.5
+    ],
+    [
+     4240.0,
+     -635.0,
+     2.5
+    ],
+    [
+     4310.0,
+     -635.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    -1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_35",
+   "stall": 30
+  },
+  {
+   "i": 55,
+   "points": [
+    [
+     3760.4,
+     448.3,
+     2.5
+    ],
+    [
+     3690.6,
+     451.8,
+     2.5
+    ],
+    [
+     3626.0,
+     455.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_36",
+   "stall": 31
+  },
+  {
+   "i": 56,
+   "points": [
+    [
+     3900.0,
+     441.0,
+     2.5
+    ]
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "vendor": "Sotuvchi_36",
+   "stall": 31
+  }
+ ],
+ "seats": [
+  {
+   "i": 0,
+   "pos": [
+    4149.9,
+    -1366.6,
+    0.0
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "i": 1,
+   "pos": [
+    85.0,
+    1020.0,
+    3.2
+   ],
+   "fwd": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "i": 2,
+   "pos": [
+    235.0,
+    1100.0,
+    3.2
+   ],
+   "fwd": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "i": 3,
+   "pos": [
+    211.6,
+    1429.9,
+    0.0
+   ],
+   "fwd": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "i": 4,
+   "pos": [
+    68.4,
+    1430.1,
+    0.0
+   ],
+   "fwd": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "i": 5,
+   "pos": [
+    139.9,
+    -576.6,
+    0.0
+   ],
+   "fwd": [
+    -0.0,
+    1.0,
+    0.0
+   ]
+  }
+ ],
+ "wander": [
+  [
+   150.0,
+   -119.3,
+   2.5
+  ],
+  [
+   400.0,
+   -21.0,
+   2.5
+  ],
+  [
+   650.0,
+   -67.9,
+   2.5
+  ],
+  [
+   900.0,
+   119.0,
+   2.5
+  ],
+  [
+   1150.0,
+   109.8,
+   2.5
+  ],
+  [
+   1400.0,
+   -102.7,
+   2.5
+  ],
+  [
+   1650.6,
+   78.5,
+   2.5
+  ],
+  [
+   1900.0,
+   136.1,
+   2.5
+  ],
+  [
+   2150.0,
+   101.6,
+   2.5
+  ],
+  [
+   2400.0,
+   101.6,
+   2.5
+  ],
+  [
+   2650.0,
+   -22.4,
+   2.5
+  ],
+  [
+   2900.0,
+   -141.7,
+   2.5
+  ],
+  [
+   3150.0,
+   125.7,
+   2.5
+  ],
+  [
+   3400.0,
+   90.6,
+   2.5
+  ],
+  [
+   3650.0,
+   -50.1,
+   2.5
+  ],
+  [
+   3900.0,
+   -81.4,
+   2.5
+  ],
+  [
+   4150.0,
+   -103.7,
+   2.5
+  ],
+  [
+   400.0,
+   -1089.6,
+   4.1
+  ],
+  [
+   700.0,
+   -1023.0,
+   2.5
+  ],
+  [
+   1000.0,
+   -1023.8,
+   2.5
+  ],
+  [
+   1300.0,
+   -1049.6,
+   2.5
+  ],
+  [
+   1600.0,
+   -1083.7,
+   2.5
+  ],
+  [
+   1900.0,
+   -1090.7,
+   2.5
+  ],
+  [
+   2200.0,
+   -1061.3,
+   2.5
+  ],
+  [
+   2534.0,
+   -1078.0,
+   2.5
+  ],
+  [
+   2800.0,
+   -1083.0,
+   2.5
+  ],
+  [
+   3080.0,
+   -1065.6,
+   2.5
+  ],
+  [
+   400.0,
+   1071.7,
+   2.5
+  ],
+  [
+   700.0,
+   1052.1,
+   2.5
+  ],
+  [
+   1000.0,
+   1059.3,
+   2.5
+  ],
+  [
+   1300.0,
+   1023.7,
+   2.5
+  ],
+  [
+   1600.0,
+   1058.7,
+   2.5
+  ],
+  [
+   1900.0,
+   1068.9,
+   2.5
+  ],
+  [
+   2200.0,
+   1094.7,
+   2.5
+  ],
+  [
+   2500.0,
+   1056.8,
+   2.5
+  ],
+  [
+   2800.0,
+   1089.5,
+   2.5
+  ],
+  [
+   3080.0,
+   1096.1,
+   2.5
+  ],
+  [
+   1650.0,
+   -1060.0,
+   2.5
+  ],
+  [
+   1650.0,
+   -600.0,
+   2.5
+  ],
+  [
+   1650.0,
+   600.0,
+   2.5
+  ],
+  [
+   1650.0,
+   1060.0,
+   2.5
+  ],
+  [
+   3750.0,
+   -616.0,
+   2.5
+  ],
+  [
+   4000.0,
+   0.0,
+   2.5
+  ],
+  [
+   3840.0,
+   -1050.0,
+   2.5
+  ]
+ ],
+ "gate": [
+  [
+   -150.0,
+   0.0,
+   2.5
+  ],
+  [
+   4450.0,
+   -120.0,
+   2.5
+  ],
+  [
+   1650.0,
+   -1680.0,
+   2.5
+  ],
+  [
+   1650.0,
+   1680.0,
+   2.0
+  ]
+ ],
+ "actions": [
+  [
+   "V_Idle",
+   "AnimationSequence_Cashier_Idle_Standing",
+   true
+  ],
+  [
+   "V_Idle",
+   "AS_StandUpright_Normal01_Loop01",
+   true
+  ],
+  [
+   "V_Idle",
+   "AS_StandUpright_Normal02_Loop01",
+   true
+  ],
+  [
+   "V_Idle",
+   "AS_StandUpright_Normal03_Loop01",
+   true
+  ],
+  [
+   "V_Idle",
+   "AS_Idle__2__Anim",
+   true
+  ],
+  [
+   "V_Idle",
+   "Waiting_1",
+   true
+  ],
+  [
+   "V_Idle",
+   "Waiting_2",
+   true
+  ],
+  [
+   "V_Idle",
+   "Waiting_3",
+   true
+  ],
+  [
+   "V_Lean",
+   "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+   true
+  ],
+  [
+   "V_Lean",
+   "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+   true
+  ],
+  [
+   "V_Busy",
+   "AS_Texting_Anim",
+   true
+  ],
+  [
+   "V_Busy",
+   "AS_Phone_Loop",
+   true
+  ],
+  [
+   "V_Busy",
+   "AnimationSequence_Chef_WorkStation_Inspect",
+   false
+  ],
+  [
+   "V_Busy",
+   "AnimationSequence_Customer_Standing_BrowsingItems02",
+   true
+  ],
+  [
+   "V_Busy",
+   "AS_Arm_Stretching_Anim",
+   false
+  ],
+  [
+   "V_Busy",
+   "AnimationSequence_Server_Broom_Sweep_Loop",
+   true
+  ],
+  [
+   "V_Call",
+   "AnimationSequence_Salesman_HandGesture_WaveOver",
+   false
+  ],
+  [
+   "V_Call",
+   "AnimationSequence_Salesman_HandGesture_OpenArms",
+   false
+  ],
+  [
+   "V_Call",
+   "AnimationSequence_Cashier_Greeting_WaveHello",
+   false
+  ],
+  [
+   "V_Greet",
+   "AnimationSequence_Cashier_Greeting_WaveHello",
+   false
+  ],
+  [
+   "V_Greet",
+   "AnimationSequence_Cashier_Greeting_Bow",
+   false
+  ],
+  [
+   "V_Listen",
+   "AnimationSequence_Cashier_Talk_HeadNod_Yes",
+   false
+  ],
+  [
+   "V_Listen",
+   "AnimationSequence_Cashier_Idle_Standing",
+   true
+  ],
+  [
+   "V_Talk",
+   "Dialog_Calm_Medium_01",
+   true
+  ],
+  [
+   "V_Talk",
+   "Dialog_Calm_Short_02",
+   true
+  ],
+  [
+   "V_Talk",
+   "AnimationSequence_Server_TalkGesture_FriendlyConvo",
+   false
+  ],
+  [
+   "V_Talk",
+   "AnimationSequence_Server_TalkGesture_LeftSide",
+   false
+  ],
+  [
+   "V_Talk",
+   "AnimationSequence_Salesman_HandGesture_OpenArms",
+   false
+  ],
+  [
+   "V_Weigh",
+   "AnimationSequence_Cashier_Show_LeftSide",
+   false
+  ],
+  [
+   "V_Weigh",
+   "AnimationSequence_Cashier_Show_RightSide",
+   false
+  ],
+  [
+   "V_Weigh",
+   "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+   false
+  ],
+  [
+   "V_Handout",
+   "AnimationSequence_Cashier_Handout",
+   false
+  ],
+  [
+   "V_Thanks",
+   "AnimationSequence_Cashier_Greeting_Bow",
+   false
+  ],
+  [
+   "C_Browse",
+   "AnimationSequence_Customer_Standing_BrowsingItems01",
+   true
+  ],
+  [
+   "C_Browse",
+   "AnimationSequence_Customer_Standing_BrowsingItems02",
+   true
+  ],
+  [
+   "C_Browse",
+   "AS_Thinking_Anim",
+   false
+  ],
+  [
+   "C_Talk",
+   "Dialog_Calm_Short_01",
+   true
+  ],
+  [
+   "C_Talk",
+   "Dialog_Calm_Short_03",
+   true
+  ],
+  [
+   "C_Talk",
+   "AS_Talking_Anim",
+   true
+  ],
+  [
+   "C_Talk",
+   "AS_Talking__1__Anim",
+   true
+  ],
+  [
+   "C_Talk",
+   "Dialog_Intense_Short_01",
+   true
+  ],
+  [
+   "C_Talk",
+   "AnimationSequence_Server_TalkGesture_BothSides",
+   false
+  ],
+  [
+   "C_Listen",
+   "AS_Thinking_Anim",
+   false
+  ],
+  [
+   "C_Listen",
+   "AnimationSequence_Customer_Standing_WaitingInLine01",
+   true
+  ],
+  [
+   "C_Listen",
+   "AS_StandUpright_Normal01_Loop01",
+   true
+  ],
+  [
+   "C_Pay",
+   "AnimationSequence_Cashier_Handout",
+   false
+  ],
+  [
+   "C_Pay",
+   "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+   false
+  ],
+  [
+   "C_Reject",
+   "AS_Disappointed_Anim",
+   false
+  ],
+  [
+   "C_Wait",
+   "AnimationSequence_Customer_Standing_WaitingInLine01",
+   true
+  ],
+  [
+   "C_Wait",
+   "AnimationSequence_Customer_Standing_WaitingInLine02",
+   true
+  ],
+  [
+   "C_Wait",
+   "AnimationSequence_Customer_Standing_WaitingInLine03",
+   true
+  ],
+  [
+   "F_Idle",
+   "AnimationSequence_Customer_Standing_WaitingInLine02",
+   true
+  ],
+  [
+   "F_Idle",
+   "AS_Texting_Anim",
+   true
+  ],
+  [
+   "F_Idle",
+   "AS_StandUpright_Normal02_Loop01",
+   true
+  ],
+  [
+   "F_Idle",
+   "AnimationSequence_Customer_Standing_BrowsingItems01",
+   true
+  ],
+  [
+   "F_Idle",
+   "AS_Talking__5__Anim",
+   true
+  ],
+  [
+   "P_Pause",
+   "AS_Texting_Anim",
+   true
+  ],
+  [
+   "P_Pause",
+   "AS_Phone_Loop",
+   true
+  ],
+  [
+   "P_Pause",
+   "AS_Thinking_Anim",
+   false
+  ],
+  [
+   "P_Pause",
+   "AS_Arm_Stretching_Anim",
+   false
+  ],
+  [
+   "P_Pause",
+   "AS_DrinkingLoop_Anim",
+   true
+  ],
+  [
+   "S_Down",
+   "AS_Stand_To_Sit_Anim",
+   false
+  ],
+  [
+   "S_Loop",
+   "AnimationSequence_Customer_Sit_Chair_Idle",
+   true
+  ],
+  [
+   "S_Loop",
+   "AnimationSequence_Customer_Sit_Chair_Idle_LookingAround",
+   true
+  ],
+  [
+   "S_Drink",
+   "AnimationSequence_Customer_Sit_Chair_Drink_Cup_Sip",
+   false
+  ],
+  [
+   "S_Drink",
+   "AnimationSequence_Customer_Sit_Chair_Drink_Cup_Idle",
+   true
+  ],
+  [
+   "S_Up",
+   "AS_Stand_To_Sit_Up_Anim_Anim",
+   false
+  ],
+  [
+   "Pair",
+   "AS_Talking__2__Anim",
+   true
+  ],
+  [
+   "Pair",
+   "AS_Talking__3__Anim",
+   true
+  ],
+  [
+   "Pair",
+   "AS_Talking__4__Anim",
+   true
+  ],
+  [
+   "Pair",
+   "AS_Talking__6__Anim",
+   true
+  ],
+  [
+   "Pair",
+   "Dialog_Calm_Long_01",
+   true
+  ],
+  [
+   "Pair",
+   "Dialog_Calm_Long_03",
+   true
+  ]
+ ]
+}

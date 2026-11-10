@@ -1,0 +1,107 @@
+{
+  "izoh": "Sotuv ma'lumoti. O'yin boshida har sotuvchining rastasi atrofidagi mollar (mesh nomi 'kalitlar'dan biriga mos kelsa) uning assortimenti bo'ladi. Narx har o'yinda 'narx' oralig'idan tasodifiy, 500 so'mga yaxlitlanadi. 'sozlar' - bola gapida mahsulotni tanish uchun. Fe'l: rastalar ro'yxatida berilmasa stall raqamidan tanlanadi. Fe'l: engPast - eng past narx (so'ralgan narxga nisbatan), qadam - bir tushirish, rad - birinchi so'rovda rad etish ehtimoli, odob/qopol - bolaning odobli/qo'pol gapi munosabatni (0..100, boshida 50) qanchaga o'zgartiradi, xatoQaytim - qaytimni kam berish ehtimoli (qaytim 2 000 dan katta bo'lsa; 1 000 yoki 2 000 kam beradi; o'yinda -XatoQaytim bilan hamma sotuvchida 1). Gaplar kaliti EBozorJavob nomi; '_iliq' (munosabat 70+) va '_sovuq' (30 dan past) variantlari ham bo'lishi mumkin.",
+
+  "mahsulotlar": [
+    { "id": "non",       "nomi": "non",        "birlik": "dona",  "narx": [4000, 6000],     "sozlar": ["non"],                 "kalitlar": ["non_taxlam", "bread"] },
+    { "id": "patir",     "nomi": "patir",      "birlik": "dona",  "narx": [8000, 12000],    "sozlar": ["patir"],               "kalitlar": ["patir"] },
+    { "id": "pomidor",   "nomi": "pomidor",    "birlik": "kilo",  "narx": [10000, 15000],   "sozlar": ["pomidor"],             "kalitlar": ["pomidor", "tomato"] },
+    { "id": "bodring",   "nomi": "bodring",    "birlik": "kilo",  "narx": [8000, 12000],    "sozlar": ["bodring"],             "kalitlar": ["bodring", "cucumber"] },
+    { "id": "kartoshka", "nomi": "kartoshka",  "birlik": "kilo",  "narx": [5000, 7000],     "sozlar": ["kartoshka"],           "kalitlar": ["kartoshka", "potatobag"] },
+    { "id": "piyoz",     "nomi": "piyoz",      "birlik": "kilo",  "narx": [4000, 6000],     "sozlar": ["piyoz"],               "kalitlar": ["piyoz"] },
+    { "id": "sabzi",     "nomi": "sabzi",      "birlik": "kilo",  "narx": [5000, 7000],     "sozlar": ["sabzi"],               "kalitlar": ["sabzi"] },
+    { "id": "karam",     "nomi": "karam",      "birlik": "kilo",  "narx": [4000, 6000],     "sozlar": ["karam"],               "kalitlar": ["karam"] },
+    { "id": "baqlajon",  "nomi": "baqlajon",   "birlik": "kilo",  "narx": [8000, 12000],    "sozlar": ["baqlajon"],            "kalitlar": ["baqlajon", "eggplant"] },
+    { "id": "qovoqcha",  "nomi": "qovoqcha",   "birlik": "kilo",  "narx": [6000, 9000],     "sozlar": ["qovoqcha"],            "kalitlar": ["qovoqcha", "zuchini"] },
+    { "id": "qalampir",  "nomi": "bulg'or qalampiri", "birlik": "kilo", "narx": [12000, 18000], "sozlar": ["bulg'or", "qalampir"], "kalitlar": ["yuk_qalampir"] },
+    { "id": "olma",      "nomi": "olma",       "birlik": "kilo",  "narx": [12000, 18000],   "sozlar": ["olma"],                "kalitlar": ["olma"] },
+    { "id": "anor",      "nomi": "anor",       "birlik": "kilo",  "narx": [15000, 22000],   "sozlar": ["anor"],                "kalitlar": ["anor"] },
+    { "id": "uzum",      "nomi": "uzum",       "birlik": "kilo",  "narx": [15000, 25000],   "sozlar": ["uzum"],                "kalitlar": ["uzum"] },
+    { "id": "behi",      "nomi": "behi",       "birlik": "kilo",  "narx": [12000, 16000],   "sozlar": ["behi"],                "kalitlar": ["behi"] },
+    { "id": "limon",     "nomi": "limon",      "birlik": "kilo",  "narx": [20000, 30000],   "sozlar": ["limon"],               "kalitlar": ["limon"] },
+    { "id": "apelsin",   "nomi": "apelsin",    "birlik": "kilo",  "narx": [20000, 28000],   "sozlar": ["apelsin"],             "kalitlar": ["apelsin"] },
+    { "id": "kivi",      "nomi": "kivi",       "birlik": "kilo",  "narx": [25000, 35000],   "sozlar": ["kivi"],                "kalitlar": ["kivi"] },
+    { "id": "tarvuz",    "nomi": "tarvuz",     "birlik": "kilo",  "narx": [2500, 4000],     "sozlar": ["tarvuz"],              "kalitlar": ["uyum_tarvuz"] },
+    { "id": "qovun",     "nomi": "qovun",      "birlik": "kilo",  "narx": [5000, 8000],     "sozlar": ["qovun"],               "kalitlar": ["uyum_qovun"] },
+    { "id": "sarimsoq",  "nomi": "sarimsoq",   "birlik": "kilo",  "narx": [20000, 30000],   "sozlar": ["sarimsoq"],            "kalitlar": ["sarimsoq"] },
+    { "id": "qoziqorin", "nomi": "qo'ziqorin", "birlik": "kilo",  "narx": [30000, 45000],   "sozlar": ["qo'ziqorin", "qoziqorin"], "kalitlar": ["qoziqorin"] },
+    { "id": "kokat",     "nomi": "ko'kat",     "birlik": "bog'",  "narx": [2000, 3000],     "sozlar": ["ko'kat", "kokat"],     "kalitlar": ["kokat"] },
+    { "id": "gosht",     "nomi": "go'sht",     "birlik": "kilo",  "narx": [110000, 130000], "sozlar": ["go'sht", "gosht"],     "kalitlar": ["gosht_rastasi", "gosht_qovurga", "gosht_dudlangan"] },
+    { "id": "bedana",    "nomi": "bedana",     "birlik": "dona",  "narx": [15000, 20000],   "sozlar": ["bedana"],              "kalitlar": ["gosht_bedana"] },
+    { "id": "zira",      "nomi": "zira",       "birlik": "qadoq", "narx": [8000, 12000],    "sozlar": ["zira"],                "kalitlar": ["ziravor_zira"] },
+    { "id": "murch",     "nomi": "qora murch", "birlik": "qadoq", "narx": [6000, 9000],     "sozlar": ["murch"],               "kalitlar": ["qora_murch"] },
+    { "id": "qizilqalampir", "nomi": "qizil qalampir", "birlik": "qadoq", "narx": [5000, 8000], "sozlar": ["qizil qalampir"], "kalitlar": ["ziravor_qizil"] },
+    { "id": "zarchava",  "nomi": "zarchava",   "birlik": "qadoq", "narx": [5000, 8000],     "sozlar": ["zarchava"],            "kalitlar": ["zarchava"] },
+    { "id": "qurt",      "nomi": "qurt",       "birlik": "dona",  "narx": [3000, 5000],     "sozlar": ["qurt", "kurt"],        "kalitlar": ["tovoq_kurt"] }
+  ],
+
+  "fellar": {
+    "mehribon": {
+      "izoh": "Tez tushiradi, iliq gapiradi",
+      "engPast": 0.80, "qadam": 0.08, "rad": 0.15, "odob": 15, "qopol": -10,
+      "gaplar": {
+        "KutibOlish": ["Keling, bolam! Nima kerak? Bizda {mollar} bor.", "Assalomu alaykum, o'g'lim! Qarang, {mollar} - hammasi yangi."],
+        "Salom": ["Va alaykum assalom, bolam! Keling, nima olasiz?"],
+        "TushirdiMan": ["Mayli, siz uchun {narx} so'm qilaman."],
+        "TushirdiMan_iliq": ["Siz odobli bola ekansiz, {narx} so'mdan beraman.", "Odobingizga qoyil, bolam! {narx} so'm bo'la qolsin."],
+        "QopolgaRad": ["Voy bolam, kattalarga bunaqa gapirmaydi. Narxi shu."]
+      }
+    },
+    "qattiq": {
+      "izoh": "Kam tushiradi, qisqa gapiradi",
+      "engPast": 0.92, "qadam": 0.04, "rad": 0.5, "odob": 8, "qopol": -25,
+      "gaplar": {
+        "KutibOlish": ["Ha, nima kerak?", "Keling. {mollar} bor. Narxi yozib qo'yilgan."],
+        "Salom": ["Vaalaykum assalom. Nima olasiz?"],
+        "TushirmaymanHozircha": ["Narxi shu. Tushmaydi.", "Bu narx ham arzon, boshqa joyda qimmatroq."],
+        "TushirdiMan": ["Mayli, {narx}. Bundan pasti yo'q."]
+      }
+    },
+    "shoshqaloq": {
+      "izoh": "Shoshib turadi, savdoni tez tugatmoqchi",
+      "engPast": 0.88, "qadam": 0.06, "rad": 0.3, "odob": 10, "qopol": -15, "xatoQaytim": 0.15,
+      "gaplar": {
+        "KutibOlish": ["Ha, tez ayting, nima olasiz?", "Keling-keling, {mollar} bor, qaysi biri kerak?"],
+        "MiqdorSora": ["Nechta? Tezroq ayting, bolam."],
+        "TushirdiMan": ["Xo'p, {narx}, bo'ldi, oling!"]
+      }
+    },
+    "ayyor": {
+      "izoh": "Muloyim, lekin ba'zan qaytimni kam beradi",
+      "engPast": 0.85, "qadam": 0.05, "rad": 0.35, "odob": 12, "qopol": -12, "xatoQaytim": 0.5,
+      "gaplar": {
+        "KutibOlish": ["Ooo, keling, keling! Eng zo'r {mollar} faqat menda!", "Keling, bolam, sizga eng yaxshisini tanlab beraman."],
+        "TushirmaymanHozircha": ["Voy, bundan arzon bersam o'zim zarar qilaman-ku!"]
+      }
+    }
+  },
+
+  "felTartibi": ["mehribon", "qattiq", "shoshqaloq", "ayyor"],
+
+  "darajalarIzoh": "Daraja o'yinga ?Daraja=N (yoki -Daraja=N) bilan beriladi, natija oynasida Enter - keyingisi. pul: kupyura -> soni; royxat: [nomi (mahsulot nomi bilan bir xil), miqdor, birlik]; xatoQaytim: false - hech kim qaytimni xato bermaydi, true - fe'llardagi ehtimollar.",
+  "darajalar": [
+    {
+      "nomi": "Birinchi xarid",
+      "eslatma": "Bitta non olib kel. Salom berishni unutma!\n— Oying",
+      "pul": { "5000": 1, "2000": 1, "1000": 2 },
+      "royxat": [ ["non", 1, "dona"] ],
+      "xatoQaytim": false
+    },
+    {
+      "nomi": "Ro'yxat",
+      "eslatma": "Narxlarni solishtir - arzonini ol!\n— Oying",
+      "pul": { "20000": 1, "10000": 2, "5000": 1, "2000": 1, "1000": 2, "500": 2 },
+      "royxat": [ ["non", 2, "dona"], ["kartoshka", 2, "kilo"], ["olma", 1, "kilo"] ],
+      "xatoQaytim": false
+    },
+    {
+      "nomi": "Pul kam",
+      "eslatma": "Pul oz - odob bilan savdolash! Qaytimni sanab ol!\n— Oying",
+      "pul": { "20000": 1, "10000": 2, "5000": 1 },
+      "royxat": [ ["non", 2, "dona"], ["kartoshka", 2, "kilo"], ["olma", 2, "kilo"] ],
+      "xatoQaytim": true
+    }
+  ],
+
+  "rastalar": [
+  ]
+}

@@ -1,0 +1,31 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.8",
+	"Category": "",
+	"Description": "Dehqon bozori: Unity'dan Unreal'ga ko'chirilgan sinov loyihasi (Third Person)",
+	"Modules": [
+		{
+			"Name": "BozorUnreal",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{ "Name": "ModelingToolsEditorMode", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "GameplayStateTree", "Enabled": true },
+		{ "Name": "PythonScriptPlugin", "Enabled": true },
+		{ "Name": "EditorScriptingUtilities", "Enabled": true },
+		{ "Name": "IKRig", "Enabled": true },
+		{ "Name": "PerformanceCaptureCore", "Enabled": true },
+		{ "Name": "ModelContextProtocol", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "ToolsetRegistry", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "EditorToolset", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "AIModuleToolset", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "ConfigSettingsToolset", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "StateTreeToolset", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "UMGToolSet", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "MetaHumanCharacter", "Enabled": true },
+		{ "Name": "MetaHumanGenerator", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+		{ "Name": "ChaosVehiclesPlugin", "Enabled": true }
+	]
+}

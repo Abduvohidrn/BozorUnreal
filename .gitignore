@@ -1,0 +1,31 @@
+# ===== Unreal: avtomatik qayta yaratiladigan papkalar =====
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# ===== IDE =====
+.vs/
+.vscode/
+.idea/
+*.sln
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+
+# ===== Loglar va vaqtinchalik =====
+*.log
+graphify-out/
+__pycache__/
+*.pyc
+Thumbs.db
+desktop.ini
+~$*
+
+# ===== Claude / MCP lokal sozlamalari =====
+.claude/settings.local.json

@@ -1,0 +1,7440 @@
+{
+ "izoh": "Har NPC: persona, tezlik, boshlanish kechikishi, o'z animatsiyalari va qadamlar. Qadam turlari: GoTo, Anim, Face, Greet, Stall, Sit, Wait (npc_ssenariy_rejasi.md 3-bo'lim). Koordinatalar sm (Unreal).",
+ "npcs": {
+  "Sotuvchi_01": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_02": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_03": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_04": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_05": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_06": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_07": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_08": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_09": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_10": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_11": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_12": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_13": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_14": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_15": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_16": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_17": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_18": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_19": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_20": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_21": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_22": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_23": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_24": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_25": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_26": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_27": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_28": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_29": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_30": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_31": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Sotuvchi_32": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_33": {
+   "persona": "sotuvchi_erkak",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_StandUpright_Normal03_Loop01",
+     "AnimationSequence_Cashier_Idle_Standing"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_34": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_35": {
+   "persona": "sotuvchi_keksa",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop",
+     "AS_StandUpright_Normal01_Loop01",
+     "AS_Idle__2__Anim"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_ElbowLean_Loop",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Chef_WorkStation_Inspect",
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Sotuvchi_36": {
+   "persona": "sotuvchi_ayol",
+   "actions": {
+    "V_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "V_Show": [
+     "AnimationSequence_Cashier_Show_LeftSide",
+     "AnimationSequence_Cashier_Show_RightSide"
+    ],
+    "V_Yes": [
+     "AnimationSequence_Cashier_Talk_HeadNod_Yes"
+    ],
+    "V_No": [
+     "AnimationSequence_Cashier_Talk_HeadNod_No"
+    ],
+    "V_Offer": [
+     "AnimationSequence_Cashier_Handout"
+    ],
+    "V_Call": [
+     "AnimationSequence_Salesman_HandGesture_WaveOver",
+     "AnimationSequence_Cashier_Greeting_WaveHello",
+     "AnimationSequence_Salesman_HandGesture_OpenArms"
+    ],
+    "V_Idle": [
+     "AnimationSequence_Cashier_Idle_Standing",
+     "AS_StandUpright_Normal02_Loop01",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Lean": [
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_Loop"
+    ],
+    "V_Busy": [
+     "AnimationSequence_Server_PlaceFoodOnTable_LeftSide",
+     "AnimationSequence_Server_PlaceFoodOnTable_RightSide",
+     "AnimationSequence_Bartender_Idle_Standing_HandsOnTable_WipeCounter_Loop",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Xaridor_01": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 82.3,
+   "steps": [
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_32"
+    },
+    {
+     "op": "Stall",
+     "index": 51,
+     "buy": true,
+     "time": 4.5,
+     "note": "Sotuvchi_32"
+    },
+    {
+     "op": "Stall",
+     "index": 30,
+     "buy": true,
+     "time": 7.6,
+     "note": "Sotuvchi_18"
+    },
+    {
+     "op": "Stall",
+     "index": 0,
+     "buy": false,
+     "time": 6.3,
+     "note": "Sotuvchi_01"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1616,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_27"
+    },
+    {
+     "op": "Stall",
+     "index": 44,
+     "buy": false,
+     "time": 4.4,
+     "note": "Sotuvchi_27"
+    },
+    {
+     "op": "Stall",
+     "index": 43,
+     "buy": true,
+     "time": 7.4,
+     "note": "Sotuvchi_25"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.3
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_21"
+    },
+    {
+     "op": "Stall",
+     "index": 36,
+     "buy": true,
+     "time": 5.1,
+     "note": "Sotuvchi_21"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.9
+    },
+    {
+     "op": "Stall",
+     "index": 51,
+     "buy": true,
+     "time": 3.1,
+     "note": "Sotuvchi_32"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 16.4
+    }
+   ],
+   "start_delay": 10.4
+  },
+  "Xaridor_02": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 102.4,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 38,
+     "buy": true,
+     "time": 6.7,
+     "note": "Sotuvchi_22"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.8
+    },
+    {
+     "op": "Stall",
+     "index": 37,
+     "buy": false,
+     "time": 7.2,
+     "note": "Sotuvchi_21"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1668,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 7,
+     "buy": true,
+     "time": 4.7,
+     "note": "Sotuvchi_04"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_02"
+    },
+    {
+     "op": "Stall",
+     "index": 3,
+     "buy": false,
+     "time": 5.6,
+     "note": "Sotuvchi_02"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1680,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 17
+    }
+   ],
+   "start_delay": 12.6
+  },
+  "Xaridor_03": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 91.7,
+   "steps": [
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_05"
+    },
+    {
+     "op": "Stall",
+     "index": 8,
+     "buy": true,
+     "time": 5,
+     "note": "Sotuvchi_05"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_16"
+    },
+    {
+     "op": "Stall",
+     "index": 27,
+     "buy": false,
+     "time": 5.8,
+     "note": "Sotuvchi_16"
+    },
+    {
+     "op": "Stall",
+     "index": 2,
+     "buy": true,
+     "time": 5.6,
+     "note": "Sotuvchi_02"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.2
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1621,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 52,
+     "buy": true,
+     "time": 7.4,
+     "note": "Sotuvchi_33"
+    },
+    {
+     "op": "Stall",
+     "index": 18,
+     "buy": true,
+     "time": 4.3,
+     "note": "Sotuvchi_11"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 15.9
+    }
+   ],
+   "start_delay": 10.4
+  },
+  "Xaridor_04": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 93.8,
+   "steps": [
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_06"
+    },
+    {
+     "op": "Stall",
+     "index": 11,
+     "buy": true,
+     "time": 5.3,
+     "note": "Sotuvchi_06"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.6
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_04"
+    },
+    {
+     "op": "Stall",
+     "index": 6,
+     "buy": true,
+     "time": 6.6,
+     "note": "Sotuvchi_04"
+    },
+    {
+     "op": "Stall",
+     "index": 4,
+     "buy": true,
+     "time": 4.3,
+     "note": "Sotuvchi_03"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1595,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 17,
+     "buy": true,
+     "time": 4.2,
+     "note": "Sotuvchi_10"
+    },
+    {
+     "op": "Stall",
+     "index": 12,
+     "buy": true,
+     "time": 4,
+     "note": "Sotuvchi_08"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1680,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 12.8
+    }
+   ],
+   "start_delay": 16.9
+  },
+  "Xaridor_05": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 100.2,
+   "steps": [
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_07"
+    },
+    {
+     "op": "Stall",
+     "index": 13,
+     "buy": true,
+     "time": 7.7,
+     "note": "Sotuvchi_07"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.1
+    },
+    {
+     "op": "Stall",
+     "index": 15,
+     "buy": false,
+     "time": 6.1,
+     "note": "Sotuvchi_09"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_10"
+    },
+    {
+     "op": "Stall",
+     "index": 16,
+     "buy": false,
+     "time": 6.7,
+     "note": "Sotuvchi_10"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.2
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1705,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 48,
+     "buy": false,
+     "time": 5,
+     "note": "Sotuvchi_29"
+    },
+    {
+     "op": "Stall",
+     "index": 5,
+     "buy": true,
+     "time": 4.5,
+     "note": "Sotuvchi_03"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1680,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 8.1
+    }
+   ],
+   "start_delay": 5.3
+  },
+  "Xaridor_06": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 96.9,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 49,
+     "buy": true,
+     "time": 5.9,
+     "note": "Sotuvchi_30"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.6
+    },
+    {
+     "op": "Stall",
+     "index": 1,
+     "buy": false,
+     "time": 6,
+     "note": "Sotuvchi_01"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.5
+    },
+    {
+     "op": "Stall",
+     "index": 24,
+     "buy": false,
+     "time": 6.9,
+     "note": "Sotuvchi_14"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1618,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_12"
+    },
+    {
+     "op": "Stall",
+     "index": 20,
+     "buy": true,
+     "time": 5.3,
+     "note": "Sotuvchi_12"
+    },
+    {
+     "op": "Stall",
+     "index": 14,
+     "buy": true,
+     "time": 7,
+     "note": "Sotuvchi_09"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 19.2
+    }
+   ],
+   "start_delay": 14.4
+  },
+  "Xaridor_07": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 98.3,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 26,
+     "buy": true,
+     "time": 4.4,
+     "note": "Sotuvchi_15"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.7
+    },
+    {
+     "op": "Stall",
+     "index": 55,
+     "buy": false,
+     "time": 7.2,
+     "note": "Sotuvchi_36"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1676,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 21,
+     "buy": true,
+     "time": 5.3,
+     "note": "Sotuvchi_12"
+    },
+    {
+     "op": "Stall",
+     "index": 19,
+     "buy": false,
+     "time": 6.9,
+     "note": "Sotuvchi_11"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 18.1
+    }
+   ],
+   "start_delay": 12.6
+  },
+  "Xaridor_08": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 97.5,
+   "steps": [
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_13"
+    },
+    {
+     "op": "Stall",
+     "index": 23,
+     "buy": true,
+     "time": 7.6,
+     "note": "Sotuvchi_13"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.5
+    },
+    {
+     "op": "Stall",
+     "index": 53,
+     "buy": true,
+     "time": 5.7,
+     "note": "Sotuvchi_34"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_35"
+    },
+    {
+     "op": "Stall",
+     "index": 54,
+     "buy": true,
+     "time": 5.2,
+     "note": "Sotuvchi_35"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1600,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 10,
+     "buy": true,
+     "time": 5.5,
+     "note": "Sotuvchi_06"
+    },
+    {
+     "op": "Stall",
+     "index": 9,
+     "buy": false,
+     "time": 5.8,
+     "note": "Sotuvchi_05"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 15.9
+    }
+   ],
+   "start_delay": 10.5
+  },
+  "Xaridor_09": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   },
+   "speed": 64.6,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 50,
+     "buy": true,
+     "time": 7.4,
+     "note": "Sotuvchi_31"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_18"
+    },
+    {
+     "op": "Stall",
+     "index": 31,
+     "buy": true,
+     "time": 6.2,
+     "note": "Sotuvchi_18"
+    },
+    {
+     "op": "Stall",
+     "index": 29,
+     "buy": true,
+     "time": 8.9,
+     "note": "Sotuvchi_17"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1630,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 42,
+     "buy": false,
+     "time": 8.4,
+     "note": "Sotuvchi_25"
+    },
+    {
+     "op": "Stall",
+     "index": 40,
+     "buy": false,
+     "time": 6.1,
+     "note": "Sotuvchi_24"
+    },
+    {
+     "op": "Sit",
+     "index": 1,
+     "time": 36.5
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 10.7
+    }
+   ],
+   "start_delay": 8.7
+  },
+  "Xaridor_10": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   },
+   "speed": 59.3,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 53,
+     "buy": true,
+     "time": 10,
+     "note": "Sotuvchi_34"
+    },
+    {
+     "op": "Stall",
+     "index": 22,
+     "buy": true,
+     "time": 6.5,
+     "note": "Sotuvchi_13"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_10"
+    },
+    {
+     "op": "Stall",
+     "index": 17,
+     "buy": false,
+     "time": 6.2,
+     "note": "Sotuvchi_10"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.7
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1595,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 28,
+     "buy": true,
+     "time": 9.7,
+     "note": "Sotuvchi_17"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.5
+    },
+    {
+     "op": "Stall",
+     "index": 25,
+     "buy": true,
+     "time": 8.9,
+     "note": "Sotuvchi_14"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.3
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 9.2
+    }
+   ],
+   "start_delay": 3.9
+  },
+  "Xaridor_11": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 96.5,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 21,
+     "buy": true,
+     "time": 7,
+     "note": "Sotuvchi_12"
+    },
+    {
+     "op": "Stall",
+     "index": 19,
+     "buy": true,
+     "time": 8,
+     "note": "Sotuvchi_11"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.2
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_09"
+    },
+    {
+     "op": "Stall",
+     "index": 14,
+     "buy": true,
+     "time": 4.6,
+     "note": "Sotuvchi_09"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.6
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1682,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 34,
+     "buy": false,
+     "time": 5,
+     "note": "Sotuvchi_20"
+    },
+    {
+     "op": "Stall",
+     "index": 33,
+     "buy": false,
+     "time": 6.9,
+     "note": "Sotuvchi_19"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 10.1
+    }
+   ],
+   "start_delay": 16.5
+  },
+  "Xaridor_12": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   },
+   "speed": 65.7,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 45,
+     "buy": false,
+     "time": 6.5,
+     "note": "Sotuvchi_26"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.2
+    },
+    {
+     "op": "Stall",
+     "index": 41,
+     "buy": true,
+     "time": 8.2,
+     "note": "Sotuvchi_24"
+    },
+    {
+     "op": "Stall",
+     "index": 39,
+     "buy": true,
+     "time": 7.6,
+     "note": "Sotuvchi_23"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.9
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1674,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_36"
+    },
+    {
+     "op": "Stall",
+     "index": 56,
+     "buy": true,
+     "time": 6.1,
+     "note": "Sotuvchi_36"
+    },
+    {
+     "op": "Stall",
+     "index": 35,
+     "buy": true,
+     "time": 9.1,
+     "note": "Sotuvchi_20"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 17.7
+    }
+   ],
+   "start_delay": 13.1
+  },
+  "Xaridor_13": {
+   "persona": "keksa_ota",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Long_01",
+     "Dialog_Calm_Long_03"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1",
+     "AS_Idle__2__Anim"
+    ],
+    "P_Pause": [
+     "AS_Thinking_Anim",
+     "AS_Idle__2__Anim"
+    ]
+   },
+   "speed": 67,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 32,
+     "buy": false,
+     "time": 7.3,
+     "note": "Sotuvchi_19"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.1
+    },
+    {
+     "op": "Stall",
+     "index": 26,
+     "buy": false,
+     "time": 9.1,
+     "note": "Sotuvchi_15"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.8
+    },
+    {
+     "op": "Stall",
+     "index": 25,
+     "buy": true,
+     "time": 7.9,
+     "note": "Sotuvchi_14"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1647,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 18,
+     "buy": false,
+     "time": 8.1,
+     "note": "Sotuvchi_11"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.7
+    },
+    {
+     "op": "Stall",
+     "index": 16,
+     "buy": true,
+     "time": 6.1,
+     "note": "Sotuvchi_10"
+    },
+    {
+     "op": "Sit",
+     "index": 1,
+     "time": 41.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 19.4
+    }
+   ],
+   "start_delay": 2.3
+  },
+  "Xaridor_14": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 90.9,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 4,
+     "buy": true,
+     "time": 4.1,
+     "note": "Sotuvchi_03"
+    },
+    {
+     "op": "Stall",
+     "index": 31,
+     "buy": false,
+     "time": 6.7,
+     "note": "Sotuvchi_18"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.1
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_19"
+    },
+    {
+     "op": "Stall",
+     "index": 33,
+     "buy": false,
+     "time": 4.1,
+     "note": "Sotuvchi_19"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1648,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 47,
+     "buy": true,
+     "time": 6.1,
+     "note": "Sotuvchi_28"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.5
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_25"
+    },
+    {
+     "op": "Stall",
+     "index": 42,
+     "buy": true,
+     "time": 5.8,
+     "note": "Sotuvchi_25"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 16.4
+    }
+   ],
+   "start_delay": 7.3
+  },
+  "Xaridor_15": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 100.8,
+   "steps": [
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_32"
+    },
+    {
+     "op": "Stall",
+     "index": 51,
+     "buy": true,
+     "time": 4.2,
+     "note": "Sotuvchi_32"
+    },
+    {
+     "op": "Stall",
+     "index": 35,
+     "buy": false,
+     "time": 5.8,
+     "note": "Sotuvchi_20"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1671,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 46,
+     "buy": true,
+     "time": 4.5,
+     "note": "Sotuvchi_28"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_25"
+    },
+    {
+     "op": "Stall",
+     "index": 43,
+     "buy": false,
+     "time": 7,
+     "note": "Sotuvchi_25"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 16
+    }
+   ],
+   "start_delay": 6.8
+  },
+  "Xaridor_16": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 88.6,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 40,
+     "buy": true,
+     "time": 5.5,
+     "note": "Sotuvchi_24"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4
+    },
+    {
+     "op": "Stall",
+     "index": 38,
+     "buy": true,
+     "time": 6.2,
+     "note": "Sotuvchi_22"
+    },
+    {
+     "op": "Stall",
+     "index": 36,
+     "buy": false,
+     "time": 5.5,
+     "note": "Sotuvchi_21"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1659,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_30"
+    },
+    {
+     "op": "Stall",
+     "index": 49,
+     "buy": true,
+     "time": 7.6,
+     "note": "Sotuvchi_30"
+    },
+    {
+     "op": "Stall",
+     "index": 7,
+     "buy": false,
+     "time": 7.3,
+     "note": "Sotuvchi_04"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_01"
+    },
+    {
+     "op": "Stall",
+     "index": 1,
+     "buy": true,
+     "time": 4.8,
+     "note": "Sotuvchi_01"
+    },
+    {
+     "op": "Stall",
+     "index": 40,
+     "buy": true,
+     "time": 4.4,
+     "note": "Sotuvchi_24"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 9.9
+    }
+   ],
+   "start_delay": 19.8
+  },
+  "Guruh00_Boshliq": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 81.3,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 46,
+     "buy": true,
+     "time": 7.3,
+     "note": "Sotuvchi_28"
+    },
+    {
+     "op": "Stall",
+     "index": 41,
+     "buy": false,
+     "time": 7.5,
+     "note": "Sotuvchi_24"
+    },
+    {
+     "op": "Stall",
+     "index": 39,
+     "buy": false,
+     "time": 4.2,
+     "note": "Sotuvchi_23"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1662,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 34,
+     "buy": false,
+     "time": 6.8,
+     "note": "Sotuvchi_20"
+    },
+    {
+     "op": "Stall",
+     "index": 32,
+     "buy": true,
+     "time": 6.8,
+     "note": "Sotuvchi_19"
+    },
+    {
+     "op": "Stall",
+     "index": 0,
+     "buy": false,
+     "time": 7.5,
+     "note": "Sotuvchi_01"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.4
+    },
+    {
+     "op": "Stall",
+     "index": 46,
+     "buy": true,
+     "time": 3.9,
+     "note": "Sotuvchi_28"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 9.4
+    }
+   ],
+   "start_delay": 6.9
+  },
+  "Guruh00_Hamroh1": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 92.5
+  },
+  "Guruh00_Hamroh2": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 81.3
+  },
+  "Guruh01_Boshliq": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 80,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 37,
+     "buy": true,
+     "time": 5.6,
+     "note": "Sotuvchi_21"
+    },
+    {
+     "op": "Stall",
+     "index": 44,
+     "buy": true,
+     "time": 5.2,
+     "note": "Sotuvchi_27"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_26"
+    },
+    {
+     "op": "Stall",
+     "index": 45,
+     "buy": true,
+     "time": 4.8,
+     "note": "Sotuvchi_26"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1673,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 9,
+     "buy": false,
+     "time": 7.1,
+     "note": "Sotuvchi_05"
+    },
+    {
+     "op": "Stall",
+     "index": 5,
+     "buy": true,
+     "time": 5.9,
+     "note": "Sotuvchi_03"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_02"
+    },
+    {
+     "op": "Stall",
+     "index": 3,
+     "buy": false,
+     "time": 7.4,
+     "note": "Sotuvchi_02"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.9
+    },
+    {
+     "op": "Stall",
+     "index": 37,
+     "buy": true,
+     "time": 4.4,
+     "note": "Sotuvchi_21"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 11.2
+    }
+   ],
+   "start_delay": 13
+  },
+  "Guruh01_Hamroh1": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 107
+  },
+  "Guruh02_Boshliq": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   },
+   "speed": 60.6,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 56,
+     "buy": true,
+     "time": 7.4,
+     "note": "Sotuvchi_36"
+    },
+    {
+     "op": "Stall",
+     "index": 6,
+     "buy": true,
+     "time": 9.5,
+     "note": "Sotuvchi_04"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_17"
+    },
+    {
+     "op": "Stall",
+     "index": 28,
+     "buy": true,
+     "time": 7,
+     "note": "Sotuvchi_17"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1595,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 47,
+     "buy": true,
+     "time": 9.8,
+     "note": "Sotuvchi_28"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_26"
+    },
+    {
+     "op": "Stall",
+     "index": 45,
+     "buy": false,
+     "time": 9.4,
+     "note": "Sotuvchi_26"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.2
+    },
+    {
+     "op": "Sit",
+     "index": 1,
+     "time": 56.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 18.5
+    }
+   ],
+   "start_delay": 12.1
+  },
+  "Guruh02_Hamroh1": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 91.3
+  },
+  "Guruh03_Boshliq": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 66.1,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 50,
+     "buy": true,
+     "time": 7.3,
+     "note": "Sotuvchi_31"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_36"
+    },
+    {
+     "op": "Stall",
+     "index": 55,
+     "buy": false,
+     "time": 6.6,
+     "note": "Sotuvchi_36"
+    },
+    {
+     "op": "Stall",
+     "index": 8,
+     "buy": true,
+     "time": 5.7,
+     "note": "Sotuvchi_05"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1624,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 46,
+     "buy": true,
+     "time": 4.3,
+     "note": "Sotuvchi_28"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_25"
+    },
+    {
+     "op": "Stall",
+     "index": 43,
+     "buy": true,
+     "time": 5.3,
+     "note": "Sotuvchi_25"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 3.6
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1680,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 17.5
+    }
+   ],
+   "start_delay": 11.5
+  },
+  "Guruh03_Hamroh1": {
+   "persona": "keksa_ota",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Long_01",
+     "Dialog_Calm_Long_03"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1",
+     "AS_Idle__2__Anim"
+    ],
+    "P_Pause": [
+     "AS_Thinking_Anim",
+     "AS_Idle__2__Anim"
+    ]
+   },
+   "speed": 66.1
+  },
+  "Guruh04_Boshliq": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 93.8,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 2,
+     "buy": true,
+     "time": 7.7,
+     "note": "Sotuvchi_02"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_14"
+    },
+    {
+     "op": "Stall",
+     "index": 24,
+     "buy": false,
+     "time": 4.5,
+     "note": "Sotuvchi_14"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1702,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_22"
+    },
+    {
+     "op": "Stall",
+     "index": 38,
+     "buy": true,
+     "time": 6.8,
+     "note": "Sotuvchi_22"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_21"
+    },
+    {
+     "op": "Stall",
+     "index": 37,
+     "buy": false,
+     "time": 7.6,
+     "note": "Sotuvchi_21"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 8.5
+    }
+   ],
+   "start_delay": 11.1
+  },
+  "Guruh04_Hamroh1": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 93.8
+  },
+  "Guruh05_Boshliq": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 89.5,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 27,
+     "buy": true,
+     "time": 6.9,
+     "note": "Sotuvchi_16"
+    },
+    {
+     "op": "Stall",
+     "index": 29,
+     "buy": true,
+     "time": 6.7,
+     "note": "Sotuvchi_17"
+    },
+    {
+     "op": "Stall",
+     "index": 10,
+     "buy": true,
+     "time": 5.5,
+     "note": "Sotuvchi_06"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1619,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_24"
+    },
+    {
+     "op": "Stall",
+     "index": 40,
+     "buy": false,
+     "time": 4.8,
+     "note": "Sotuvchi_24"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.1
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_23"
+    },
+    {
+     "op": "Stall",
+     "index": 39,
+     "buy": true,
+     "time": 4.3,
+     "note": "Sotuvchi_23"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1680,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 12
+    }
+   ],
+   "start_delay": 7.7
+  },
+  "Guruh05_Hamroh1": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 89.5
+  },
+  "Guruh06_Boshliq": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 64.7,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 48,
+     "buy": true,
+     "time": 5.7,
+     "note": "Sotuvchi_29"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.9
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_06"
+    },
+    {
+     "op": "Stall",
+     "index": 11,
+     "buy": true,
+     "time": 7.2,
+     "note": "Sotuvchi_06"
+    },
+    {
+     "op": "Stall",
+     "index": 30,
+     "buy": true,
+     "time": 5.9,
+     "note": "Sotuvchi_18"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1606,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_07"
+    },
+    {
+     "op": "Stall",
+     "index": 13,
+     "buy": false,
+     "time": 4,
+     "note": "Sotuvchi_07"
+    },
+    {
+     "op": "Stall",
+     "index": 12,
+     "buy": true,
+     "time": 5.1,
+     "note": "Sotuvchi_08"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 12.5
+    }
+   ],
+   "start_delay": 6.7
+  },
+  "Guruh06_Hamroh1": {
+   "persona": "keksa_ota",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Long_01",
+     "Dialog_Calm_Long_03"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1",
+     "AS_Idle__2__Anim"
+    ],
+    "P_Pause": [
+     "AS_Thinking_Anim",
+     "AS_Idle__2__Anim"
+    ]
+   },
+   "speed": 64.7
+  },
+  "Guruh07_Boshliq": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 86,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 31,
+     "buy": true,
+     "time": 6,
+     "note": "Sotuvchi_18"
+    },
+    {
+     "op": "Stall",
+     "index": 8,
+     "buy": true,
+     "time": 6,
+     "note": "Sotuvchi_05"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_20"
+    },
+    {
+     "op": "Stall",
+     "index": 35,
+     "buy": true,
+     "time": 7,
+     "note": "Sotuvchi_20"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1648,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 54,
+     "buy": true,
+     "time": 4.6,
+     "note": "Sotuvchi_35"
+    },
+    {
+     "op": "Stall",
+     "index": 20,
+     "buy": false,
+     "time": 8,
+     "note": "Sotuvchi_12"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 15.3
+    }
+   ],
+   "start_delay": 12.6
+  },
+  "Guruh07_Hamroh1": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 86
+  },
+  "Guruh08_Boshliq": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 59.6,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 23,
+     "buy": true,
+     "time": 7.2,
+     "note": "Sotuvchi_13"
+    },
+    {
+     "op": "Stall",
+     "index": 15,
+     "buy": false,
+     "time": 5.4,
+     "note": "Sotuvchi_09"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1633,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 7,
+     "buy": true,
+     "time": 5.3,
+     "note": "Sotuvchi_04"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_18"
+    },
+    {
+     "op": "Stall",
+     "index": 30,
+     "buy": false,
+     "time": 5.9,
+     "note": "Sotuvchi_18"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.9
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 13.6
+    }
+   ],
+   "start_delay": 2.3
+  },
+  "Guruh08_Hamroh1": {
+   "persona": "keksa_ota",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Long_01",
+     "Dialog_Calm_Long_03"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1",
+     "AS_Idle__2__Anim"
+    ],
+    "P_Pause": [
+     "AS_Thinking_Anim",
+     "AS_Idle__2__Anim"
+    ]
+   },
+   "speed": 72.3
+  },
+  "Guruh08_Hamroh2": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   },
+   "speed": 59.6
+  },
+  "Guruh09_Boshliq": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 93.6,
+   "steps": [
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_30"
+    },
+    {
+     "op": "Stall",
+     "index": 49,
+     "buy": true,
+     "time": 4.9,
+     "note": "Sotuvchi_30"
+    },
+    {
+     "op": "Stall",
+     "index": 34,
+     "buy": true,
+     "time": 7.7,
+     "note": "Sotuvchi_20"
+    },
+    {
+     "op": "Stall",
+     "index": 6,
+     "buy": false,
+     "time": 6.5,
+     "note": "Sotuvchi_04"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1689,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_33"
+    },
+    {
+     "op": "Stall",
+     "index": 52,
+     "buy": false,
+     "time": 6.8,
+     "note": "Sotuvchi_33"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_13"
+    },
+    {
+     "op": "Stall",
+     "index": 22,
+     "buy": true,
+     "time": 8,
+     "note": "Sotuvchi_13"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 19.9
+    }
+   ],
+   "start_delay": 9.4
+  },
+  "Guruh09_Hamroh1": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 93.6
+  },
+  "Guruh10_Boshliq": {
+   "persona": "keksa_ota",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Long_01",
+     "Dialog_Calm_Long_03"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1",
+     "AS_Idle__2__Anim"
+    ],
+    "P_Pause": [
+     "AS_Thinking_Anim",
+     "AS_Idle__2__Anim"
+    ]
+   },
+   "speed": 62.9,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 32,
+     "buy": true,
+     "time": 6.9,
+     "note": "Sotuvchi_19"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.1
+    },
+    {
+     "op": "Stall",
+     "index": 2,
+     "buy": true,
+     "time": 8.7,
+     "note": "Sotuvchi_02"
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_01"
+    },
+    {
+     "op": "Stall",
+     "index": 1,
+     "buy": true,
+     "time": 7.2,
+     "note": "Sotuvchi_01"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1671,
+      530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_28"
+    },
+    {
+     "op": "Stall",
+     "index": 47,
+     "buy": true,
+     "time": 7,
+     "note": "Sotuvchi_28"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.6
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_24"
+    },
+    {
+     "op": "Stall",
+     "index": 41,
+     "buy": true,
+     "time": 7.6,
+     "note": "Sotuvchi_24"
+    },
+    {
+     "op": "Sit",
+     "index": 4,
+     "time": 54.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 11.9
+    }
+   ],
+   "start_delay": 12.8
+  },
+  "Guruh10_Hamroh1": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 95.2
+  },
+  "Guruh10_Hamroh2": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 101.9
+  },
+  "Guruh11_Boshliq": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 90.5,
+   "steps": [
+    {
+     "op": "Stall",
+     "index": 3,
+     "buy": true,
+     "time": 4.1,
+     "note": "Sotuvchi_02"
+    },
+    {
+     "op": "Stall",
+     "index": 28,
+     "buy": true,
+     "time": 6.3,
+     "note": "Sotuvchi_17"
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.9
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_06"
+    },
+    {
+     "op": "Stall",
+     "index": 10,
+     "buy": true,
+     "time": 4.9,
+     "note": "Sotuvchi_06"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1607,
+      -530,
+      3
+     ]
+    },
+    {
+     "op": "Greet",
+     "other": "Sotuvchi_33"
+    },
+    {
+     "op": "Stall",
+     "index": 52,
+     "buy": false,
+     "time": 7.2,
+     "note": "Sotuvchi_33"
+    },
+    {
+     "op": "Stall",
+     "index": 15,
+     "buy": true,
+     "time": 5.6,
+     "note": "Sotuvchi_09"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 18.2
+    }
+   ],
+   "start_delay": 18.8
+  },
+  "Guruh11_Hamroh1": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 100.7
+  },
+  "Yolovchi_01": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 98,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ],
+     "speed": 124.5
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      900,
+      60,
+      3
+     ],
+     "speed": 124.5
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      40,
+      3
+     ],
+     "speed": 124.5
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 6.6
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3400,
+      60,
+      3
+     ],
+     "speed": 124.5
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ],
+     "speed": 124.5
+    },
+    {
+     "op": "Wait",
+     "time": 13
+    }
+   ],
+   "start_delay": 15.1
+  },
+  "Yolovchi_02": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   },
+   "speed": 62,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1060,
+      3
+     ]
+    },
+    {
+     "op": "Stall",
+     "index": 44,
+     "buy": false,
+     "time": 3.6,
+     "note": "Sotuvchi_27"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      700,
+      1060,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      300,
+      600,
+      3
+     ]
+    },
+    {
+     "op": "Sit",
+     "index": 4,
+     "time": 37.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 10.4
+    }
+   ],
+   "start_delay": 5.6
+  },
+  "Yolovchi_03": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 98.2,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ],
+     "speed": 124.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1060,
+      3
+     ],
+     "speed": 124.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      700,
+      1060,
+      3
+     ],
+     "speed": 124.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      300,
+      600,
+      3
+     ],
+     "speed": 124.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ],
+     "speed": 124.1
+    },
+    {
+     "op": "Wait",
+     "time": 12.1
+    }
+   ],
+   "start_delay": 13.6
+  },
+  "Yolovchi_04": {
+   "persona": "keksa_ota",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Long_01",
+     "Dialog_Calm_Long_03"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1",
+     "AS_Idle__2__Anim"
+    ],
+    "P_Pause": [
+     "AS_Thinking_Anim",
+     "AS_Idle__2__Anim"
+    ]
+   },
+   "speed": 64.2,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1060,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      700,
+      1060,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      300,
+      600,
+      3
+     ]
+    },
+    {
+     "op": "Sit",
+     "index": 3,
+     "time": 33.2
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 8.2
+    }
+   ],
+   "start_delay": 10.6
+  },
+  "Yolovchi_05": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   },
+   "speed": 106,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ],
+     "speed": 132.3
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      400,
+      -1080,
+      3
+     ],
+     "speed": 132.3
+    },
+    {
+     "op": "Stall",
+     "index": 17,
+     "buy": false,
+     "time": 4.1,
+     "note": "Sotuvchi_10"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1900,
+      -1080,
+      3
+     ],
+     "speed": 132.3
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3080,
+      -1066,
+      3
+     ],
+     "speed": 132.3
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3840,
+      -1050,
+      3
+     ],
+     "speed": 132.3
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ],
+     "speed": 132.3
+    },
+    {
+     "op": "Wait",
+     "time": 14.1
+    }
+   ],
+   "start_delay": 12.1
+  },
+  "Yolovchi_06": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 89.2,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ],
+     "speed": 113.6
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      900,
+      60,
+      3
+     ],
+     "speed": 113.6
+    },
+    {
+     "op": "Stall",
+     "index": 0,
+     "buy": false,
+     "time": 4.1,
+     "note": "Sotuvchi_01"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      40,
+      3
+     ],
+     "speed": 113.6
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3400,
+      60,
+      3
+     ],
+     "speed": 113.6
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ],
+     "speed": 113.6
+    },
+    {
+     "op": "Wait",
+     "time": 13.9
+    }
+   ],
+   "start_delay": 17
+  },
+  "Yolovchi_07": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   },
+   "speed": 88.6,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1680,
+      3
+     ],
+     "speed": 105.2
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1060,
+      3
+     ],
+     "speed": 105.2
+    },
+    {
+     "op": "Stall",
+     "index": 16,
+     "buy": false,
+     "time": 4,
+     "note": "Sotuvchi_10"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      0,
+      3
+     ],
+     "speed": 105.2
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.7
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1060,
+      3
+     ],
+     "speed": 105.2
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ],
+     "speed": 105.2
+    },
+    {
+     "op": "Wait",
+     "time": 5.4
+    }
+   ],
+   "start_delay": 2.7
+  },
+  "Yolovchi_08": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 93.5,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1680,
+      2
+     ],
+     "speed": 120.9
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1060,
+      3
+     ],
+     "speed": 120.9
+    },
+    {
+     "op": "Stall",
+     "index": 36,
+     "buy": false,
+     "time": 3.1,
+     "note": "Sotuvchi_21"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      700,
+      1060,
+      3
+     ],
+     "speed": 120.9
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 5.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      300,
+      600,
+      3
+     ],
+     "speed": 120.9
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ],
+     "speed": 120.9
+    },
+    {
+     "op": "Wait",
+     "time": 9.7
+    }
+   ],
+   "start_delay": 16.2
+  },
+  "Yolovchi_09": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 92,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ],
+     "speed": 117.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3900,
+      -40,
+      3
+     ],
+     "speed": 117.1
+    },
+    {
+     "op": "Stall",
+     "index": 5,
+     "buy": false,
+     "time": 3.9,
+     "note": "Sotuvchi_03"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      2400,
+      -40,
+      3
+     ],
+     "speed": 117.1
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 6.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -600,
+      3
+     ],
+     "speed": 117.1
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1680,
+      3
+     ],
+     "speed": 117.1
+    },
+    {
+     "op": "Wait",
+     "time": 14.9
+    }
+   ],
+   "start_delay": 4.1
+  },
+  "Yolovchi_10": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   },
+   "speed": 96.8,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ],
+     "speed": 123.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      400,
+      -1080,
+      3
+     ],
+     "speed": 123.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1900,
+      -1080,
+      3
+     ],
+     "speed": 123.8
+    },
+    {
+     "op": "Anim",
+     "clip": "P_Pause",
+     "time": 4.4
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3080,
+      -1066,
+      3
+     ],
+     "speed": 123.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3840,
+      -1050,
+      3
+     ],
+     "speed": 123.8
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ],
+     "speed": 123.8
+    },
+    {
+     "op": "Wait",
+     "time": 10.6
+    }
+   ],
+   "start_delay": 0.2
+  },
+  "Hammol_11": {
+   "persona": "hammol",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "P_Pause": [
+     "AS_Arm_Stretching_Anim",
+     "Waiting_3"
+    ]
+   },
+   "speed": 142.3,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      300,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1060,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3080,
+      1080,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 6.6,
+     "clip": "P_Pause"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      1060,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4150,
+      -100,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      4450,
+      -120,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 5.3,
+     "clip": "P_Pause"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3400,
+      60,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      40,
+      3
+     ]
+    }
+   ],
+   "start_delay": 0.1
+  },
+  "Hammol_12": {
+   "persona": "hammol",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "P_Pause": [
+     "AS_Arm_Stretching_Anim",
+     "Waiting_3"
+    ]
+   },
+   "speed": 130.7,
+   "steps": [
+    {
+     "op": "GoTo",
+     "target": [
+      400,
+      -1080,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1060,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3080,
+      -1066,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3160,
+      -900,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 4,
+     "clip": "P_Pause"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      3160,
+      -300,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -40,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      1650,
+      -1060,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      700,
+      -1050,
+      3
+     ]
+    },
+    {
+     "op": "Wait",
+     "time": 6.4,
+     "clip": "P_Pause"
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      -150,
+      0,
+      3
+     ]
+    },
+    {
+     "op": "GoTo",
+     "target": [
+      150,
+      -110,
+      3
+     ]
+    }
+   ],
+   "start_delay": 0.6
+  },
+  "Suhbatdosh_02": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   }
+  },
+  "Suhbatdosh_03": {
+   "persona": "yigit",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_03",
+     "Dialog_Calm_Short_02"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "Waiting_3"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Texting_Anim",
+     "AS_Arm_Stretching_Anim"
+    ]
+   }
+  },
+  "Suhbatdosh_05": {
+   "persona": "keksa_ota",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Long_01",
+     "Dialog_Calm_Long_03"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1",
+     "AS_Idle__2__Anim"
+    ],
+    "P_Pause": [
+     "AS_Thinking_Anim",
+     "AS_Idle__2__Anim"
+    ]
+   }
+  },
+  "Suhbatdosh_06": {
+   "persona": "ona",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Short_02",
+     "Dialog_Intense_Medium_01",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Suhbatdosh_07": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Suhbatdosh_09": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Suhbatdosh_10": {
+   "persona": "qiz",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_03",
+     "Dialog_Intense_Short_01"
+    ],
+    "C_Wait": [
+     "AS_Texting_Anim",
+     "AnimationSequence_Customer_Standing_WaitingInLine03"
+    ],
+    "P_Pause": [
+     "AS_Texting_Anim",
+     "AS_Phone_Loop"
+    ]
+   }
+  },
+  "Suhbatdosh_12": {
+   "persona": "erkak",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Intense_Short_01",
+     "Dialog_Intense_Medium_02",
+     "Dialog_Calm_Medium_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine01",
+     "Waiting_1"
+    ],
+    "P_Pause": [
+     "AS_Phone_Loop",
+     "AS_Arm_Stretching_Anim",
+     "AS_Thinking_Anim"
+    ]
+   }
+  },
+  "Suhbatdosh_13": {
+   "persona": "keksa_momo",
+   "actions": {
+    "C_Greet": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Thanks": [
+     "AnimationSequence_Cashier_Greeting_Bow"
+    ],
+    "C_Ask": [
+     "Dialog_Calm_Short_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Short_03"
+    ],
+    "C_Think": [
+     "AS_Thinking_Anim"
+    ],
+    "C_Reject": [
+     "AS_Disappointed_Anim"
+    ],
+    "C_Browse": [
+     "AnimationSequence_Customer_Standing_BrowsingItems01",
+     "AnimationSequence_Customer_Standing_BrowsingItems02"
+    ],
+    "C_Pick": [
+     "Collect_in_basket_1",
+     "Collect_in_basket_2",
+     "Collect_in_basket_3",
+     "Collect_in_basket_4",
+     "Collect_in_basket_5"
+    ],
+    "C_Haggle": [
+     "Dialog_Calm_Medium_01",
+     "Dialog_Calm_Short_02",
+     "Dialog_Calm_Long_01"
+    ],
+    "C_Wait": [
+     "AnimationSequence_Customer_Standing_WaitingInLine02",
+     "Waiting_2"
+    ],
+    "P_Pause": [
+     "AS_Idle__2__Anim",
+     "Waiting_2"
+    ]
+   }
+  }
+ }
+}

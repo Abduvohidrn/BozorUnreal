@@ -7,6 +7,7 @@
 #include "BozorOyinchi.generated.h"
 
 class UCameraComponent;
+class UBozorQuloq;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
@@ -93,6 +94,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bozor")
 	TObjectPtr<UBozorHamyon> Hamyon;
 
+	// mikrofon: V ni bosib turib gapiriladi, lokal STT matni Gapir() ga boradi
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bozor")
+	TObjectPtr<UBozorQuloq> Quloq;
+
 	// sotuvchi bilan gaplashish mumkin bo'lgan masofa (rasta markazigacha, sm)
 	UPROPERTY(EditAnywhere, Category = "Bozor")
 	float GaplashishMasofasi = 350.f;
@@ -114,6 +119,14 @@ public:
 
 	// E: yaqindagi sotuvchi bilan suhbatni boshlaydi yoki tugatadi
 	void EBosildi();
+
+	// V: mikrofon bilan gapirish (bosib turiladi)
+	void VBosildi();
+	void VQoyildi();
+	// Konsol: QuloqSinov <audio fayl> - mikrofonsiz, faylni STT dan o'tkazib sotuvchiga aytadi
+	UFUNCTION(Exec)
+	void QuloqSinov(const FString& Fayl);
+	const UBozorQuloq* GetQuloq() const { return Quloq; }
 
 	// Javob variantini tanlash (0 dan; tugma, 1-5 raqamlar yoki konsol "Tanla 0")
 	UFUNCTION(Exec)

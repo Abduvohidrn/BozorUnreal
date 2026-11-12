@@ -66,7 +66,19 @@ enum class EBozorBosqich : uint8
 	NarxAytildi,
 	PulKutilmoqda,
 	QaytimTekshir,   // pul olindi, qaytim berildi - bola sanab, rozi bo'ladi yoki "kam" deydi
-	Tugadi
+	Tugadi,
+	TaroziTekshir    // tortildi - bola tarozini (xaltani) ko'radi: ko'p yoki kam bo'lsa aytadi yoki indamaydi, keyin pul
+};
+
+// Tarozi natijasi (daraja rejasidagi xato va bolaning tanlovi)
+UENUM(BlueprintType)
+enum class EBozorTarozi : uint8
+{
+	Togri,
+	OrtiqAytdi,   // ko'p tortildi - bola aytdi, sotuvchi ortig'ini oldi
+	OrtiqOldi,    // ko'p tortildi - bola indamadi, ko'proq oldi va ko'proq to'ladi
+	KamAytdi,     // kam tortildi - bola aytdi, sotuvchi qo'shib berdi
+	KamOtkazdi    // kam tortildi - bola sezmadi, kam oldi, to'liq to'ladi
 };
 
 // Miya so'raydigan harakat - suhbat uni tekshirib bajaradi
@@ -83,7 +95,9 @@ enum class EBozorHarakat : uint8
 	Tushunmadi,
 	MolTanlash,    // Mol - qaysi mahsulot (boshqa harakatsiz faqat nomini aytdi)
 	QaytimRozi,    // qaytimni oldi, rahmat
-	QaytimKam      // "qaytim kam berdingiz"
+	QaytimKam,     // "qaytim kam berdingiz"
+	TaroziRozi,    // tarozidagini oladi (xato bo'lsa ham indamaydi)
+	TaroziAyt      // "men X so'ragandim" - ko'p yoki kam tortilganini aytadi
 };
 
 USTRUCT(BlueprintType)
@@ -106,7 +120,10 @@ struct FBozorSuhbatHolati
 	UPROPERTY(BlueprintReadOnly) int32 QaytimKam = 0;              // qaytim shuncha kam berildi (0 - to'g'ri)
 	UPROPERTY(BlueprintReadOnly) EBozorBosqich Bosqich = EBozorBosqich::Boshlanish;
 	UPROPERTY(BlueprintReadOnly) int32 JoriyNarx = 0;   // hozir kelishilgan narx (bir birlik)
-	UPROPERTY(BlueprintReadOnly) float Miqdor = 0.f;
+	UPROPERTY(BlueprintReadOnly) float Miqdor = 0.f;          // tarozida (bola aslida oladigani)
+	UPROPERTY(BlueprintReadOnly) float SoralganMiqdor = 0.f;  // bola so'ragani
+	UPROPERTY(BlueprintReadOnly) float HisobMiqdor = 0.f;     // sotuvchi aytgan va puli olinadigani (kam tortsa - so'ralgani)
+	UPROPERTY(BlueprintReadOnly) EBozorTarozi Tarozi = EBozorTarozi::Togri;
 	UPROPERTY(BlueprintReadOnly) int32 Summa = 0;
 	UPROPERTY(BlueprintReadOnly) int32 Savdolashuv = 0;  // necha marta tushirish so'raldi
 	UPROPERTY(BlueprintReadOnly) bool bSalomlashdi = false;
@@ -178,7 +195,10 @@ enum class EBozorJavob : uint8
 	Haydadi,      // munosabat juda yomon - savdoni to'xtatdi
 	QaytimUzr,    // bola kam qaytimni sezdi - sotuvchi uzr so'rab qolganini beradi
 	QaytimTogri,  // qaytim to'g'ri edi
-	OshBolsin     // qaytimni oldi
+	OshBolsin,    // qaytimni oldi
+	TaroziUzr,    // bola ko'p/kam tortilganini aytdi - sotuvchi to'g'rilaydi
+	TaroziTogri,  // tarozi to'g'ri edi
+	TaroziKelishdi// bola tarozidagini oldi - sotuvchi summani aytadi
 };
 
 // Gapni tushunadi va javob matnini yozadi. Hozir - tayyor javoblar; keyin AI bilan almashtiriladi.
@@ -219,6 +239,36 @@ struct FBozorRoyxatQator
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Miqdor = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Birlik = TEXT("dona");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bOlindi = false;
+	UPROPERTY(BlueprintReadOnly) float Olindi = 0.f;   // hamma xariddan jami olingani
+};
+
+// Bitta xarid (to'langanda yoziladi) - natija statistikasi uchun
+USTRUCT(BlueprintType)
+struct FBozorXarid
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly) FString Nomi;
+	UPROPERTY(BlueprintReadOnly) FString Birlik;
+	UPROPERTY(BlueprintReadOnly) float Soralgan = 0.f;
+	UPROPERTY(BlueprintReadOnly) float Olindi = 0.f;
+	UPROPERTY(BlueprintReadOnly) int32 Narx = 0;         // so'ralgan narx (bir birlik)
+	UPROPERTY(BlueprintReadOnly) int32 Kelishildi = 0;   // savdolashib kelishilgan narx
+	UPROPERTY(BlueprintReadOnly) int32 Tolandi = 0;
+	UPROPERTY(BlueprintReadOnly) EBozorTarozi Tarozi = EBozorTarozi::Togri;
+};
+
+// Natija jadvalidagi bir qator: ro'yxatdagi (yoki ro'yxatdan tashqari olingan) mol bo'yicha jami
+struct FBozorNatijaQator
+{
+	FString Nomi;
+	FString Birlik;
+	float Kerak = -1.f;   // ro'yxatda yo'q bo'lsa -1
+	float Olindi = 0.f;
+	int32 Tolandi = 0;
+	int32 Narx = 0, Kelishildi = 0;   // birinchi xariddagi
+	// "to'g'ri" / "ko'p" / "kam" / "olinmadi" / "ro'yxatda yo'q"
+	FString Baho() const;
 };
 
 // Daraja: boshlang'ich pul, xarid ro'yxati, onaning eslatmasi (sotuv.json "darajalar")
@@ -233,6 +283,8 @@ struct FBozorDaraja
 	UPROPERTY(BlueprintReadOnly) TMap<int32, int32> Kupyura;
 	UPROPERTY(BlueprintReadOnly) TArray<FBozorRoyxatQator> Royxat;
 	UPROPERTY(BlueprintReadOnly) bool bXatoQaytim = false;
+	// tortishlar tartibida tarozi rejasi: "togri", "ortiq" (ko'p tortadi), "kam" (kam tortib, to'liq narx so'raydi)
+	UPROPERTY(BlueprintReadOnly) TArray<FString> Tarozi;
 };
 
 // O'yinchining puli (kupyuralar), xarid ro'yxati (cho'ntakdagi qog'oz) va xarid qilganlari
@@ -262,12 +314,22 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Bozor") int32 Rahmatlar = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Bozor") int32 Tejaldi = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Bozor") int32 BoshlangichPul = 0;
+	// tarozi: ko'p/kam tortilganini bola aytdimi yoki indamadimi
+	UPROPERTY(BlueprintReadOnly, Category = "Bozor") int32 TaroziSezildi = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Bozor") int32 TaroziOtkazildi = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Bozor") TArray<FBozorXarid> Xaridlar;
+	// darajaning tarozi rejasi va nechanchi tortish
+	TArray<FString> TaroziRejasi;
+	int32 Tortishlar = 0;
 
 	bool RoyxatTugadimi() const;
 	// darajaning puli, ro'yxati va eslatmasi bilan boshidan boshlaydi (statistika ham nolga)
 	void Boshla(const FBozorDaraja& D);
-	// 1-3 yulduz: 1 - ro'yxat to'liq, +1 - odob (hamma suhbat salom bilan, qo'pol gap yo'q), +1 - qaytim xatosi o'tkazilmagan va savdolashib tejalgan
+	// 1-3 yulduz: 1 - ro'yxat to'liq, +1 - odob (hamma suhbat salom bilan, qo'pol gap yo'q),
+	// +1 - qaytim va tarozi xatosi o'tkazilmagan va savdolashib tejalgan
 	int32 Yulduzlar() const;
+	// ro'yxat qatorlari (tartibida), keyin ro'yxatdan tashqari olinganlar
+	TArray<FBozorNatijaQator> NatijaQatorlari() const;
 
 	// katta qiymatdan kichigiga: 200 000 ... 500
 	static const TArray<int32>& Turlari();

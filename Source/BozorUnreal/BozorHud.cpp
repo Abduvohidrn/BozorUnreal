@@ -562,8 +562,11 @@ void ABozorHud::NatijaChiz()
 		Canvas->DrawItem(T);
 	};
 
+	// jadval: ro'yxatdagi har mol (kerak / olindi / to'landi / narx / baho), keyin ro'yxatdan tashqari olinganlar
+	const TArray<FBozorNatijaQator> Jadval = H->NatijaQatorlari();
+	const float QatorH = 40.f * S;
 	Tort(0.f, 0.f, Canvas->ClipX, Canvas->ClipY, FLinearColor(0.f, 0.f, 0.f, 0.55f));
-	const float W = 1000.f * S, Hh = 760.f * S;
+	const float W = 1240.f * S, Hh = FMath::Min(Canvas->ClipY - 20.f * S, 780.f * S + QatorH * (Jadval.Num() + 1));
 	const float X = (Canvas->ClipX - W) * 0.5f, Y = (Canvas->ClipY - Hh) * 0.5f;
 	Tort(X, Y, W, Hh, FLinearColor(0.96f, 0.93f, 0.83f, 0.97f));
 	const bool bTugadi = H->RoyxatTugadimi();
@@ -585,12 +588,44 @@ void ABozorHud::NatijaChiz()
 		FString::Printf(TEXT("Savdolashib tejaldi: %s so'm"), *BozorSotuv::Som(H->Tejaldi)),
 		FString::Printf(TEXT("Odob: salom bilan boshlangan suhbat %d / %d, qo'pol gap %d"), H->Suhbatlar - H->Salomsiz, H->Suhbatlar, H->Qopol),
 		FString::Printf(TEXT("Qaytim: kam qaytim sezildi %d, sezilmadi %d"), H->XatoQaytimSezildi, H->XatoQaytimOtkazildi),
+		FString::Printf(TEXT("Tarozi: ko'p/kam tortilganini aytdingiz %d, indamadingiz %d"), H->TaroziSezildi, H->TaroziOtkazildi),
 	};
-	float Ty = Y + 250.f * S;
+	float Ty = Y + 245.f * S;
 	for (const FString& Q : Qatorlar)
 	{
-		Yoz(Q, X + 70.f * S, Ty, 1.7f * S, Siyoh);
-		Ty += 52.f * S;
+		Yoz(Q, X + 70.f * S, Ty, 1.55f * S, Siyoh);
+		Ty += 44.f * S;
+	}
+
+	// xaridlar jadvali
+	Ty += 12.f * S;
+	const float Ustun[] = {70.f, 300.f, 470.f, 690.f, 880.f, 1080.f};
+	const TCHAR* Sarlavha[] = {TEXT("Mahsulot"), TEXT("Kerak edi"), TEXT("Olindi"), TEXT("To'landi"), TEXT("Narx (1 birlik)"), TEXT("Baho")};
+	Tort(X + 50.f * S, Ty - 4.f * S, W - 100.f * S, QatorH, FLinearColor(0.3f, 0.25f, 0.15f, 0.18f));
+	for (int32 I = 0; I < UE_ARRAY_COUNT(Ustun); ++I) Yoz(Sarlavha[I], X + Ustun[I] * S, Ty, 1.35f * S, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.75f));
+	Ty += QatorH;
+	for (const FBozorNatijaQator& Q : Jadval)
+	{
+		const FString Baho = Q.Baho();
+		// to'g'ri - yashil, ko'p - to'q sariq, kam/olinmadi - qizil, ro'yxatda yo'q - kulrang
+		const FLinearColor Rang = Baho == TEXT("to'g'ri") ? FLinearColor(0.1f, 0.45f, 0.15f, 1.f)
+			: Baho == TEXT("ko'p") ? FLinearColor(0.75f, 0.4f, 0.05f, 1.f)
+			: Q.Kerak < 0.f ? FLinearColor(0.35f, 0.35f, 0.35f, 1.f) : FLinearColor(0.7f, 0.12f, 0.1f, 1.f);
+		FString OlindiMatn = Q.Olindi > 0.f ? FString::Printf(TEXT("%s %s"), *BozorSotuv::Miqdor(Q.Olindi), *Q.Birlik) : FString(TEXT("—"));
+		if (Q.Kerak >= 0.f && Q.Olindi > 0.f && !FMath::IsNearlyEqual(Q.Olindi, Q.Kerak, 0.05f))
+			OlindiMatn += FString::Printf(TEXT(" (%s%s)"), Q.Olindi > Q.Kerak ? TEXT("+") : TEXT("−"), *BozorSotuv::Miqdor(FMath::Abs(Q.Olindi - Q.Kerak)));
+		const FString Narx = Q.Olindi <= 0.f ? FString(TEXT("—"))
+			: Q.Kelishildi < Q.Narx ? FString::Printf(TEXT("%s → %s"), *BozorSotuv::Som(Q.Narx), *BozorSotuv::Som(Q.Kelishildi)) : BozorSotuv::Som(Q.Kelishildi);
+		const FString Ustunlar[] = {
+			Q.Nomi,
+			Q.Kerak >= 0.f ? FString::Printf(TEXT("%s %s"), *BozorSotuv::Miqdor(Q.Kerak), *Q.Birlik) : FString(TEXT("—")),
+			OlindiMatn,
+			Q.Tolandi > 0 ? FString::Printf(TEXT("%s so'm"), *BozorSotuv::Som(Q.Tolandi)) : FString(TEXT("—")),
+			Narx,
+			Baho,
+		};
+		for (int32 I = 0; I < UE_ARRAY_COUNT(Ustun); ++I) Yoz(Ustunlar[I], X + Ustun[I] * S, Ty, 1.35f * S, I == 0 ? Siyoh : Rang);
+		Ty += QatorH;
 	}
 
 	// eng muhim maslahat (birinchi topilgani)
@@ -599,6 +634,7 @@ void ABozorHud::NatijaChiz()
 	else if (H->Salomsiz > 0) Maslahat = TEXT("Sotuvchi bilan gapni salomdan boshlang.");
 	else if (H->Qopol > 0) Maslahat = TEXT("Kattalarga qo'pol gapirmang - odobli bolaga sotuvchi arzonroq beradi.");
 	else if (H->XatoQaytimOtkazildi > 0) Maslahat = TEXT("Qaytimni har doim sanab oling.");
+	else if (H->TaroziOtkazildi > 0) Maslahat = TEXT("Tarozini kuzating: ko'p yoki kam tortilsa, odob bilan ayting.");
 	else if (H->Tejaldi == 0) Maslahat = TEXT("Iltimos qilib savdolashsangiz, pulni tejaysiz.");
 	else Maslahat = TEXT("Barakalla! Bozorda o'zingizni juda yaxshi tutdingiz.");
 	Ty += 20.f * S;

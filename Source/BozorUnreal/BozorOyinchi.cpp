@@ -2,6 +2,7 @@
 #include "BozorHud.h"
 #include "BozorNpc.h"
 #include "BozorOvoz.h"
+#include "BozorQuloq.h"
 
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
@@ -227,6 +228,7 @@ ABozorOyinchi::ABozorOyinchi(const FObjectInitializer& ObjectInitializer)
 	Cm->AirControl = 0.4f;
 
 	Hamyon = CreateDefaultSubobject<UBozorHamyon>(TEXT("Hamyon"));
+	Quloq = CreateDefaultSubobject<UBozorQuloq>(TEXT("Quloq"));
 }
 
 void ABozorOyinchi::BeginPlay()
@@ -269,6 +271,55 @@ void ABozorOyinchi::BeginPlay()
 	// tekshiruv: -RefPoza - tana animatsiyasiz, asl pozada
 	if (FParse::Param(FCommandLine::Get(), TEXT("RefPoza"))) GetMesh()->SetAnimInstanceClass(nullptr);
 	TestVaqt = GetWorld()->GetTimeSeconds();
+
+	// mikrofon matni: sotuvchiga gap sifatida (tugmadagi gap bilan bir xil yo'l)
+	Quloq->NatijaKeldi = [this](const FString& Matn)
+	{
+		if (Matn.IsEmpty())
+		{
+			Xabar = TEXT("Eshitmadim - V ni bosib turib, aniqroq gapiring");
+			XabarVaqti = GetWorld()->GetTimeSeconds();
+			return;
+		}
+		Xabar.Reset();
+		Gapir(Matn);
+	};
+}
+
+void ABozorOyinchi::VBosildi()
+{
+	if (!bSuhbatda && !SuhbatniBoshla())
+	{
+		if (Xabar.IsEmpty() || GetWorld()->GetTimeSeconds() - XabarVaqti > 3.0) Xabar = TEXT("Gapirish uchun sotuvchi oldiga borib, unga qarang");
+		XabarVaqti = GetWorld()->GetTimeSeconds();
+		return;
+	}
+	if (!Quloq->Boshla())
+	{
+		Xabar = Quloq->GetXato();
+		XabarVaqti = GetWorld()->GetTimeSeconds();
+	}
+}
+
+void ABozorOyinchi::QuloqSinov(const FString& Fayl)
+{
+	if (!bSuhbatda && !SuhbatniBoshla())
+	{
+		Chiqar(TEXT("Bozor"), TEXT("Yaqin atrofda sotuvchi yo'q"), FColor::Red, true);
+		return;
+	}
+	Quloq->Fayldan(Fayl);
+}
+
+void ABozorOyinchi::VQoyildi()
+{
+	if (!Quloq->Tinglayapti()) return;
+	Quloq->Tugat();
+	if (Quloq->Tushunyapti())
+	{
+		Xabar = TEXT("...");
+		XabarVaqti = GetWorld()->GetTimeSeconds();
+	}
 }
 
 void ABozorOyinchi::PawnClientRestart()
@@ -301,6 +352,8 @@ void ABozorOyinchi::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ABozorOyinchi::SichqonchaBosildi);
 	PlayerInputComponent->BindKey(EKeys::Enter, IE_Pressed, this, &ABozorOyinchi::EnterBosildi);
 	PlayerInputComponent->BindKey(EKeys::R, IE_Pressed, this, &ABozorOyinchi::RBosildi);
+	PlayerInputComponent->BindKey(EKeys::V, IE_Pressed, this, &ABozorOyinchi::VBosildi);
+	PlayerInputComponent->BindKey(EKeys::V, IE_Released, this, &ABozorOyinchi::VQoyildi);
 	// 1-9 raqamlari - javob variantlari (to'lovda kupyuralar ham)
 	const FKey Raqamlar[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
 	for (int32 I = 0; I < UE_ARRAY_COUNT(Raqamlar); ++I)
@@ -328,6 +381,17 @@ void ABozorOyinchi::Look(const FInputActionValue& Value)
 void ABozorOyinchi::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (Quloq->Tinglayapti())
+	{
+		const int32 Chiziq = FMath::Clamp(FMath::RoundToInt(Quloq->GetBalandlik() * 12.f), 0, 10);
+		Xabar = FString::Printf(TEXT("Gapiring...  %s  (V ni qo'yib yuboring)"), *FString::ChrN(FMath::Max(1, Chiziq), TEXT('|')));
+		XabarVaqti = GetWorld()->GetTimeSeconds();
+	}
+	else if (Quloq->Tushunyapti())
+	{
+		Xabar = TEXT("Tushunilmoqda...");
+		XabarVaqti = GetWorld()->GetTimeSeconds();
+	}
 	if (bTest) SotuvTestQadami();
 	if (bBot) BotQadami();
 	if (!bSuhbatda) YaqinSotuvchiniTop();
@@ -418,6 +482,7 @@ bool ABozorOyinchi::SuhbatniBoshla()
 	bSuhbatda = true;
 	TugatishVaqti = -1.0;
 	OxirgiGapim.Empty();
+	Quloq->Isit(true);   // birinchi gapning boshi yo'qolmasin
 	if (APlayerController* Pc = Cast<APlayerController>(GetController()))
 	{
 		Pc->SetIgnoreMoveInput(true);
@@ -436,6 +501,7 @@ void ABozorOyinchi::SuhbatniTugat()
 	if (!bSuhbatda) return;
 	bSuhbatda = false;
 	TugatishVaqti = -1.0;
+	Quloq->Isit(false);
 	if (Suhbat && Suhbat->GetSotuvchi()) Suhbat->GetSotuvchi()->OyinchiBilanTugat();
 	if (APlayerController* Pc = Cast<APlayerController>(GetController()))
 	{
@@ -489,9 +555,12 @@ void ABozorOyinchi::Natija()
 	}
 	KursorniKorsat(true);
 	GetCharacterMovement()->StopMovementImmediately();
-	Chiqar(TEXT("Natija"), FString::Printf(TEXT("%d yulduz | qoldi %s so'm | tejaldi %s | salomsiz %d/%d | qo'pol %d | qaytim sezildi %d, o'tkazildi %d"),
+	for (const FBozorNatijaQator& Q : Hamyon->NatijaQatorlari())
+		Chiqar(TEXT("Xarid"), FString::Printf(TEXT("%s: kerak %s, olindi %s %s, to'landi %s so'm - %s"), *Q.Nomi,
+			Q.Kerak < 0.f ? TEXT("-") : *BozorSotuv::Miqdor(Q.Kerak), *BozorSotuv::Miqdor(Q.Olindi), *Q.Birlik, *BozorSotuv::Som(Q.Tolandi), *Q.Baho()), FColor::White);
+	Chiqar(TEXT("Natija"), FString::Printf(TEXT("%d yulduz | qoldi %s so'm | tejaldi %s | salomsiz %d/%d | qo'pol %d | qaytim sezildi %d, o'tkazildi %d | tarozi sezildi %d, o'tkazildi %d"),
 		Hamyon->Yulduzlar(), *BozorSotuv::Som(Hamyon->Pul), *BozorSotuv::Som(Hamyon->Tejaldi), Hamyon->Salomsiz, Hamyon->Suhbatlar,
-		Hamyon->Qopol, Hamyon->XatoQaytimSezildi, Hamyon->XatoQaytimOtkazildi), FColor::White);
+		Hamyon->Qopol, Hamyon->XatoQaytimSezildi, Hamyon->XatoQaytimOtkazildi, Hamyon->TaroziSezildi, Hamyon->TaroziOtkazildi), FColor::White);
 }
 
 void ABozorOyinchi::EnterBosildi()
@@ -548,6 +617,7 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 		break;
 	case EBozorJavob::TushirdiMan:
 	case EBozorJavob::MiqdorSora:
+	case EBozorJavob::TaroziKelishdi:
 		Harakat = TEXT("V_Yes");
 		break;
 	case EBozorJavob::TushirmaymanEngPast:
@@ -562,9 +632,11 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	case EBozorJavob::Tortdim:
 	case EBozorJavob::PulOldim:
 	case EBozorJavob::QaytimUzr:
+	case EBozorJavob::TaroziUzr:
 		Harakat = TEXT("V_Offer");
 		break;
 	case EBozorJavob::QaytimTogri:
+	case EBozorJavob::TaroziTogri:
 		Harakat = TEXT("V_No");
 		break;
 	case EBozorJavob::OshBolsin:
@@ -668,6 +740,7 @@ void ABozorOyinchi::TestRastasigaBor()
 		Tur(EBozorTanlovTur::MiqdorOch),
 		Tur(EBozorTanlovTur::MiqdorKop),
 		Harakat(EBozorHarakat::Tortish),
+		Harakat(EBozorHarakat::TaroziRozi),
 		Tur(EBozorTanlovTur::TolovOch),
 		Tur(EBozorTanlovTur::KupyuraQoy),   // eng katta kupyura (ro'yxatda birinchi)
 		Harakat(EBozorHarakat::PulQabul),
@@ -684,11 +757,12 @@ void ABozorOyinchi::TestRastasigaBor()
 	TestSuratlar[1] = TEXT("3d_narx_tanlovlar.png");
 	TestSuratlar[3] = TEXT("3e_odobli_savdo.png");
 	TestSuratlar[5] = TEXT("3f_miqdor.png");
-	TestSuratlar[7] = TEXT("3g_kupyuralar.png");
-	TestSuratlar[8] = TEXT("3h_peshtaxta.png");
-	TestSuratlar[9] = TEXT("3i_qaytim.png");
-	TestSuratlar[10] = TEXT("3j_qaytim_kam.png");
-	TestSuratlar[14] = TEXT("3k_qopol.png");
+	TestSuratlar[6] = TEXT("3f2_tarozi.png");
+	TestSuratlar[8] = TEXT("3g_kupyuralar.png");
+	TestSuratlar[9] = TEXT("3h_peshtaxta.png");
+	TestSuratlar[10] = TEXT("3i_qaytim.png");
+	TestSuratlar[11] = TEXT("3j_qaytim_kam.png");
+	TestSuratlar[15] = TEXT("3k_qopol.png");
 	TestGaplar = {TEXT("-")};   // TestQadam==5 da qayta chaqirilmasin
 	RastalarniChiqar(false);
 }
@@ -790,6 +864,13 @@ void ABozorOyinchi::BotQadami()
 		const bool bKam = Olindi < BotBerildi - BotSumma;
 		Chiqar(TEXT("Bot"), FString::Printf(TEXT("qaytim: kerak %s, olindi %s"), *BozorSotuv::Som(BotBerildi - BotSumma), *BozorSotuv::Som(Olindi)), FColor::White);
 		I = Top(Gap(bKam ? EBozorHarakat::QaytimKam : EBozorHarakat::QaytimRozi));
+	}
+	else if (H.Bosqich == EBozorBosqich::TaroziTekshir)
+	{
+		// tarozidagini so'ralgani bilan solishtiradi: farq bo'lsa odob bilan aytadi
+		const bool bXato = !FMath::IsNearlyEqual(H.Miqdor, H.SoralganMiqdor);
+		Chiqar(TEXT("Bot"), FString::Printf(TEXT("tarozi: so'ralgan %s, tarozida %s %s"), *BozorSotuv::Miqdor(H.SoralganMiqdor), *BozorSotuv::Miqdor(H.Miqdor), *H.Mahsulot.Birlik), FColor::White);
+		I = Top(Gap(bXato ? EBozorHarakat::TaroziAyt : EBozorHarakat::TaroziRozi, 1));
 	}
 	else if (Suhbat->Tolovda())
 	{

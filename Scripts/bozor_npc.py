@@ -13,7 +13,7 @@ ROOT = "/Game/Bozor"
 ABP = ROOT + "/Pack/Queue/ABP_Manny"
 # MetaHuman: eski personaj -> MetaHuman (tana + yuz + o'tkazilgan kiyim). Animatsiyalar MetaHuman skeletiga retarget qilingan
 # (/Game/Bozor/MetaAnim). Yuz va kiyim tana pozasiga ABozorNpc::BeginPlay'da (leader pose) ergashadi.
-USE_MH = True
+USE_MH = False
 MH = {
     "Otaxon_Chopon_01": "MH_KeksaOtaxon", "Otaxon_Pidjak_01": "MH_DehqonOta", "Momo_01": "MH_KeksaMomo",
     "Ayol_Kofta_01": "MH_XaridorAyol", "Sotuvchi_Ayol_01": "MH_Onaxon", "Qiz_01": "MH_YoshSotuvchiQiz",
@@ -54,9 +54,7 @@ def load(path):
 
 
 def anim(name):
-    if USE_MH:
-        return load("%s/%s" % (MH_ANIM, name))
-    return load("%s/Animations/%s" % (ROOT, name)) or load("%s/Pack/WW100/%s" % (ROOT, name))
+    return load('%s/CitizenAnim/Male/%s' % (ROOT, name))
 
 
 # Fab'dagi tayyor kiyimlar (vaqtincha, rasmiy kiyimsiz): MetaHuman -> {rol: to'plam}, "*" - qolgan rollar.
@@ -228,10 +226,13 @@ def cit_parts(character, role, idx):
 
 def cit_dress(actor, mesh_comp, g, parts):
     """Yashirin Citizen tanasi (CitizenPose) + unga biriktirilgan ko'rinadigan qismlar; teri bir xil ohangda."""
-    body = add_part(actor, mesh_comp, "CitizenTana",
-                    load(CIT + "Meshes/Basebody/SK_%s_body_average" % g))
-    body.set_editor_property("anim_class", load(CIT_ABP % ("Male" if g == "ma" else "Female")).generated_class())
-    body.set_editor_property("component_tags", ["CitizenPose"])
+    body = mesh_comp
+    body.set_skeletal_mesh_asset(load(CIT + 'Meshes/Basebody/SK_%s_body_average' % g))
+    bp = load(ROOT + '/CitizenAnim/' + ('Male' if g == 'ma' else 'Female') + '/ABP_Manny')
+    if not bp:
+        raise RuntimeError('Run Citizen animation migration first')
+    body.set_anim_instance_class(bp.generated_class())
+    body.set_editor_property('disable_post_process_blueprint', True)
     body.set_editor_property("visibility_based_anim_tick_option",
                              unreal.VisibilityBasedAnimTickOption.ALWAYS_TICK_POSE_AND_REFRESH_BONES)
     body.set_editor_property("visible", False)
@@ -289,8 +290,6 @@ def build(scene, log):
     actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     npc = scene["npc"]
     npcs = npc["npcs"]
-    abp = load(ABP).generated_class()
-    mh_abp = load(MH_ABP).generated_class() if USE_MH else None
 
     def spawn(cls, loc, rot, label, folder):
         a = actors.spawn_actor_from_class(cls, loc, rot)
@@ -306,29 +305,13 @@ def build(scene, log):
         feet = V(n["pos"])
         a = spawn(unreal.BozorNpc, unreal.Vector(feet.x, feet.y, feet.z + CAPSULE_HALF + 2), Q(n["rot"]).rotator(), n["name"], "%s/%s" % (FOLDER, role))
         m = a.get_editor_property("mesh")
-        mh = mh_parts(n["character"], role)
-        cit = cit_parts(n["character"], role, i) if mh else None
+        cit = cit_parts(n["character"], role, i)
         if cit:
-            # yashirin MetaHuman tanasi animatsiya manbai, ko'rinadigan gavda - Citizen qismlari
-            m.set_editor_property("skeletal_mesh_asset", mh[0])
-            m.set_editor_property("anim_class", mh_abp)
             cit_dress(a, m, *cit)
             stats["kiyim_" + cit[1][0][1].get_name()] += 1
             stats["Citizen"] += 1
-        elif mh:
-            m.set_editor_property("skeletal_mesh_asset", mh[0])
-            m.set_editor_property("anim_class", mh_abp)
-            # yuz, soch, qosh: MetaHuman BP'sining o'zi (child actor). Alohida qo'shilgan groom'lar o'yinda
-            # ko'rinmaydi - BP'dagi LODSync va MetaHuman komponentlari kerak. Tanasi ABozorNpc::BeginPlay'da ergashadi.
-            add_part(a, m, "MH", mh[3], unreal.ChildActorComponent)
-            add_part(a, m, "Kiyim", mh[2])
-            stats["kiyim_" + mh[2].get_name()] += 1
-            stats["MetaHuman"] += 1
         else:
-            if USE_MH:
-                stats["MH_topilmadi_" + n["character"]] += 1
-            m.set_editor_property("skeletal_mesh_asset", load("%s/Characters/%s" % (ROOT, n["character"])))
-            m.set_editor_property("anim_class", abp)
+            raise RuntimeError('Missing Citizen outfit: ' + n['character'])
         s = float(n["scale"][1])
         m.set_editor_property("relative_scale3d", unreal.Vector(s, s, s))
         m.set_editor_property("enable_update_rate_optimizations", True)
@@ -371,6 +354,17 @@ def build(scene, log):
             continue
         acts.append(unreal.BozorNpcAction(category=x["category"], anim=a, loop=bool(x["loop"])))
     mgr.set_editor_property("actions", acts)
+    # Every actor owns clips on its own skeleton, including female NPCs.
+    for i, a in made.items():
+        gender = 'Female' if npcs[i]['female'] else 'Male'
+        own = []
+        for action in acts:
+            clip = load(ROOT + '/CitizenAnim/' + gender + '/' + action.anim.get_name())
+            if not clip:
+                raise RuntimeError('Missing Citizen clip: ' + action.anim.get_name())
+            own.append(unreal.BozorNpcAction(category=action.category, anim=clip, loop=action.loop))
+        a.set_editor_property('own_actions', own)
+    mgr.set_editor_property('actions', [])
     queues = []
     for s in npc["spots"]:
         if s["vendor"] not in made:

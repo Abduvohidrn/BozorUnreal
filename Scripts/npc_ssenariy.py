@@ -8,8 +8,8 @@ import os
 
 import unreal
 
-HERE = r"D:/Unreal Projects/BozorUnreal/Scripts"
-ANIM = "/Game/Bozor/MetaAnim/"
+HERE = os.path.dirname(os.path.abspath(__file__))
+ANIM = '/Game/Bozor/CitizenAnim/'
 # EBozorStepOp qiymatlari Python'da (GoTo -> GOTO yoki GO_TO): nomni pastki chiziqsiz solishtirib topamiz
 OPS = {}
 for _n in dir(unreal.BozorStepOp):
@@ -30,13 +30,14 @@ def apply(path=os.path.join(HERE, "npc_ssenariy.json")):
     npcs = {a.get_actor_label(): a for a in actors if isinstance(a, unreal.BozorNpc)}
     cache, missing, stats = {}, set(), {"npc": 0, "qadam": 0, "klip": 0}
 
-    def clip(name):
-        if name not in cache:
-            p = ANIM + name
-            cache[name] = unreal.load_asset(p) if unreal.EditorAssetLibrary.does_asset_exist(p) else None
-            if not cache[name]:
+    def clip(name, gender):
+        key = (gender, name)
+        if key not in cache:
+            p = ANIM + gender + '/' + name
+            cache[key] = unreal.load_asset(p) if unreal.EditorAssetLibrary.does_asset_exist(p) else None
+            if not cache[key]:
                 missing.add(name)
-        return cache[name]
+        return cache[key]
 
     for label, e in data.items():
         a = npcs.get(label)
@@ -46,7 +47,7 @@ def apply(path=os.path.join(HERE, "npc_ssenariy.json")):
         acts = []
         for cat, clips in e.get("actions", {}).items():
             for c in clips:
-                an = clip(c)
+                an = clip(c, 'Female' if a.get_editor_property('female') else 'Male')
                 if an:
                     acts.append(unreal.BozorNpcAction(category=cat, anim=an, loop=is_loop(cat, c)))
         steps = []

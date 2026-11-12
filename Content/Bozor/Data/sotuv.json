@@ -77,28 +77,31 @@
 
   "felTartibi": ["mehribon", "qattiq", "shoshqaloq", "ayyor"],
 
-  "darajalarIzoh": "Daraja o'yinga ?Daraja=N (yoki -Daraja=N) bilan beriladi, natija oynasida Enter - keyingisi. pul: kupyura -> soni; royxat: [nomi (mahsulot nomi bilan bir xil), miqdor, birlik]; xatoQaytim: false - hech kim qaytimni xato bermaydi, true - fe'llardagi ehtimollar.",
+  "darajalarIzoh": "Daraja o'yinga ?Daraja=N (yoki -Daraja=N) bilan beriladi, natija oynasida Enter - keyingisi. pul: kupyura -> soni; royxat: [nomi (mahsulot nomi bilan bir xil), miqdor, birlik]; xatoQaytim: false - hech kim qaytimni xato bermaydi, true - fe'llardagi ehtimollar. tarozi: tortishlar tartibida reja - 'togri', 'ortiq' (bir qadam ko'p tortadi va ko'piga pul so'raydi), 'kam' (kilo - 80%, dona - 1 ta kam soladi, lekin to'liq narx so'raydi); rejadan keyingi tortishlar to'g'ri. Bola tarozini ko'rib, indamay oladi yoki aytadi.",
   "darajalar": [
     {
       "nomi": "Birinchi xarid",
       "eslatma": "Bitta non olib kel. Salom berishni unutma!\n— Oying",
       "pul": { "5000": 1, "2000": 1, "1000": 2 },
       "royxat": [ ["non", 1, "dona"] ],
-      "xatoQaytim": false
+      "xatoQaytim": false,
+      "tarozi": ["ortiq"]
     },
     {
       "nomi": "Ro'yxat",
       "eslatma": "Narxlarni solishtir - arzonini ol!\n— Oying",
       "pul": { "20000": 1, "10000": 2, "5000": 1, "2000": 1, "1000": 2, "500": 2 },
       "royxat": [ ["non", 2, "dona"], ["kartoshka", 2, "kilo"], ["olma", 1, "kilo"] ],
-      "xatoQaytim": false
+      "xatoQaytim": false,
+      "tarozi": ["togri", "ortiq", "kam"]
     },
     {
       "nomi": "Pul kam",
       "eslatma": "Pul oz - odob bilan savdolash! Qaytimni sanab ol!\n— Oying",
       "pul": { "20000": 1, "10000": 2, "5000": 1 },
       "royxat": [ ["non", 2, "dona"], ["kartoshka", 2, "kilo"], ["olma", 2, "kilo"] ],
-      "xatoQaytim": true
+      "xatoQaytim": true,
+      "tarozi": ["kam", "ortiq", "togri"]
     }
   ],
 

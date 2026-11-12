@@ -41,43 +41,116 @@ namespace
 		return false;
 	}
 
-	float SozSon(const FString& W)
-	{
-		static const TMap<FString, float> Sonlar = {
-			{TEXT("bir"), 1}, {TEXT("ikki"), 2}, {TEXT("uch"), 3}, {TEXT("to'rt"), 4}, {TEXT("tort"), 4},
-			{TEXT("besh"), 5}, {TEXT("olti"), 6}, {TEXT("yetti"), 7}, {TEXT("sakkiz"), 8},
-			{TEXT("to'qqiz"), 9}, {TEXT("toqqiz"), 9}, {TEXT("o'n"), 10}, {TEXT("on"), 10}};
-		const float* V = Sonlar.Find(W);
-		return V ? *V : -1.f;
-	}
-
 	bool Raqam(const FString& W) { return W.Len() > 0 && W[0] >= TEXT('0') && W[0] <= TEXT('9'); }
 
-	// "12 000", "12.000", "12 ming" -> 12000; "1,5" -> 1.5; "bir yarim" -> 1.5
-	struct FSon { float Qiymat; int32 Joy; };
+	// sonni bildiruvchi so'z: birlik/o'nlik qo'shiladi, yuz/ming/million ko'paytiradi, yarim - 0.5
+	enum class ESonTur : uint8 { Yoq, Qosh, Yuz, Ming, Million, Yarim };
+	struct FSonSoz { ESonTur Tur = ESonTur::Yoq; float Qiymat = 0.f; bool bQoshimcha = false; bool bTa = false; };
+
+	// "ikki", "ikkita", "mingdan", "o'nga" - so'z o'zagi va ruxsat etilgan qo'shimcha ("uchun", "biroz" son emas)
+	FSonSoz SonSoz(FString W)
+	{
+		while (W.Len() > 1 && (W.EndsWith(TEXT(".")) || W.EndsWith(TEXT(",")))) W.LeftChopInline(1);
+		struct FOzak { const TCHAR* Soz; ESonTur Tur; float Qiymat; };
+		static const FOzak Ozaklar[] = {
+			{TEXT("bir"), ESonTur::Qosh, 1}, {TEXT("ikki"), ESonTur::Qosh, 2}, {TEXT("uch"), ESonTur::Qosh, 3},
+			{TEXT("to'rt"), ESonTur::Qosh, 4}, {TEXT("tort"), ESonTur::Qosh, 4}, {TEXT("besh"), ESonTur::Qosh, 5},
+			{TEXT("olti"), ESonTur::Qosh, 6}, {TEXT("yetti"), ESonTur::Qosh, 7}, {TEXT("sakkiz"), ESonTur::Qosh, 8},
+			{TEXT("to'qqiz"), ESonTur::Qosh, 9}, {TEXT("toqqiz"), ESonTur::Qosh, 9},
+			{TEXT("o'n"), ESonTur::Qosh, 10}, {TEXT("on"), ESonTur::Qosh, 10}, {TEXT("yigirma"), ESonTur::Qosh, 20},
+			{TEXT("o'ttiz"), ESonTur::Qosh, 30}, {TEXT("ottiz"), ESonTur::Qosh, 30}, {TEXT("qirq"), ESonTur::Qosh, 40},
+			{TEXT("ellik"), ESonTur::Qosh, 50}, {TEXT("oltmish"), ESonTur::Qosh, 60}, {TEXT("yetmish"), ESonTur::Qosh, 70},
+			{TEXT("sakson"), ESonTur::Qosh, 80}, {TEXT("to'qson"), ESonTur::Qosh, 90}, {TEXT("toqson"), ESonTur::Qosh, 90},
+			{TEXT("yuz"), ESonTur::Yuz, 100}, {TEXT("ming"), ESonTur::Ming, 1000}, {TEXT("million"), ESonTur::Million, 1e6f},
+			{TEXT("mln"), ESonTur::Million, 1e6f}, {TEXT("yarim"), ESonTur::Yarim, 0.5f}};
+		static const TCHAR* Qoshimchalar[] = {TEXT("ta"), TEXT("tasi"), TEXT("tasini"), TEXT("tadan"), TEXT("dan"), TEXT("ga"), TEXT("ni"), TEXT("lik"), TEXT("talik"), TEXT("ning")};
+		// eng uzun o'zak birinchi ("oltmish" "olti"dan oldin)
+		FSonSoz Eng;
+		int32 EngUzun = 0;
+		for (const auto& O : Ozaklar)
+		{
+			const int32 L = FCString::Strlen(O.Soz);
+			if (L <= EngUzun || !W.StartsWith(O.Soz, ESearchCase::CaseSensitive)) continue;
+			const FString Qolgan = W.RightChop(L);
+			bool bOk = Qolgan.IsEmpty();
+			for (const TCHAR* Q : Qoshimchalar) bOk |= Qolgan == Q;
+			if (!bOk) continue;
+			Eng = FSonSoz();
+			Eng.Tur = O.Tur;
+			Eng.Qiymat = O.Qiymat;
+			Eng.bQoshimcha = !Qolgan.IsEmpty();
+			Eng.bTa = Qolgan.StartsWith(TEXT("ta"));
+			EngUzun = L;
+		}
+		return Eng;
+	}
+
+	// "12 000", "12.000", "12 ming" -> 12000; "1,5" -> 1.5; "bir yarim" -> 1.5;
+	// "o'n ikki ming besh yuz" -> 12500; "ikki yuz ming" -> 200000; "ikkita" -> 2 (bTa - dona)
+	struct FSon { float Qiymat; int32 Joy; bool bTa = false; };
 	TArray<FSon> Sonlar(const TArray<FString>& T)
 	{
 		TArray<FSon> Out;
 		for (int32 i = 0; i < T.Num(); ++i)
 		{
-			float V = -1.f;
 			const int32 Boshi = i;
+			double Jami = 0.0, Joriy = 0.0;
+			bool bBor = false, bTa = false;
 			if (Raqam(T[i]))
 			{
 				FString W = T[i];
 				const int32 Nuqta = FMath::Max(W.Find(TEXT("."), ESearchCase::CaseSensitive, ESearchDir::FromEnd), W.Find(TEXT(","), ESearchCase::CaseSensitive, ESearchDir::FromEnd));
 				if (Nuqta != INDEX_NONE && W.Len() - Nuqta - 1 == 3) W = W.Replace(TEXT("."), TEXT("")).Replace(TEXT(","), TEXT(""));
-				V = FCString::Atof(*W.Replace(TEXT(","), TEXT(".")));
-				while (i + 1 < T.Num() && T[i + 1].Len() == 3 && T[i + 1].IsNumeric()) V = V * 1000.f + FCString::Atof(*T[++i]);
+				Joriy = FCString::Atof(*W.Replace(TEXT(","), TEXT(".")));
+				while (i + 1 < T.Num() && T[i + 1].Len() == 3 && T[i + 1].IsNumeric()) Joriy = Joriy * 1000.0 + FCString::Atof(*T[++i]);
+				bBor = true;
+				++i;
 			}
-			else if (T[i] == TEXT("yarim")) V = 0.5f;
-			else V = SozSon(T[i]);
-			if (V < 0.f) continue;
-			if (i + 1 < T.Num() && T[i + 1] == TEXT("yarim")) { V += 0.5f; ++i; }
-			if (i + 1 < T.Num() && T[i + 1] == TEXT("ming")) { V *= 1000.f; ++i; }
-			Out.Add({V, Boshi});
+			for (; i < T.Num(); ++i)
+			{
+				const FSonSoz S = SonSoz(T[i]);
+				if (S.Tur == ESonTur::Yoq) break;
+				switch (S.Tur)
+				{
+				case ESonTur::Qosh:
+				case ESonTur::Yarim: Joriy += S.Qiymat; break;
+				case ESonTur::Yuz: Joriy = (Joriy > 0.0 ? Joriy : 1.0) * 100.0; break;
+				default: Jami += (Joriy > 0.0 ? Joriy : 1.0) * S.Qiymat; Joriy = 0.0; break;   // ming, million
+				}
+				bBor = true;
+				bTa |= S.bTa;
+				if (S.bQoshimcha) { ++i; break; }   // "mingdan", "ikkita" - son shu yerda tugaydi
+			}
+			if (bBor) Out.Add({float(Jami + Joriy), Boshi, bTa});
+			i = FMath::Max(Boshi, i - 1);   // tashqi tsikl ++i qiladi
 		}
 		return Out;
+	}
+
+	// tovush/xato yozuv: "pamidor" ~ "pomidor" (5+ harfli so'zda bitta harf farqi)
+	int32 Farq(const FString& A, const FString& B)
+	{
+		TArray<int32> D, Y;
+		D.SetNum(B.Len() + 1);
+		Y.SetNum(B.Len() + 1);
+		for (int32 j = 0; j <= B.Len(); ++j) D[j] = j;
+		for (int32 i = 1; i <= A.Len(); ++i)
+		{
+			Y[0] = i;
+			for (int32 j = 1; j <= B.Len(); ++j)
+				Y[j] = FMath::Min3(D[j] + 1, Y[j - 1] + 1, D[j - 1] + (A[i - 1] == B[j - 1] ? 0 : 1));
+			Swap(D, Y);
+		}
+		return D[B.Len()];
+	}
+
+	// gap so'zi (qo'shimchasi bilan: "pamidorni") mol so'zining 1 harf farqli shakli bilan boshlanadimi
+	bool TaxminanBor(const FString& Mol, const FString& W)
+	{
+		if (Mol.Len() < 5 || W.Len() < Mol.Len() - 1) return false;
+		for (int32 L = Mol.Len() - 1; L <= Mol.Len() + 1; ++L)
+			if (L <= W.Len() && Farq(W.Left(L), Mol) <= 1) return true;
+		return false;
 	}
 
 	// gapda shu so'z bilan boshlanadigan so'z bormi ("pomidordan" ham mos). "olma" "olmayman" bilan adashmasin
@@ -141,7 +214,10 @@ void UBozorHamyon::Boshla(const FBozorDaraja& D)
 	Royxat = D.Royxat;
 	Eslatma = D.Eslatma;
 	Savat.Reset();
+	Xaridlar.Reset();
+	TaroziRejasi = D.Tarozi;
 	XatoQaytimSezildi = XatoQaytimOtkazildi = Suhbatlar = Salomsiz = Qopol = Rahmatlar = Tejaldi = 0;
+	TaroziSezildi = TaroziOtkazildi = Tortishlar = 0;
 }
 
 bool UBozorHamyon::RoyxatTugadimi() const
@@ -155,8 +231,43 @@ int32 UBozorHamyon::Yulduzlar() const
 {
 	if (!RoyxatTugadimi()) return 0;
 	const bool bOdob = Salomsiz == 0 && Qopol == 0;
-	const bool bHisob = XatoQaytimOtkazildi == 0 && Tejaldi > 0;
+	const bool bHisob = XatoQaytimOtkazildi == 0 && TaroziOtkazildi == 0 && Tejaldi > 0;
 	return 1 + (bOdob ? 1 : 0) + (bHisob ? 1 : 0);
+}
+
+TArray<FBozorNatijaQator> UBozorHamyon::NatijaQatorlari() const
+{
+	TArray<FBozorNatijaQator> Out;
+	for (const FBozorRoyxatQator& R : Royxat)
+	{
+		FBozorNatijaQator& Q = Out.AddDefaulted_GetRef();
+		Q.Nomi = R.Nomi;
+		Q.Birlik = R.Birlik;
+		Q.Kerak = R.Miqdor;
+	}
+	for (const FBozorXarid& X : Xaridlar)
+	{
+		FBozorNatijaQator* Q = Out.FindByPredicate([&X](const FBozorNatijaQator& Q) { return Q.Nomi.Equals(X.Nomi, ESearchCase::IgnoreCase); });
+		if (!Q)
+		{
+			Q = &Out.AddDefaulted_GetRef();
+			Q->Nomi = X.Nomi;
+			if (Q->Nomi.Len()) Q->Nomi[0] = FChar::ToUpper(Q->Nomi[0]);
+		}
+		if (Q->Olindi <= 0.f) { Q->Narx = X.Narx; Q->Kelishildi = X.Kelishildi; }
+		Q->Birlik = X.Birlik;
+		Q->Olindi += X.Olindi;
+		Q->Tolandi += X.Tolandi;
+	}
+	return Out;
+}
+
+FString FBozorNatijaQator::Baho() const
+{
+	if (Kerak < 0.f) return TEXT("ro'yxatda yo'q");
+	if (Olindi <= 0.f) return TEXT("olinmadi");
+	if (FMath::IsNearlyEqual(Olindi, Kerak, 0.05f)) return TEXT("to'g'ri");
+	return Olindi > Kerak ? TEXT("ko'p") : TEXT("kam");
 }
 
 // ================= narx taxtachasi
@@ -264,9 +375,17 @@ FBozorTushuncha UBozorTayyorJavob::Tushun(const FString& Gap, const FBozorSuhbat
 	S.ParseIntoArrayWS(Soz);
 	const TArray<FSon> Son = Sonlar(Soz);
 
-	T.bSalomBor = Bor(S, {TEXT("salom"), TEXT("assalom")});
-	if (Bor(S, {TEXT("iltimos"), TEXT("marhamat"), TEXT("amaki"), TEXT("opa"), TEXT("xola")})) T.Odob = 1;
-	else if (Bor(S, {TEXT(" hoy "), TEXT("bunaqa"), TEXT("aldayapsiz"), TEXT("tez bo'ling")})) T.Odob = -1;
+	// kalit so'z bir harf xatosi bilan ham (mikrofon: "qanch", "raxmat", "arzan")
+	auto Yaqin = [&Soz](std::initializer_list<const TCHAR*> Sozlar)
+	{
+		for (const TCHAR* K : Sozlar)
+			for (const FString& G : Soz)
+				if (TaxminanBor(K, G)) return true;
+		return false;
+	};
+	T.bSalomBor = Bor(S, {TEXT("salom"), TEXT("assalom"), TEXT("salam"), TEXT("alaykum"), TEXT("aleykum")}) || Yaqin({TEXT("assalomu"), TEXT("alaykum")});
+	if (Bor(S, {TEXT("iltimos"), TEXT("marhamat"), TEXT("amaki"), TEXT(" opa"), TEXT("xola"), TEXT(" aka"), TEXT("kechirasiz"), TEXT(" uzr")})) T.Odob = 1;
+	else if (Bor(S, {TEXT(" hoy"), TEXT("bunaqa"), TEXT("aldayapsiz"), TEXT("tez bo'l")})) T.Odob = -1;
 
 	// qaysi mol haqida (eng uzun mos so'z - "qizil qalampir" "qalampir"dan ustun)
 	int32 EngUzun = 0;
@@ -277,27 +396,36 @@ FBozorTushuncha UBozorTayyorJavob::Tushun(const FString& Gap, const FBozorSuhbat
 		for (const FString& W : Sozlar)
 			if (W.Len() > EngUzun && SozBor(S, W)) { T.Mol = i; EngUzun = W.Len(); }
 	}
+	// aniq topilmasa - bir harf xatosi bilan ("pamidor": mikrofon yoki yozuv xatosi)
+	for (int32 i = 0; T.Mol == INDEX_NONE && i < Holat.Mollar.Num(); ++i)
+		for (const FString& W : Holat.Mollar[i].Sozlar)
+			for (const FString& G : Soz)
+				if (T.Mol == INDEX_NONE && TaxminanBor(W, G)) T.Mol = i;
 
-	// miqdor: "kilo" so'zi va kichik son, pul: katta son
+	// miqdor: "kilo" so'zi (yoki "ikkita") va kichik son, pul: katta son
 	float Kilo = -1.f, Pul = -1.f;
-	const bool bKilo = Bor(S, {TEXT("kilo"), TEXT(" kg"), TEXT("dona"), TEXT("bog'"), TEXT(" ta "), TEXT("qadoq")});
+	bool bKilo = Bor(S, {TEXT("kilo"), TEXT(" kg"), TEXT("dona"), TEXT("bog'"), TEXT(" ta "), TEXT("qadoq")});
+	for (const FSon& N : Son) bKilo |= N.bTa;
 	for (const FSon& N : Son)
 	{
 		if (N.Qiymat >= 500.f) Pul = FMath::Max(Pul, N.Qiymat);
 		else if (bKilo && Kilo < 0.f) Kilo = N.Qiymat;
 	}
-	if (bKilo && Kilo < 0.f && Bor(S, {TEXT(" yarim")})) Kilo = 0.5f;
 
-	const bool bSavdo = Bor(S, {TEXT("arzon"), TEXT("tushir"), TEXT("kamaytir"), TEXT("qimmat"), TEXT("chegirma"), TEXT("kamroq"), TEXT("kelish")});
-	const bool bNarx = Bor(S, {TEXT("necha"), TEXT("qancha"), TEXT("narx")});
+	const bool bSavdo = Bor(S, {TEXT("arzon"), TEXT("tushir"), TEXT("kamaytir"), TEXT("qimmat"), TEXT("chegirma"), TEXT("kamroq"), TEXT("kelish"), TEXT("insof")}) || Yaqin({TEXT("arzon"), TEXT("tushiring"), TEXT("qimmat")});
+	const bool bNarx = Bor(S, {TEXT("necha"), TEXT("qancha"), TEXT("narx")}) || Yaqin({TEXT("qancha"), TEXT("necha"), TEXT("narxi")});
 	const bool bRad = Bor(S, {TEXT("kerak emas"), TEXT("olmayman"), TEXT("kerakmas")});
-	const bool bXayr = Bor(S, {TEXT("rahmat"), TEXT("xayr"), TEXT("sog' bo'ling")});
+	const bool bXayr = Bor(S, {TEXT("rahmat"), TEXT("raxmat"), TEXT("xayr"), TEXT("sog' bo'ling")}) || Yaqin({TEXT("rahmat")});
 	const bool bRozi = Bor(S, {TEXT("olaman"), TEXT("mayli"), TEXT("xo'p"), TEXT(" xop "), TEXT("bering"), TEXT("tortib"), TEXT("torting"), TEXT("olay"), TEXT("kerak")});
 
-	if (Holat.Bosqich == EBozorBosqich::QaytimTekshir && Bor(S, {TEXT(" kam"), TEXT("yetmaydi"), TEXT("xato")})) T.Harakat = EBozorHarakat::QaytimKam;
+	if (Holat.Bosqich == EBozorBosqich::TaroziTekshir && Bor(S, {TEXT(" ko'p"), TEXT(" kop "), TEXT(" kam"), TEXT("so'ragan"), TEXT("noto'g'ri"), TEXT("xato")})) T.Harakat = EBozorHarakat::TaroziAyt;
+	else if (Holat.Bosqich == EBozorBosqich::TaroziTekshir && (bXayr || bRozi)) T.Harakat = EBozorHarakat::TaroziRozi;
+	else if (Holat.Bosqich == EBozorBosqich::QaytimTekshir && Bor(S, {TEXT(" kam"), TEXT("yetmaydi"), TEXT("xato")})) T.Harakat = EBozorHarakat::QaytimKam;
 	else if (Holat.Bosqich == EBozorBosqich::QaytimTekshir && (bXayr || bRozi)) T.Harakat = EBozorHarakat::QaytimRozi;
 	else if (Holat.Bosqich == EBozorBosqich::PulKutilmoqda && Pul > 0.f) { T.Harakat = EBozorHarakat::PulQabul; T.Qiymat = Pul; }
 	else if (Kilo > 0.f) { T.Harakat = EBozorHarakat::Tortish; T.Qiymat = Kilo; }
+	// pul kutilmayotganda aytilgan katta son - narx taklifi ("o'n mingdan bering", "o'n ming qilib bering")
+	else if (Pul > 0.f && Holat.Bosqich != EBozorBosqich::PulKutilmoqda) { T.Harakat = EBozorHarakat::Savdolashish; T.Qiymat = Pul; }
 	else if (bSavdo) T.Harakat = EBozorHarakat::Savdolashish;
 	else if (bNarx) T.Harakat = EBozorHarakat::NarxAytish;
 	else if (bRad || (bXayr && Holat.Bosqich != EBozorBosqich::PulKutilmoqda)) T.Harakat = EBozorHarakat::Xayr;
@@ -326,6 +454,9 @@ FString UBozorTayyorJavob::Yoz(EBozorJavob Javob, const FBozorSuhbatHolati& H, i
 		{EBozorJavob::QaytimUzr, {TEXT("Voy, kechirasiz, bolam, adashibman! Mana yana {son} so'm."), TEXT("Rostdan ham! Uzr, bolam, mana {son} so'm.")}},
 		{EBozorJavob::QaytimTogri, {TEXT("Sanab ko'ring, bolam: to'ppa-to'g'ri berdim."), TEXT("Yo'q, bolam, to'g'ri berdim. Yana bir sanang.")}},
 		{EBozorJavob::OshBolsin, {TEXT("Osh bo'lsin! Yana nima kerak?"), TEXT("Osh bo'lsin, bolam!")}},
+		{EBozorJavob::TaroziUzr, {TEXT("Voy, rostdan ham! Uzr, bolam. Mana, {miqdor} {birlik}, {summa} so'm."), TEXT("Ko'zim ilg'amabdi, kechirasiz. To'g'riladim: {miqdor} {birlik} - {summa} so'm.")}},
+		{EBozorJavob::TaroziTogri, {TEXT("Tarozini qarang, bolam: to'ppa-to'g'ri {miqdor} {birlik}. {summa} so'm."), TEXT("Yo'q, bolam, to'g'ri tortdim. {summa} so'm bo'ladi.")}},
+		{EBozorJavob::TaroziKelishdi, {TEXT("Yaxshi, unda {summa} so'm bo'ladi."), TEXT("Xo'p, {summa} so'm, bolam.")}},
 		{EBozorJavob::Xayr, {TEXT("Yana keling, bolam!"), TEXT("Osh bo'lsin, yana keling!")}},
 		{EBozorJavob::XayrSotibOlmay, {TEXT("Mayli, boshqa safar keling!"), TEXT("Xo'p, kerak bo'lsa qaytib keling.")}},
 		{EBozorJavob::SalomBering, {TEXT("Avval salom bersangiz yaxshi bo'lardi, bolam."), TEXT("Salom-alik qilmaysizmi, bolam?")}},
@@ -368,7 +499,7 @@ FString UBozorTayyorJavob::Yoz(EBozorJavob Javob, const FBozorSuhbatHolati& H, i
 	A.Add(TEXT("mollar"), MollarRoyxati(H.Mollar));
 	A.Add(TEXT("birlik"), H.Mahsulot.Birlik);
 	A.Add(TEXT("narx"), BozorSotuv::Som(H.JoriyNarx > 0 ? H.JoriyNarx : H.Mahsulot.Narx));
-	A.Add(TEXT("miqdor"), BozorSotuv::Miqdor(H.Miqdor));
+	A.Add(TEXT("miqdor"), BozorSotuv::Miqdor(H.HisobMiqdor > 0.f ? H.HisobMiqdor : H.Miqdor));   // sotuvchi aytgani (tarozidagi emas)
 	A.Add(TEXT("summa"), BozorSotuv::Som(H.Summa));
 	A.Add(TEXT("son"), BozorSotuv::Som(Qaytim));
 	{
@@ -411,7 +542,8 @@ void UBozorSuhbat::MolniTanla(int32 I)
 	Holat.Mahsulot = Holat.Mollar[I];
 	Holat.Bosqich = EBozorBosqich::Boshlanish;
 	Holat.JoriyNarx = 0;
-	Holat.Miqdor = 0.f;
+	Holat.Miqdor = Holat.SoralganMiqdor = Holat.HisobMiqdor = 0.f;
+	Holat.Tarozi = EBozorTarozi::Togri;
 	Holat.Summa = 0;
 	Holat.Savdolashuv = 0;
 }
@@ -438,7 +570,7 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 	if (!Miya || !Hamyon) return FString();
 
 	// boshqa molga o'tish (pul kutilayotganda emas) yoki xariddan keyin yangi xarid
-	if (Holat.Mollar.IsValidIndex(T.Mol) && Holat.Bosqich != EBozorBosqich::PulKutilmoqda && Holat.Bosqich != EBozorBosqich::QaytimTekshir
+	if (Holat.Mollar.IsValidIndex(T.Mol) && Holat.Bosqich != EBozorBosqich::PulKutilmoqda && Holat.Bosqich != EBozorBosqich::QaytimTekshir && Holat.Bosqich != EBozorBosqich::TaroziTekshir
 		&& (T.Mol != Holat.Tanlangan || Holat.Bosqich == EBozorBosqich::Tugadi))
 		MolniTanla(T.Mol);
 
@@ -525,7 +657,7 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 		}
 		if (Holat.Bosqich == EBozorBosqich::Boshlanish) Holat.Bosqich = EBozorBosqich::NarxAytildi;
 		// tortilgandan keyin tushirsa ham summa yangi narxdan
-		if (Holat.Miqdor > 0.f) Holat.Summa = FMath::RoundToInt(Holat.JoriyNarx * Holat.Miqdor / 500.f) * 500;
+		if (Holat.HisobMiqdor > 0.f) Holat.Summa = FMath::RoundToInt(Holat.JoriyNarx * Holat.HisobMiqdor / 500.f) * 500;
 		break;
 	}
 
@@ -536,10 +668,63 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 			Asosiy = Javob(EBozorJavob::MiqdorSora);
 			break;
 		}
-		Holat.Miqdor = FMath::Clamp(T.Qiymat, 0.5f, 20.f);
-		Holat.Summa = FMath::RoundToInt(Holat.JoriyNarx * Holat.Miqdor / 500.f) * 500;
+	{
+		Holat.SoralganMiqdor = FMath::Clamp(T.Qiymat, 0.5f, 20.f);
+		Holat.Miqdor = Holat.HisobMiqdor = Holat.SoralganMiqdor;
+		// tarozi: daraja rejasidagi navbatdagi xato. "ortiq" - ko'p tortadi (ko'piga pul so'raydi),
+		// "kam" - kam tortadi, lekin so'ralganicha deb to'liq pul so'raydi
+		const FString Reja = Hamyon->TaroziRejasi.IsValidIndex(Hamyon->Tortishlar) ? Hamyon->TaroziRejasi[Hamyon->Tortishlar] : FString();
+		++Hamyon->Tortishlar;
+		const bool bKilo = Holat.Mahsulot.Birlik == TEXT("kilo");
+		if (Reja == TEXT("ortiq"))
+			Holat.Miqdor = Holat.HisobMiqdor = Holat.SoralganMiqdor + MiqdorQadami();
+		else if (Reja == TEXT("kam"))
+		{
+			const float Kam = bKilo ? FMath::RoundToFloat(Holat.SoralganMiqdor * 8.f) / 10.f : Holat.SoralganMiqdor - 1.f;
+			if (Kam > 0.f) Holat.Miqdor = Kam;
+		}
+		Holat.Tarozi = EBozorTarozi::Togri;
+		Holat.Summa = FMath::RoundToInt(Holat.JoriyNarx * Holat.HisobMiqdor / 500.f) * 500;
+		Holat.Bosqich = EBozorBosqich::TaroziTekshir;
+		// bola tarozini (dona bo'lsa - xaltani) o'zi ko'radi
+		Asosiy = Javob(EBozorJavob::Tortdim) + FString::Printf(TEXT(" [%s: %s %s]"), bKilo ? TEXT("Tarozida") : TEXT("Xaltada"),
+			*BozorSotuv::Miqdor(Holat.Miqdor), *Holat.Mahsulot.Birlik);
+		break;
+	}
+
+	case EBozorHarakat::TaroziRozi:
+		if (Holat.Bosqich != EBozorBosqich::TaroziTekshir)
+		{
+			Asosiy = Javob(EBozorJavob::Tushunmadim);
+			break;
+		}
+		if (!FMath::IsNearlyEqual(Holat.Miqdor, Holat.SoralganMiqdor))
+		{
+			Holat.Tarozi = Holat.Miqdor > Holat.SoralganMiqdor ? EBozorTarozi::OrtiqOldi : EBozorTarozi::KamOtkazdi;
+			++Hamyon->TaroziOtkazildi;
+		}
 		Holat.Bosqich = EBozorBosqich::PulKutilmoqda;
-		Asosiy = Javob(EBozorJavob::Tortdim);
+		Asosiy = Javob(EBozorJavob::TaroziKelishdi);
+		break;
+
+	case EBozorHarakat::TaroziAyt:
+		if (Holat.Bosqich != EBozorBosqich::TaroziTekshir)
+		{
+			Asosiy = Javob(EBozorJavob::Tushunmadim);
+			break;
+		}
+		Holat.Bosqich = EBozorBosqich::PulKutilmoqda;
+		if (FMath::IsNearlyEqual(Holat.Miqdor, Holat.SoralganMiqdor))
+		{
+			Munosabat(-5);   // to'g'ri tortilganga "xato" deyildi
+			Asosiy = Javob(EBozorJavob::TaroziTogri);
+			break;
+		}
+		Holat.Tarozi = Holat.Miqdor > Holat.SoralganMiqdor ? EBozorTarozi::OrtiqAytdi : EBozorTarozi::KamAytdi;
+		++Hamyon->TaroziSezildi;
+		Holat.Miqdor = Holat.HisobMiqdor = Holat.SoralganMiqdor;
+		Holat.Summa = FMath::RoundToInt(Holat.JoriyNarx * Holat.HisobMiqdor / 500.f) * 500;
+		Asosiy = Javob(EBozorJavob::TaroziUzr);
 		break;
 
 	case EBozorHarakat::PulQabul:
@@ -575,10 +760,25 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 			Holat.QaytimKupyuralar = UBozorHamyon::Ajrat(Qaytim - Kam);
 			for (int32 K : Holat.QaytimKupyuralar) Hamyon->Qosh(K);
 			Hamyon->Savat.Add(FString::Printf(TEXT("%s %s %s"), *BozorSotuv::Miqdor(Holat.Miqdor), *Holat.Mahsulot.Birlik, *Holat.Mahsulot.Nomi));
-			Hamyon->Tejaldi += FMath::Max(0, FMath::RoundToInt((Holat.Mahsulot.Narx - Holat.JoriyNarx) * Holat.Miqdor));
-			// xarid ro'yxatida bo'lsa - belgilanadi (yetarli miqdorda olinganda)
+			Hamyon->Tejaldi += FMath::Max(0, FMath::RoundToInt((Holat.Mahsulot.Narx - Holat.JoriyNarx) * Holat.HisobMiqdor));
+			{
+				FBozorXarid& X = Hamyon->Xaridlar.AddDefaulted_GetRef();
+				X.Nomi = Holat.Mahsulot.Nomi;
+				X.Birlik = Holat.Mahsulot.Birlik;
+				X.Soralgan = Holat.SoralganMiqdor > 0.f ? Holat.SoralganMiqdor : Holat.Miqdor;
+				X.Olindi = Holat.Miqdor;
+				X.Narx = Holat.Mahsulot.Narx;
+				X.Kelishildi = Holat.JoriyNarx;
+				X.Tolandi = Holat.Summa;
+				X.Tarozi = Holat.Tarozi;
+			}
+			// xarid ro'yxatida bo'lsa - jami yetarli miqdorda olinganda belgilanadi
 			for (FBozorRoyxatQator& R : Hamyon->Royxat)
-				if (R.Nomi.Equals(Holat.Mahsulot.Nomi, ESearchCase::IgnoreCase) && Holat.Miqdor + KINDA_SMALL_NUMBER >= R.Miqdor) R.bOlindi = true;
+				if (R.Nomi.Equals(Holat.Mahsulot.Nomi, ESearchCase::IgnoreCase))
+				{
+					R.Olindi += Holat.Miqdor;
+					if (R.Olindi + KINDA_SMALL_NUMBER >= R.Miqdor) R.bOlindi = true;
+				}
 			Holat.Bosqich = Qaytim > 0 ? EBozorBosqich::QaytimTekshir : EBozorBosqich::Tugadi;
 			bSotibOldi = true;
 			Asosiy = Javob(EBozorJavob::PulOldim, Qaytim - Kam);
@@ -700,6 +900,15 @@ TArray<FBozorTanlov> UBozorSuhbat::Tanlovlar() const
 		// bola qaytimni sanaydi: to'g'ri bo'lsa rahmat, kam bo'lsa aytadi
 		Gap(TEXT("Rahmat!"), EBozorHarakat::QaytimRozi, 1);
 		Gap(TEXT("Kechirasiz, qaytimni kam berdingiz"), EBozorHarakat::QaytimKam);
+		return V;
+	}
+	if (Holat.Bosqich == EBozorBosqich::TaroziTekshir)
+	{
+		// bola tarozini ko'radi: indamay oladi yoki ko'p/kam tortilganini aytadi (odob bilan yoki qo'pol)
+		const FString Soralgan = FString::Printf(TEXT("%s %s"), *BozorSotuv::Miqdor(Holat.SoralganMiqdor), *M.Birlik);
+		Gap(TEXT("Mayli, rahmat"), EBozorHarakat::TaroziRozi, 1);
+		Gap(FString::Printf(TEXT("Kechirasiz, men %s so'ragandim"), *Soralgan), EBozorHarakat::TaroziAyt, 1);
+		Gap(TEXT("Hoy, tarozingiz noto'g'ri-ku!"), EBozorHarakat::TaroziAyt, -1);
 		return V;
 	}
 	if (Holat.Bosqich == EBozorBosqich::PulKutilmoqda && bTolov)
@@ -910,6 +1119,7 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 			O->TryGetStringField(TEXT("nomi"), D.Nomi);
 			O->TryGetStringField(TEXT("eslatma"), D.Eslatma);
 			O->TryGetBoolField(TEXT("xatoQaytim"), D.bXatoQaytim);
+			O->TryGetStringArrayField(TEXT("tarozi"), D.Tarozi);
 			const TSharedPtr<FJsonObject>* Pul = nullptr;
 			if (O->TryGetObjectField(TEXT("pul"), Pul))
 				for (const auto& K : (*Pul)->Values) D.Kupyura.Add(FCString::Atoi(*FString(*K.Key)), static_cast<int32>(K.Value->AsNumber()));

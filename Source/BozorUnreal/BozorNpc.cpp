@@ -493,15 +493,24 @@ float ABozorNpc::Do(FName Category, float Min, float Max)
 	// o'tirish va turish tana surilishi bilan bir vaqtda boshlanadi va tugaydi - boshidan o'ynaydi
 	const bool bChained = Category == TEXT("S_Down") || Category == TEXT("S_Up");
 	// loop bo'lmagan klip ham biroz tasodifiy joydan: bir vaqtda boshlagan ikki odam bir xil qimirlamasin
-	const float Offset = A->bLoop ? FMath::FRandRange(0.f, Len * 0.7f) : bChained ? 0.f : FMath::FRandRange(0.f, FMath::Min(0.3f, Len * 0.1f));
-	Inst->PlaySlotAnimationAsDynamicMontage(A->Anim, SlotName, 0.3f, 0.25f, 1.f, A->bLoop ? 1000 : 1, -1.f, Offset);
+	// One-shot actions must start at frame zero (greeting/payment/contact).
+	const float Offset = A->bLoop ? FMath::FRandRange(0.f, Len * 0.7f) : 0.f;
+	const float Duration = A->bLoop ? FMath::FRandRange(Min, FMath::Max(Min, Max)) : Len;
+	const int32 Loops = A->bLoop ? FMath::Max(2, FMath::CeilToInt((Duration + Offset) / FMath::Max(Len, 0.01f)) + 1) : 1;
+	const float Blend = FMath::Min(bChained ? 0.12f : 0.2f, Len * 0.15f);
+	if (!Inst->PlaySlotAnimationAsDynamicMontage(A->Anim, SlotName, Blend, Blend, 1.f, Loops, -1.f, Offset))
+	{
+		PlayMove();
+		return 0.f;
+	}
 	SettleAt = 0.0;
 	if (!A->bLoop && !bChained && Category.ToString().StartsWith(TEXT("S_")))
 	{
 		SettleAt = GetWorld()->GetTimeSeconds() + FMath::Max(Len - Offset - 0.25f, 0.1f);
 		SettleCategory = TEXT("S_Loop");
 	}
-	return A->bLoop ? FMath::FRandRange(Min, Max) : FMath::Clamp(Len, Min, Max);
+	// Do not advance AI before a one-shot has actually finished.
+	return Duration;
 }
 
 // delay soniyadan keyin Do (bir vaqtda boshlagan odamlar bir xil klipni bir xil fazada o'ynamasin)

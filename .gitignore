@@ -29,3 +29,14 @@ desktop.ini
 
 # ===== Claude / MCP lokal sozlamalari =====
 .claude/settings.local.json
+
+# ===== AI sinov (0-bosqich): yuklangan dasturlar va modellar =====
+AI/poc/vendor/
+AI/poc/models/
+AI/poc/audio/
+AI/poc/natija/
+AI/stt/*.exe
+AI/stt/*.dll
+AI/stt/*.gguf
+AI/stt/LICENSE
+AI/stt/THIRD_PARTY_NOTICES.txt

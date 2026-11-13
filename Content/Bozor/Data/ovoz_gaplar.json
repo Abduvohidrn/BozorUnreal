@@ -1,0 +1,161 @@
+{
+ "izoh": "Sotuvchi gap matni -> ovoz klipi (BozorKit_hammasi/Ovoz/unreal_eksport.py yaratadi, qo'lda tahrirlamang). ABozorSotuvchiOvozi::SayLine matnni normallab (kichik harf, apostrof, raqam -> so'z) solishtiradi.",
+ "gaplar": [
+  {
+   "fel": "mehribon",
+   "ayol": true,
+   "matn": "Keling, bolam! Nima kerak? Bizda pomidor, bodring va karam bor.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_mehribon_00.dlg_mehribon_00"
+  },
+  {
+   "fel": "mehribon",
+   "ayol": true,
+   "matn": "Assalomu alaykum, o'g'lim! Qarang, olma va nok, hammasi yangi.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_mehribon_01.dlg_mehribon_01"
+  },
+  {
+   "fel": "mehribon",
+   "ayol": true,
+   "matn": "Va alaykum assalom, bolam! Keling, nima olasiz?",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_mehribon_02.dlg_mehribon_02"
+  },
+  {
+   "fel": "mehribon",
+   "ayol": true,
+   "matn": "Mayli, siz uchun o'n ming so'm qilaman.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_mehribon_03.dlg_mehribon_03"
+  },
+  {
+   "fel": "mehribon",
+   "ayol": true,
+   "matn": "Siz odobli bola ekansiz, to'qqiz ming so'mdan beraman.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_mehribon_04.dlg_mehribon_04"
+  },
+  {
+   "fel": "mehribon",
+   "ayol": true,
+   "matn": "Voy bolam, kattalarga bunaqa gapirmaydi. Narxi shu.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_mehribon_05.dlg_mehribon_05"
+  },
+  {
+   "fel": "mehribon",
+   "ayol": true,
+   "matn": "Osh bo'lsin, bolam! Yana nima kerak?",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_mehribon_06.dlg_mehribon_06"
+  },
+  {
+   "fel": "qattiq",
+   "ayol": false,
+   "matn": "Ha, nima kerak?",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_qattiq_00.dlg_qattiq_00"
+  },
+  {
+   "fel": "qattiq",
+   "ayol": false,
+   "matn": "Keling. Kartoshka va piyoz bor. Narxi yozib qo'yilgan.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_qattiq_01.dlg_qattiq_01"
+  },
+  {
+   "fel": "qattiq",
+   "ayol": false,
+   "matn": "Vaalaykum assalom. Nima olasiz?",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_qattiq_02.dlg_qattiq_02"
+  },
+  {
+   "fel": "qattiq",
+   "ayol": false,
+   "matn": "Narxi shu. Tushmaydi.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_qattiq_03.dlg_qattiq_03"
+  },
+  {
+   "fel": "qattiq",
+   "ayol": false,
+   "matn": "Bu narx ham arzon, boshqa joyda qimmatroq.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_qattiq_04.dlg_qattiq_04"
+  },
+  {
+   "fel": "qattiq",
+   "ayol": false,
+   "matn": "Mayli, o'n bir ming. Bundan pasti yo'q.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_qattiq_05.dlg_qattiq_05"
+  },
+  {
+   "fel": "qattiq",
+   "ayol": false,
+   "matn": "Bu yetmaydi, bolam. Yana ikki ming so'm bering.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_qattiq_06.dlg_qattiq_06"
+  },
+  {
+   "fel": "shoshqaloq",
+   "ayol": false,
+   "matn": "Ha, tez ayting, nima olasiz?",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_shoshqaloq_00.dlg_shoshqaloq_00"
+  },
+  {
+   "fel": "shoshqaloq",
+   "ayol": false,
+   "matn": "Keling-keling, uzum va shaftoli bor, qaysi biri kerak?",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_shoshqaloq_01.dlg_shoshqaloq_01"
+  },
+  {
+   "fel": "shoshqaloq",
+   "ayol": false,
+   "matn": "Nechta? Tezroq ayting, bolam.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_shoshqaloq_02.dlg_shoshqaloq_02"
+  },
+  {
+   "fel": "shoshqaloq",
+   "ayol": false,
+   "matn": "Xo'p, o'n ikki ming, bo'ldi, oling!",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_shoshqaloq_03.dlg_shoshqaloq_03"
+  },
+  {
+   "fel": "shoshqaloq",
+   "ayol": false,
+   "matn": "Mana, ikki kilo uzum. Jami yigirma to'rt ming so'm bo'ldi.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_shoshqaloq_04.dlg_shoshqaloq_04"
+  },
+  {
+   "fel": "shoshqaloq",
+   "ayol": false,
+   "matn": "Oldim. Mana qaytimi: olti ming. Sanab oling.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_shoshqaloq_05.dlg_shoshqaloq_05"
+  },
+  {
+   "fel": "ayyor",
+   "ayol": false,
+   "matn": "Ooo, keling, keling! Eng zo'r anor faqat menda!",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_ayyor_00.dlg_ayyor_00"
+  },
+  {
+   "fel": "ayyor",
+   "ayol": false,
+   "matn": "Keling, bolam, sizga eng yaxshisini tanlab beraman.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_ayyor_01.dlg_ayyor_01"
+  },
+  {
+   "fel": "ayyor",
+   "ayol": false,
+   "matn": "Voy, bundan arzon bersam o'zim zarar qilaman-ku!",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_ayyor_02.dlg_ayyor_02"
+  },
+  {
+   "fel": "ayyor",
+   "ayol": false,
+   "matn": "Rahmat! Mana qaytimingiz: o'n besh ming.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_ayyor_03.dlg_ayyor_03"
+  },
+  {
+   "fel": "ayyor",
+   "ayol": false,
+   "matn": "Voy, kechirasiz, bolam, adashibman! Mana yana ikki ming so'm.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_ayyor_04.dlg_ayyor_04"
+  },
+  {
+   "fel": "ayyor",
+   "ayol": false,
+   "matn": "Sanab ko'ring, bolam: to'ppa-to'g'ri berdim.",
+   "asset": "/Game/Bozor/Audio/Dialog/dlg_ayyor_05.dlg_ayyor_05"
+  }
+ ]
+}

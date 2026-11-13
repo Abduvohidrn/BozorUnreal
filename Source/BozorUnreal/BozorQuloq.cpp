@@ -1,4 +1,5 @@
 #include "BozorQuloq.h"
+#include "BozorRubai.h"
 
 #include "Async/Async.h"
 #include "AudioCaptureCore.h"
@@ -39,7 +40,7 @@ UBozorQuloq::UBozorQuloq()
 
 bool UBozorQuloq::Tayyormi()
 {
-	return FPaths::FileExists(SttExe()) && FPaths::FileExists(SttModel());
+	return (FPaths::FileExists(SttExe()) && FPaths::FileExists(SttModel())) || BozorRubai::Tanlangan();
 }
 
 bool UBozorQuloq::Boshla()
@@ -84,6 +85,8 @@ void UBozorQuloq::Isit(bool bHa)
 	bFon = bHa;
 	if (bHa)
 	{
+		// rubaiSTT ~0.8 GB: suhbat boshlanganda fonda yuklanadi - birinchi gap kutib qolmasin
+		if (BozorRubai::Tanlangan()) Async(EAsyncExecution::Thread, []() { BozorRubai::Yukla(); });
 		if (!Och()) { bFon = false; return; }
 		if (!bYozmoqda)
 		{
@@ -205,6 +208,20 @@ void UBozorQuloq::Yakunla()
 		Ovoz[i] = float(Vazn > 1e-9 ? Yig / Vazn : 0.0) * Kuch;
 	}
 
+	// kuchaytirilgandan keyin ham o'rtacha energiya past - ichida gap yo'q (bitta "chiq" ovozi). Whisper (rubaiSTT)
+	// jim yozuvga so'z to'qiydi ("rahmat.", "tushunarli.") - bunday yozuv STT'ga berilmaydi
+	{
+		double E = 0.0;
+		for (float S : Ovoz) E += double(S) * S;
+		const float Rms = Ovoz.Num() ? float(FMath::Sqrt(E / Ovoz.Num())) : 0.f;
+		if (Rms < 0.012f)
+		{
+			UE_LOG(LogBozorQuloq, Log, TEXT("Yozuvda gap yo'q (%.2f s, o'rtacha %.4f)"), Sekund, Rms);
+			if (NatijaKeldi) NatijaKeldi(FString());
+			return;
+		}
+	}
+
 	const FString Papka = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Quloq"));
 	IFileManager::Get().MakeDirectory(*Papka, true);
 	const FString Asos = Papka / FString::Printf(TEXT("gap_%02d"), Raqam++ % 20);
@@ -236,20 +253,35 @@ void UBozorQuloq::Tanit(const FString& Audio, const FString& Asos, float Sekund)
 	const FString Arg = FString::Printf(TEXT("--backend fastconformer-ctc -m \"%s\" -f \"%s\" -t %d -nt -ng -np --lid-backend off --no-punctuation -otxt -of \"%s\""),
 		*SttModel(), *Audio, Iplar, *Asos);
 	TWeakObjectPtr<UBozorQuloq> Men(this);
-	Async(EAsyncExecution::Thread, [Men, Arg, Audio, Asos, Sekund]()
+	const bool bRubai = BozorRubai::Tanlangan();
+	Async(EAsyncExecution::Thread, [Men, Arg, Audio, Asos, Sekund, bRubai]()
 	{
 		const double T0 = FPlatformTime::Seconds();
 		int32 Kod = -1;
-		FString Chiqdi, XatoMatn;
-		FPlatformProcess::ExecProcess(*SttExe(), *Arg, &Kod, &Chiqdi, &XatoMatn, *SttPapka());
 		FString Matn;
-		FFileHelper::LoadFileToString(Matn, *(Asos + TEXT(".txt")));
-		Matn.TrimStartAndEndInline();
+		const TCHAR* Model = TEXT("FastConformer");
+		TArray<float> Pcm;
+		if (bRubai && BozorRubai::WavOqi(Audio, Pcm))
+		{
+			bool bOk = false;
+			Matn = BozorRubai::Tanit(Pcm, bOk);
+			Kod = bOk ? 0 : 1;
+			Model = TEXT("rubaiSTT");
+		}
+		// rubaiSTT tanlanmagan, ishlamadi yoki fayl WAV emas (mp3) - CrispASR + FastConformer
+		if (Kod != 0 && FPaths::FileExists(SttExe()))
+		{
+			FString Chiqdi, XatoMatn;
+			FPlatformProcess::ExecProcess(*SttExe(), *Arg, &Kod, &Chiqdi, &XatoMatn, *SttPapka());
+			FFileHelper::LoadFileToString(Matn, *(Asos + TEXT(".txt")));
+			Matn.TrimStartAndEndInline();
+			Model = TEXT("FastConformer");
+			if (Kod != 0) UE_LOG(LogBozorQuloq, Warning, TEXT("STT xatosi: %s"), *XatoMatn.Right(500));
+		}
 		const double Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
-		UE_LOG(LogBozorQuloq, Log, TEXT("STT: %.1f s ovoz -> %.0f ms, kod %d: \"%s\""), Sekund, Ms, Kod, *Matn);
-		if (Kod != 0) UE_LOG(LogBozorQuloq, Warning, TEXT("STT xatosi: %s"), *XatoMatn.Right(500));
+		UE_LOG(LogBozorQuloq, Log, TEXT("STT (%s): %.1f s ovoz -> %.0f ms, kod %d: \"%s\""), Model, Sekund, Ms, Kod, *Matn);
 		// jurnal: qaysi yozuvdan nima eshitildi (STT sifatini keyin tahlil qilish uchun)
-		FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s\t%s\t%.0f\t%s\n"), *FDateTime::Now().ToString(), *FPaths::GetCleanFilename(Audio), Ms, *Matn),
+		FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s\t%s\t%.0f\t%s\t%s\n"), *FDateTime::Now().ToString(), *FPaths::GetCleanFilename(Audio), Ms, *Matn, Model),
 			*(FPaths::GetPath(Asos) / TEXT("jurnal.tsv")), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM, &IFileManager::Get(), FILEWRITE_Append);
 		AsyncTask(ENamedThreads::GameThread, [Men, Matn]()
 		{

@@ -127,6 +127,8 @@ public:
 	UFUNCTION(Exec)
 	void QuloqSinov(const FString& Fayl);
 	const UBozorQuloq* GetQuloq() const { return Quloq; }
+	// Sozlamalardagi tugmalar o'zgarganda: moslashgan IMC'ni qayta qo'yadi (BozorSozlamalar)
+	void KirishniYangila();
 
 	// Javob variantini tanlash (0 dan; tugma, 1-5 raqamlar yoki konsol "Tanla 0")
 	UFUNCTION(Exec)
@@ -159,6 +161,7 @@ protected:
 private:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void TugmaBosildi(FKey Tugma);   // qayta tayinlanadigan amallar (Gaplashish, Qaytadan) va Esc
 	void KameraJoyi(float Dt);
 	// log va Saved/Sotuv_suhbat.txt; bEkran - ekranga ham (konsol buyruqlari uchun)
 	void Chiqar(const FString& Kim, const FString& Matn, const FColor& Rang, bool bEkran = false);
@@ -167,8 +170,11 @@ private:
 	// yaqindagi (qarab turgan) sotuvchi bilan suhbat boshlaydi; sotuvchi yo'q yoki band bo'lsa false
 	bool SuhbatniBoshla();
 	void SuhbatniTugat();
-	// sotuvchi javobi: matn, harakat va ovoz
+	// sotuvchi javobi: matn, harakat va ovoz. AI miya bo'lsa - matnni sotuvchining fe'lida qayta yozdirib, keyin ko'rsatadi
 	void SotuvchiAytdi(const FString& Matn);
+	void SotuvchiMatni(const FString& Matn);
+	// yakuniy gapni (LLM qayta yozgan bo'lsa ham) Navoiy bilan ovozlashtiradi; bo'lmasa - yozilgan bo'lakli ovoz (Asl gap bo'yicha)
+	void JonliAyt(int32 Raqam, const FString& Matn, const FString& Asl);
 	void YaqinSotuvchiniTop();
 	void SichqonchaBosildi();
 	void KursorniKorsat(bool bHa);
@@ -188,6 +194,7 @@ private:
 	FString SotuvchiGapi, OxirgiGapim, Xabar;
 	double GapVaqti = -100.0, XabarVaqti = -100.0;
 	double TugatishVaqti = -1.0;   // xayrlashgandan keyin suhbat o'zi yopiladigan payt
+	int32 MiyaSorov = 0;           // AI miyaga oxirgi so'rov raqami (eskisining javobi kelsa - tashlanadi)
 	bool bNatija = false;
 	void EnterBosildi();
 	void RBosildi();
@@ -219,6 +226,10 @@ private:
 	double TestVaqt = 0.0;
 	double TestVaqt2 = 0.0;
 	bool bTestSuratE = false, bTestSuratKutib = false;
+	// -SotuvTest -AiSinov: LLM va Navoiy tayyor bo'lishini kutadi, keyingi tanlov - sotuvchi gapini aytib bo'lgach
+	bool bJonliKutish = false;     // Navoiy ovozi kutilmoqda
+	double AytVaqt = 0.0;          // sotuvchi javobi boshlangan payt (LLM + Navoiy kechikishini o'lchash)
+	double TestKeyingi = 0.0, TestKutishBosh = -1.0;
 };
 
 UCLASS()

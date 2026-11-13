@@ -40,3 +40,14 @@ AI/stt/*.dll
 AI/stt/*.gguf
 AI/stt/LICENSE
 AI/stt/THIRD_PARTY_NOTICES.txt
+
+# ===== AI miya (sotuvchi tili, LLM): yukla.sh yuklaydi =====
+AI/miya/llama/
+AI/miya/vendor/
+AI/miya/models/
+AI/miya/natija/
+AI/miya/*.gguf
+AI/miya/*.log
+AI/stt/rubai/
+# ===== Navoiy TTS (jonli ovoz): muhit - D:\Trk\Ovoz_tashqi\navoiy ga junction (venv + modellar) =====
+AI/navoiy/muhit

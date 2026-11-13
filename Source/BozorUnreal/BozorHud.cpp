@@ -2,6 +2,7 @@
 
 #include "BozorAvtobus.h"
 #include "BozorOyinchi.h"
+#include "BozorSozlamalar.h"
 #include "CanvasItem.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
@@ -75,7 +76,7 @@ void ABozorHud::Tick(float Dt)
 	if (P)
 	{
 		// Tab bosib turilganda ochiq, qo'yib yuborilsa yopiladi. Introdan keyingi birinchi ochilishda Tab bosilsa - shu rejimga o'tadi
-		if (P->IsInputKeyDown(EKeys::Tab))
+		if (P->IsInputKeyDown(UBozorSozlamalar::Get()->Tugma(TEXT("Royxat"))))
 		{
 			bBirinchi = false;
 			Qogoz(true);
@@ -85,7 +86,7 @@ void ABozorHud::Tick(float Dt)
 		{
 			const bool bYurdi = Pw && Pw->GetVelocity().Size2D() > 30.f;
 			// sinovda qog'oz o'zi yopiladi - maslahat ham suratga tushsin
-			if (bYurdi || P->WasInputKeyJustPressed(EKeys::E) || P->WasInputKeyJustPressed(EKeys::Enter) || (bTest && Hozir - OchilganVaqt > 2.5))
+			if (bYurdi || P->WasInputKeyJustPressed(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))) || P->WasInputKeyJustPressed(EKeys::Enter) || (bTest && Hozir - OchilganVaqt > 2.5))
 				Qogoz(false);
 		}
 	}
@@ -168,7 +169,7 @@ void ABozorHud::DrawHUD()
 	if (Ochiqlik < 1.f && MaslahatAlfa < 1.f)
 	{
 		const float S = Canvas->ClipY / 1080.f;
-		FCanvasTextItem T(FVector2D(40.f * S, Canvas->ClipY - 70.f * S), FText::FromString(TEXT("Tab (bosib turing) — ro'yxat")), GEngine->GetMediumFont(),
+		FCanvasTextItem T(FVector2D(40.f * S, Canvas->ClipY - 70.f * S), FText::FromString(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Royxat"))).ToString() + TEXT(" (bosib turing) — ro'yxat")), GEngine->GetMediumFont(),
 			FLinearColor(1.f, 1.f, 1.f, 0.75f * (1.f - Ochiqlik) * (1.f - MaslahatAlfa)));
 		T.Scale = FVector2D(1.3f * S);
 		T.EnableShadow(FLinearColor(0.f, 0.f, 0.f, 0.6f * (1.f - Ochiqlik) * (1.f - MaslahatAlfa)));
@@ -271,10 +272,11 @@ void ABozorHud::MaslahatChiz()
 	UFont* Shrift = GEngine->GetLargeFont();
 	const float Kt = 1.7f * S;
 	struct FBand { TArray<FString> Tugmalar; FString Nima; };
+	auto Tn = [](const TCHAR* Amal) { return UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(Amal)).ToString(); };
 	const FBand Bandlar[] = {
-		{ { TEXT("W"), TEXT("A"), TEXT("S"), TEXT("D") }, TEXT("yurish") },
+		{ { Tn(TEXT("Oldinga")), Tn(TEXT("Chapga")), Tn(TEXT("Orqaga")), Tn(TEXT("Onga")) }, TEXT("yurish") },
 		{ { TEXT("Sichqoncha") }, TEXT("atrofga qarash") },
-		{ { TEXT("Tab") }, TEXT("ro'yxat (bosib turing)") },
+		{ { Tn(TEXT("Royxat")) }, TEXT("ro'yxat (bosib turing)") },
 	};
 	const float Pad = 14.f * S, Oraliq = 8.f * S, BandOraliq = 46.f * S, QopH = 46.f * S;
 
@@ -386,7 +388,7 @@ void ABozorHud::SotuvChiz()
 		const float W = 46.f * S + 16.f * S + Om.X;
 		const float X = (Canvas->ClipX - W) * 0.5f, Y = Canvas->ClipY * 0.62f;
 		Tort(X - 20.f * S, Y - 14.f * S, W + 40.f * S, 74.f * S, FLinearColor(0.f, 0.f, 0.f, 0.45f));
-		const float Q = Tugma(TEXT("E"), X, Y, 1.f);
+		const float Q = Tugma(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))).ToString(), X, Y, 1.f);
 		Yoz(M, X + Q + 16.f * S, Y + (Q - Om.Y) * 0.5f, 1.7f * S, FLinearColor::White);
 	}
 
@@ -504,7 +506,7 @@ void ABozorHud::SotuvChiz()
 		const FString M = TEXT("xayrlashmasdan ketish");
 		const FVector2D Om = Olcham(M, 1.25f * S);
 		const float Bx = X + W - Om.X - 30.f * S - 46.f * S - 12.f * S, By = Y + H - 60.f * S;
-		const float Q = Tugma(TEXT("E"), Bx, By, 0.8f * A);
+		const float Q = Tugma(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))).ToString(), Bx, By, 0.8f * A);
 		Yoz(M, Bx + Q + 12.f * S, By + (Q - Om.Y) * 0.5f, 1.25f * S, FLinearColor(1.f, 1.f, 1.f, 0.7f * A));
 	}
 }

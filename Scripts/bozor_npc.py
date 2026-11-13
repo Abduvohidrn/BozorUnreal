@@ -10,19 +10,6 @@ import collections
 import unreal
 
 ROOT = "/Game/Bozor"
-ABP = ROOT + "/Pack/Queue/ABP_Manny"
-# MetaHuman: eski personaj -> MetaHuman (tana + yuz + o'tkazilgan kiyim). Animatsiyalar MetaHuman skeletiga retarget qilingan
-# (/Game/Bozor/MetaAnim). Yuz va kiyim tana pozasiga ABozorNpc::BeginPlay'da (leader pose) ergashadi.
-USE_MH = False
-MH = {
-    "Otaxon_Chopon_01": "MH_KeksaOtaxon", "Otaxon_Pidjak_01": "MH_DehqonOta", "Momo_01": "MH_KeksaMomo",
-    "Ayol_Kofta_01": "MH_XaridorAyol", "Sotuvchi_Ayol_01": "MH_Onaxon", "Qiz_01": "MH_YoshSotuvchiQiz",
-    "Qiz_02": "MH_Bosh_02", "Hammol_01": "MH_AravakashYigit", "Sotuvchi_Jilet_01": "MH_OrtaYoshliSotuvchi",
-    "Sotuvchi_Sport_01": "MH_KochaSavdogari", "Erkak_Kurtka_01": "MH_ZamonaviyXaridor", "Yigit_01": "MH_TalabaYigit",
-    "Yigit_02": "MH_YoshDehqon",
-}
-MH_ABP = ROOT + "/MetaAnim/ABP_Manny"
-MH_ANIM = ROOT + "/MetaAnim"
 FOLDER = "NPC"
 CAPSULE_HALF = 88.0
 ROLES = {
@@ -53,51 +40,16 @@ def load(path):
     return unreal.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
 
 
-def anim(name):
-    return load('%s/CitizenAnim/Male/%s' % (ROOT, name))
+def citizen_anim_path(gender, name):
+    folder = "Male" if gender == "ma" else "Female"
+    return f"{ROOT}/CitizenAnim/{folder}/{name}"
 
 
-# Fab'dagi tayyor kiyimlar (vaqtincha, rasmiy kiyimsiz): MetaHuman -> {rol: to'plam}, "*" - qolgan rollar.
-# To'plamlar Blender'da b_fab_fit.py bilan har bir MetaHuman tanasiga moslangan (/Game/Bozor/MetaKiyim/<MH>/SKM_Fab_<to'plam>)
-FAB = {
-    "MH_AravakashYigit": {"*": "M_Hammol"},
-    "MH_KochaSavdogari": {"Sotuvchi": "M_SotB", "*": "M_XarA"},
-    "MH_OrtaYoshliSotuvchi": {"Sotuvchi": "M_SotA", "*": "M_XarB"},
-    "MH_ZamonaviyXaridor": {"Sotuvchi": "M_SotV", "*": "M_XarB"},
-    "MH_KeksaOtaxon": {"Sotuvchi": "M_KeksaSot", "*": "M_Keksa"},
-    "MH_DehqonOta": {"*": "M_Keksa"},
-    "MH_TalabaYigit": {"*": "M_Yosh"},
-    "MH_YoshDehqon": {"*": "M_YoshB"},
-    "MH_KeksaMomo": {"Sotuvchi": "W_A", "*": "W_Keksa"},
-    "MH_Onaxon": {"Sotuvchi": "W_A", "*": "W_B"},
-    "MH_XaridorAyol": {"Sotuvchi": "W_A", "*": "W_B"},
-    "MH_YoshSotuvchiQiz": {"*": "W_C"},
-    "MH_Bosh_02": {"*": "W_D"},
-}
+def anim(name, gender):
+    return load(citizen_anim_path(gender, name))
 
 
-def mh_parts(character, role=None):
-    """(tana, yuz, kiyim) skeletal mesh'lari yoki None. Kiyim rolga qarab Fab to'plamidan, bo'lmasa eski NPC kiyimi."""
-    n = MH.get(character)
-    if not (USE_MH and n):
-        return None
-    r = "/Game/MetaHumans/Heads/Unpacked/%s/" % n
-    fab = FAB.get(n, {})
-    kit = fab.get(role, fab.get("*"))
-    outfit = load("%s/MetaKiyim/%s/SKM_Fab_%s" % (ROOT, n, kit)) if kit else None
-    bp = load(r + "BP_" + n)
-    parts = (load(r + "Body/SKM_%s_BodyMesh" % n), load(r + "Face/SKM_%s_FaceMesh" % n),
-             outfit or load("%s/MetaKiyim/%s/SKM_Kiyim_%s" % (ROOT, n, character)), bp and bp.generated_class())
-    return parts if all(parts) else None
-
-
-# ---- Citizen NPC (D:\Citizen NPC paketi, /Game/CitizenNPC): bozor uslubidagi zamonaviy kundalik kiyim.
-# Animatsiya: yashirin MetaHuman tanasi (Mesh) -> ABP_Citizen<Jins> (Retarget Pose From Mesh) bilan "CitizenPose"
-# tegli yashirin Citizen tanasi -> kiyim/bosh/qo'l/shapka unga leader pose bilan ergashadi (ABozorNpc::LinkMetaHuman).
-USE_CITIZEN = True
 CIT = "/Game/CitizenNPC/CharacterParts/"
-CIT_ABP = ROOT + "/Retarget/Citizen/ABP_Citizen%s"
-# eski personaj -> bozor turi
 CIT_TUR = {
     "Otaxon_Chopon_01": "Otaxon", "Otaxon_Pidjak_01": "Otaxon", "Momo_01": "Momo", "Ayol_Kofta_01": "Ayol",
     "Sotuvchi_Ayol_01": "Ayol", "Qiz_01": "Qiz", "Qiz_02": "Qiz", "Hammol_01": "Hammol", "Sotuvchi_Jilet_01": "Erkak",
@@ -199,9 +151,7 @@ def romol_material_for_outfit(mesh, overrides):
 
 def cit_parts(character, role, idx):
     """Citizen to'plami: (jins, [(nom, mesh, {slot: material}), ...]) yoki None."""
-    tur = CIT_TUR.get(character)
-    if not (USE_CITIZEN and tur):
-        return None
+    tur = CIT_TUR[character]
     g = "fe" if tur in ("Ayol", "Momo", "Qiz") else "ma"
     kits = CIT_KIYIM.get((tur, role)) or CIT_KIYIM[(tur, "*")]
     kiyim, kmat, qol, (shapka, smat) = kits[idx % len(kits)]
@@ -224,18 +174,13 @@ def cit_parts(character, role, idx):
     return g, out
 
 
-def cit_dress(actor, mesh_comp, g, parts):
-    """Yashirin Citizen tanasi (CitizenPose) + unga biriktirilgan ko'rinadigan qismlar; teri bir xil ohangda."""
-    body = mesh_comp
-    body.set_skeletal_mesh_asset(load(CIT + 'Meshes/Basebody/SK_%s_body_average' % g))
-    bp = load(ROOT + '/CitizenAnim/' + ('Male' if g == 'ma' else 'Female') + '/ABP_Manny')
-    if not bp:
-        raise RuntimeError('Run Citizen animation migration first')
-    body.set_anim_instance_class(bp.generated_class())
-    body.set_editor_property('disable_post_process_blueprint', True)
+def cit_dress(actor, body, g, parts):
+    """Citizen tana skeleti ko'rinadigan kiyim, bosh va sochni boshqaradi."""
+    body.set_skeletal_mesh_asset(load(CIT + "Meshes/Basebody/SK_%s_body_average" % g))
+    body.set_anim_instance_class(anim("ABP_Manny", g).generated_class())
     body.set_editor_property("visibility_based_anim_tick_option",
                              unreal.VisibilityBasedAnimTickOption.ALWAYS_TICK_POSE_AND_REFRESH_BONES)
-    body.set_editor_property("visible", False)
+    body.set_visibility(False, False)
     teri = load(CIT + "Materials/" + CIT_TERI[g])
     visible_parts = []
     for name, m, mats in parts:
@@ -250,25 +195,19 @@ def cit_dress(actor, mesh_comp, g, parts):
     body.set_leader_pose_component(None)
     for c in visible_parts:
         c.set_leader_pose_component(body)
-    mesh_comp.set_editor_property("visibility_based_anim_tick_option",
-                                  unreal.VisibilityBasedAnimTickOption.ALWAYS_TICK_POSE_AND_REFRESH_BONES)
-    mesh_comp.set_visibility(False, False)
     return body
 
 
-def add_part(actor, parent, name, mesh, cls=unreal.SkeletalMeshComponent):
+def add_part(actor, parent, name, mesh):
     """Aktor nusxasiga parent'ga biriktirilgan qo'shimcha komponent (xaritada saqlanadi)."""
     sds = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
     lib = unreal.SubobjectDataBlueprintFunctionLibrary
     ph = next(h for h in sds.k2_gather_subobject_data_for_instance(actor) if lib.get_object(lib.get_data(h)) == parent)
-    h, fail = sds.add_new_subobject(unreal.AddNewSubobjectParams(parent_handle=ph, new_class=cls))
+    h, fail = sds.add_new_subobject(unreal.AddNewSubobjectParams(parent_handle=ph, new_class=unreal.SkeletalMeshComponent))
     sds.rename_subobject(h, unreal.Text(name))
     c = lib.get_object(lib.get_data(h))
-    if cls == unreal.ChildActorComponent:
-        c.set_child_actor_class(mesh)
-    else:
-        c.set_skeletal_mesh_asset(mesh)
-        c.set_editor_property("enable_update_rate_optimizations", True)
+    c.set_skeletal_mesh_asset(mesh)
+    c.set_editor_property("enable_update_rate_optimizations", True)
     return c
 
 
@@ -305,13 +244,11 @@ def build(scene, log):
         feet = V(n["pos"])
         a = spawn(unreal.BozorNpc, unreal.Vector(feet.x, feet.y, feet.z + CAPSULE_HALF + 2), Q(n["rot"]).rotator(), n["name"], "%s/%s" % (FOLDER, role))
         m = a.get_editor_property("mesh")
-        cit = cit_parts(n["character"], role, i)
-        if cit:
-            cit_dress(a, m, *cit)
-            stats["kiyim_" + cit[1][0][1].get_name()] += 1
-            stats["Citizen"] += 1
-        else:
-            raise RuntimeError('Missing Citizen outfit: ' + n['character'])
+        citizen = cit_parts(n["character"], role, i)
+        if not citizen:
+            raise RuntimeError("Citizen qismlari topilmadi: " + n["character"])
+        cit_dress(a, m, *citizen)
+        stats["kiyim_" + citizen[1][0][1].get_name()] += 1
         s = float(n["scale"][1])
         m.set_editor_property("relative_scale3d", unreal.Vector(s, s, s))
         m.set_editor_property("enable_update_rate_optimizations", True)
@@ -348,11 +285,12 @@ def build(scene, log):
     mgr = spawn(unreal.BozorNpcManager, V(npc["gatePoints"][0]) if npc["gatePoints"] else unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0), "Bozor_NPC_Menejeri", FOLDER)
     acts, missing = [], set()
     for x in npc["actions"]:
-        a = anim(x["state"])
-        if not a:
+        male = anim(x["state"], "ma")
+        female = anim(x["state"], "fe")
+        if not (male and female):
             missing.add(x["state"])
             continue
-        acts.append(unreal.BozorNpcAction(category=x["category"], anim=a, loop=bool(x["loop"])))
+        acts.append(unreal.BozorNpcAction(category=x["category"], anim=male, alternate_anim=female, loop=bool(x["loop"])))
     mgr.set_editor_property("actions", acts)
     # Every actor owns clips on its own skeleton, including female NPCs.
     for i, a in made.items():

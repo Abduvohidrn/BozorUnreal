@@ -1,7 +1,9 @@
 #include "BozorOvoz.h"
 
 #include "BozorNpc.h"
+#include "BozorSotuv.h"
 #include "AudioDevice.h"
+#include "TimerManager.h"
 #include "Components/AudioComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -14,6 +16,12 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Sound/SoundBase.h"
+#include "Sound/SoundWave.h"
+#include "Dom/JsonObject.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBozorOvoz, Log, All);
 
@@ -36,6 +44,7 @@ void ABozorSotuvchiOvozi::BeginPlay()
 {
 	Super::BeginPlay();
 	Instance = this;
+	LoadDialog();
 	for (USoundBase* C : Clips)
 	{
 		if (!C) continue;
@@ -69,6 +78,295 @@ void ABozorSotuvchiOvozi::Say(ABozorNpc* Vendor, FName Kind, float Chance)
 	if (Kind == TEXT("savdo")) Chance *= O->SavdoChance;
 	else if (Kind == TEXT("rahmat")) Chance *= O->RahmatChance;
 	if (FMath::FRand() < Chance) O->TrySay(Vendor, Kind);
+}
+
+namespace
+{
+	// 0..999 999 999 -> o'zbekcha so'z ("12000" -> "o'n ikki ming"); 100 -> "yuz", 1000 -> "ming"
+	FString SonSoz(int64 N)
+	{
+		static const TCHAR* Bir[] = {TEXT(""), TEXT("bir"), TEXT("ikki"), TEXT("uch"), TEXT("to'rt"), TEXT("besh"), TEXT("olti"), TEXT("yetti"), TEXT("sakkiz"), TEXT("to'qqiz")};
+		static const TCHAR* On[] = {TEXT(""), TEXT("o'n"), TEXT("yigirma"), TEXT("o'ttiz"), TEXT("qirq"), TEXT("ellik"), TEXT("oltmish"), TEXT("yetmish"), TEXT("sakson"), TEXT("to'qson")};
+		if (N == 0) return TEXT("nol");
+		auto Uch = [&](int32 X)
+		{
+			TArray<FString> W;
+			if (X >= 100) { if (X / 100 > 1) W.Add(Bir[X / 100]); W.Add(TEXT("yuz")); }
+			if (X % 100 >= 10) W.Add(On[(X % 100) / 10]);
+			if (X % 10) W.Add(Bir[X % 10]);
+			return FString::Join(W, TEXT(" "));
+		};
+		TArray<FString> W;
+		if (const int32 M = int32(N / 1000000 % 1000)) { W.Add(Uch(M)); W.Add(TEXT("million")); }
+		if (const int32 K = int32(N / 1000 % 1000)) { if (K > 1) W.Add(Uch(K)); W.Add(TEXT("ming")); }
+		if (const int32 R = int32(N % 1000)) W.Add(Uch(R));
+		return FString::Join(W, TEXT(" "));
+	}
+}
+
+FString ABozorSotuvchiOvozi::NormalGap(const FString& Matn)
+{
+	// "12 000" (BozorSotuv::Som) -> "12000": raqamlar orasidagi bo'shliq ming ajratgichi
+	FString S;
+	for (int32 i = 0; i < Matn.Len(); ++i)
+	{
+		const TCHAR C = Matn[i];
+		if (C == TEXT(' ') && i > 0 && FChar::IsDigit(Matn[i - 1]) && i + 3 < Matn.Len() && FChar::IsDigit(Matn[i + 1])
+			&& FChar::IsDigit(Matn[i + 2]) && FChar::IsDigit(Matn[i + 3]) && (i + 4 >= Matn.Len() || !FChar::IsDigit(Matn[i + 4])))
+			continue;
+		S.AppendChar(C);
+	}
+	FString Out;
+	for (int32 i = 0; i < S.Len();)
+	{
+		TCHAR C = S[i];
+		if (FChar::IsDigit(C))
+		{
+			int64 N = 0;
+			while (i < S.Len() && FChar::IsDigit(S[i]) && N < 1000000000) N = N * 10 + (S[i++] - TEXT('0'));
+			// miqdor: "1,5" -> "bir yarim", "0,5" -> "yarim" (BozorSotuv::Miqdor)
+			const bool bYarim = i + 1 < S.Len() && (S[i] == TEXT(',') || S[i] == TEXT('.')) && S[i + 1] == TEXT('5')
+				&& (i + 2 >= S.Len() || !FChar::IsDigit(S[i + 2]));
+			Out += TEXT(" ") + (bYarim && N == 0 ? FString() : SonSoz(N)) + (bYarim ? TEXT(" yarim ") : TEXT(" "));
+			if (bYarim) i += 2;
+			continue;
+		}
+		// barcha apostrof turlari -> ', harf va ' dan boshqasi bo'shliq
+		if (C == 0x02BB || C == 0x02BC || C == 0x2018 || C == 0x2019 || C == TEXT('`')) C = TEXT('\'');
+		C = FChar::ToLower(C);
+		Out.AppendChar(FChar::IsAlpha(C) || C == TEXT('\'') ? C : TEXT(' '));
+		++i;
+	}
+	TArray<FString> W;
+	Out.ParseIntoArrayWS(W);
+	return FString::Join(W, TEXT(" "));
+}
+
+void ABozorSotuvchiOvozi::LoadDialog()
+{
+	Dialog.Reset();
+	DialogSinov.Reset();
+	const FString Yol = FPaths::ProjectContentDir() / TEXT("Bozor/Data/ovoz_gaplar.json");
+	FString Matn;
+	TSharedPtr<FJsonObject> Ildiz;
+	if (!FFileHelper::LoadFileToString(Matn, *Yol) || !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Matn), Ildiz) || !Ildiz)
+	{
+		UE_LOG(LogBozorOvoz, Log, TEXT("[BozorOvoz] suhbat ovozlari yo'q (%s)"), *Yol);
+		return;
+	}
+	const TArray<TSharedPtr<FJsonValue>>* Ovozlar = nullptr;
+	int32 Jami = 0;
+	if (Ildiz->TryGetArrayField(TEXT("ovozlar"), Ovozlar))
+	{
+		for (const TSharedPtr<FJsonValue>& V : *Ovozlar)
+		{
+			const TSharedPtr<FJsonObject> O = V->AsObject();
+			const TSharedPtr<FJsonObject>* Ib = nullptr;
+			if (!O || !O->TryGetObjectField(TEXT("iboralar"), Ib)) continue;
+			FDialogOvoz& D = Dialog.FindOrAdd(O->GetStringField(TEXT("fel")) + (O->GetBoolField(TEXT("ayol")) ? TEXT(" ayol") : TEXT(" erkak")));
+			for (const TPair<FString, TSharedPtr<FJsonValue>>& P : (*Ib)->Values)
+			{
+				const FString K = NormalGap(P.Key);
+				if (K.IsEmpty()) continue;
+				D.Iboralar.Add(K, FSoftObjectPath(P.Value->AsString()));
+				int32 Soz = 1;
+				for (TCHAR C : K) Soz += C == TEXT(' ') ? 1 : 0;
+				D.EngUzun = FMath::Max(D.EngUzun, Soz);
+				++Jami;
+			}
+		}
+	}
+	const TArray<TSharedPtr<FJsonValue>>* Sinov = nullptr;
+	if (Ildiz->TryGetArrayField(TEXT("sinov"), Sinov))
+		for (const TSharedPtr<FJsonValue>& V : *Sinov)
+			if (const TSharedPtr<FJsonObject> O = V->AsObject())
+				DialogSinov.Emplace(O->GetStringField(TEXT("fel")), O->GetStringField(TEXT("matn")));
+	UE_LOG(LogBozorOvoz, Display, TEXT("[BozorOvoz] suhbat ovozlari: %d ovoz, %d ibora"), Dialog.Num(), Jami);
+	if (FParse::Param(FCommandLine::Get(), TEXT("OvozTest")))
+	{
+		FTimerHandle H;
+		GetWorldTimerManager().SetTimer(H, this, &ABozorSotuvchiOvozi::DialogTest, 5.f, false);
+	}
+}
+
+bool ABozorSotuvchiOvozi::Qopla(const FDialogOvoz& Ovoz, const FString& Normal, TArray<FSoftObjectPath>& Out) const
+{
+	Out.Reset();
+	TArray<FString> W;
+	Normal.ParseIntoArray(W, TEXT(" "));
+	for (int32 i = 0; i < W.Num();)
+	{
+		bool bTopildi = false;
+		for (int32 n = FMath::Min(Ovoz.EngUzun, W.Num() - i); n >= 1 && !bTopildi; --n)
+		{
+			FString K = W[i];
+			for (int32 j = 1; j < n; ++j) K += TEXT(" ") + W[i + j];
+			if (const FSoftObjectPath* P = Ovoz.Iboralar.Find(K))
+			{
+				Out.Add(*P);
+				i += n;
+				bTopildi = true;
+			}
+		}
+		if (!bTopildi)
+		{
+			UE_LOG(LogBozorOvoz, Verbose, TEXT("[BozorOvoz] qoplanmadi: \"%s\" (%d-so'z \"%s\")"), *Normal, i, *W[i]);
+			Out.Reset();
+			return false;
+		}
+	}
+	return Out.Num() > 0;
+}
+
+// -OvozTest: normallash, har ovozda namunaviy gaplarning qoplanishi, kliplar yuklanishi va sotuvchi og'zidan chalinishi;
+// natija logda "[OvozTest]" qatorlarida, keyin o'yin yopiladi
+void ABozorSotuvchiOvozi::DialogTest()
+{
+	int32 Xato = 0;
+	const TPair<const TCHAR*, const TCHAR*> Juft[] = {
+		{TEXT("Mayli, siz uchun 10 000 so'm qilaman."), TEXT("Mayli, siz uchun o'n ming so'm qilaman.")},
+		{TEXT("Xo'p, 12 000, bo'ldi, oling!"), TEXT("Xo'p, o'n ikki ming, bo'ldi, oling!")},
+		{TEXT("Bu 1 500 so’m"), TEXT("Bu ming besh yuz so'm")},
+		{TEXT("Mana: 1,5 kilo."), TEXT("Mana bir yarim kilo")},
+		{TEXT("0,5 kilo"), TEXT("yarim kilo")},
+	};
+	for (const auto& J : Juft)
+	{
+		const bool bOk = NormalGap(J.Key) == NormalGap(J.Value);
+		Xato += bOk ? 0 : 1;
+		UE_LOG(LogBozorOvoz, Display, TEXT("[OvozTest] normal %s: \"%s\" | \"%s\""), bOk ? TEXT("OK") : TEXT("XATO"), *NormalGap(J.Key), *NormalGap(J.Value));
+	}
+	// har ovoz: namunaviy gaplar qanchasi to'liq qoplanadi, iboralar yuklanadimi
+	for (const TPair<FString, FDialogOvoz>& D : Dialog)
+	{
+		int32 Yuklandi = 0;
+		for (const TPair<FString, FSoftObjectPath>& P : D.Value.Iboralar) Yuklandi += P.Value.TryLoad() ? 1 : 0;
+		int32 Sinov = 0, Qoplandi = 0;
+		TArray<FSoftObjectPath> Q;
+		for (const TPair<FString, FString>& S : DialogSinov)
+		{
+			if (!D.Key.StartsWith(S.Key + TEXT(" "))) continue;
+			++Sinov;
+			if (Qopla(D.Value, NormalGap(S.Value), Q)) ++Qoplandi;
+			else UE_LOG(LogBozorOvoz, Display, TEXT("[OvozTest] %s qoplanmadi: %s"), *D.Key, *S.Value);
+		}
+		Xato += Yuklandi == D.Value.Iboralar.Num() ? 0 : 1;
+		UE_LOG(LogBozorOvoz, Display, TEXT("[OvozTest] ovoz %s: ibora=%d yuklandi=%d gap %d/%d qoplandi"), *D.Key, D.Value.Iboralar.Num(), Yuklandi, Qoplandi, Sinov);
+	}
+	// har rasta (fe'l + jins) uchun bitta gapni haqiqatan chalib ko'radi
+	int32 Rasta = 0, Aytdi = 0;
+	if (const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this))
+	{
+		for (const FBozorRasta& R : Tz->GetRastalar())
+		{
+			if (!R.Sotuvchi) continue;
+			++Rasta;
+			const FString Fel = BozorSotuv::FelNomi(R.Fel);
+			for (const TPair<FString, FString>& S : DialogSinov)
+				if (S.Key == Fel) { Aytdi += SayLine(R.Sotuvchi, Fel, S.Value) ? 1 : 0; break; }
+		}
+	}
+	Xato += Aytdi == Rasta ? 0 : 1;
+	UE_LOG(LogBozorOvoz, Display, TEXT("[OvozTest] rasta=%d ovozli=%d xato=%d"), Rasta, Aytdi, Xato);
+	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
+}
+
+bool ABozorSotuvchiOvozi::SayLine(ABozorNpc* Vendor, const FString& Fel, const FString& Matn)
+{
+	ABozorSotuvchiOvozi* O = Instance.Get();
+	if (!O || !Vendor || O->Dialog.Num() == 0) return false;
+	// erkak sotuvchidan ayol ovozi (yoki aksincha) chiqmasin
+	const FDialogOvoz* D = O->Dialog.Find(Fel + (Vendor->bFemale ? TEXT(" ayol") : TEXT(" erkak")));
+	if (!D) return false;
+	const FString Kalit = NormalGap(Matn);
+	TArray<FSoftObjectPath> Yollar;
+	if (!O->Qopla(*D, Kalit, Yollar)) return false;
+	TArray<USoundBase*> Bolaklar;
+	float Uzunlik = 0.f;
+	for (const FSoftObjectPath& P : Yollar)
+	{
+		USoundBase* C = Cast<USoundBase>(P.TryLoad());
+		if (!C)
+		{
+			UE_LOG(LogBozorOvoz, Warning, TEXT("[BozorOvoz] suhbat klipi yuklanmadi: %s"), *P.ToString());
+			return false;
+		}
+		O->DialogLoaded.AddUnique(C);
+		Bolaklar.Add(C);
+		Uzunlik += C->GetDuration();
+	}
+	FVoice& V = O->Get(Vendor);
+	V.Navbat.Reset();
+	V.Src->Stop();   // suhbat gapi chaqiriqdan muhimroq (Stop BolakTugadi'ni chaqirsa ham navbat bo'sh)
+	V.Src->SetVolumeMultiplier(O->Volume);
+	V.Src->SetPitchMultiplier(1.f);   // yozilgan ohang - xarakterning o'zi, o'zgartirmaymiz
+	V.Src->SetSound(Bolaklar[0]);
+	V.Navbat = TArray<USoundBase*>(Bolaklar.GetData() + 1, Bolaklar.Num() - 1);
+	V.Src->Play();
+	V.Last = Bolaklar.Last();
+	V.bCall = false;
+	V.NextTime = O->GetWorld()->GetTimeSeconds() + Uzunlik + 0.06f * Bolaklar.Num() + 0.5;
+	UE_LOG(LogBozorOvoz, Display, TEXT("[BozorOvoz] suhbat: %s (%s %s) %d bo'lak, %.1f s: %s"), *Vendor->GetActorNameOrLabel(), *Fel,
+		Vendor->bFemale ? TEXT("ayol") : TEXT("erkak"), Bolaklar.Num(), Uzunlik, *Kalit);
+	return true;
+}
+
+bool ABozorSotuvchiOvozi::SayWave(ABozorNpc* Vendor, USoundWave* Ovoz)
+{
+	ABozorSotuvchiOvozi* O = Instance.Get();
+	if (!O || !Vendor || !Ovoz) return false;
+	// 3D so'nish, ovoz sinfi (fon ducking) va bir vaqtdagi gaplar chegarasi - yozilgan kliplar bilan bir xil
+	USoundBase* Namuna = O->Clips.Num() ? O->Clips[0].Get() : nullptr;
+	if (Namuna)
+	{
+		Ovoz->AttenuationSettings = Namuna->AttenuationSettings;
+		Ovoz->SoundClassObject = Namuna->SoundClassObject;
+		Ovoz->ConcurrencySet = Namuna->ConcurrencySet;
+	}
+	O->Jonli.Add(Ovoz);
+	while (O->Jonli.Num() > 6) O->Jonli.RemoveAt(0);
+	FVoice& V = O->Get(Vendor);
+	V.Navbat.Reset();
+	V.Src->Stop();
+	V.Src->SetVolumeMultiplier(O->Volume);
+	V.Src->SetPitchMultiplier(1.f);
+	V.Src->SetSound(Ovoz);
+	V.Src->Play();
+	V.Last = Ovoz;
+	V.bCall = false;
+	const double Now = O->GetWorld()->GetTimeSeconds();
+	V.NextTime = Now + Ovoz->Duration + 0.5;
+	// procedural tovush ma'lumoti tugagach ham jim "chalinib" turadi - vaqti kelganda o'zimiz to'xtatamiz
+	TWeakObjectPtr<UAudioComponent> Src(V.Src);
+	TWeakObjectPtr<USoundWave> W(Ovoz);
+	O->GetWorldTimerManager().SetTimer(O->JonliTugash, FTimerDelegate::CreateLambda([Src, W]()
+	{
+		if (Src.IsValid() && W.IsValid() && Src->Sound == W.Get()) Src->Stop();
+	}), Ovoz->Duration + 0.15f, false);
+	UE_LOG(LogBozorOvoz, Display, TEXT("[BozorOvoz] jonli: %s %.1f s"), *Vendor->GetActorNameOrLabel(), Ovoz->Duration);
+	return true;
+}
+
+bool ABozorSotuvchiOvozi::Gapiryapti(ABozorNpc* Vendor)
+{
+	ABozorSotuvchiOvozi* O = Instance.Get();
+	const FVoice* V = O && Vendor ? O->Voices.Find(Vendor) : nullptr;
+	return V && V->Src && V->Src->IsPlaying();
+}
+
+// bo'lak tugadi - shu sotuvchining navbatdagi bo'lagi (bo'laklar orasida tabiiy qisqa nafas: klip boshidagi 15 ms so'nish)
+void ABozorSotuvchiOvozi::BolakTugadi(UAudioComponent* Src)
+{
+	for (TPair<TWeakObjectPtr<ABozorNpc>, FVoice>& P : Voices)
+	{
+		FVoice& V = P.Value;
+		if (V.Src != Src || V.Navbat.Num() == 0) continue;
+		USoundBase* Keyingi = V.Navbat[0];
+		V.Navbat.RemoveAt(0);
+		V.Src->SetSound(Keyingi);
+		V.Src->Play();
+		return;
+	}
 }
 
 void ABozorSotuvchiOvozi::Tick(float DeltaSeconds)
@@ -158,6 +456,7 @@ ABozorSotuvchiOvozi::FVoice& ABozorSotuvchiOvozi::Get(ABozorNpc* Vendor)
 	A->SetupAttachment(Vendor->GetRootComponent());
 	A->SetRelativeLocation(FVector(15.f, 0.f, 155.f - Half));
 	A->RegisterComponent();
+	A->OnAudioFinishedNative.AddUObject(this, &ABozorSotuvchiOvozi::BolakTugadi);   // suhbat gapining keyingi bo'lagi
 	V.Src = A;
 	UE_LOG(LogBozorOvoz, Log, TEXT("[BozorOvoz] %s: %s, %s"), *Vendor->GetActorNameOrLabel(), *V.Persona, *V.Section);
 	return Voices.Add(Vendor, MoveTemp(V));

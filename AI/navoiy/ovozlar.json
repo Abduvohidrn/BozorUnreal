@@ -1,0 +1,7 @@
+{
+  "_izoh": "fe'l -> Navoiy kayfiyati (emotions_40h.json 'uz' nomi) va tezlik. Ovoz namunasi: ovozlar/<fel>_<ayol|erkak>.wav",
+  "mehribon":   {"kayfiyat": "mehribon", "tezlik": 1.0},
+  "qattiq":     {"kayfiyat": "xotirjam", "tezlik": 1.0},
+  "shoshqaloq": {"kayfiyat": "xursand",  "tezlik": 1.15},
+  "ayyor":      {"kayfiyat": "kinoyali", "tezlik": 1.0}
+}

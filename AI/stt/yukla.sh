@@ -14,4 +14,16 @@ if [ ! -s crispasr.exe ]; then
 fi
 [ -s stt-uz.gguf ] || curl -sSL --fail -o stt-uz.gguf \
   "https://huggingface.co/cstr/stt-uz-fastconformer-hybrid-ctc-large-GGUF/resolve/main/stt-uz-fastconformer-hybrid-ctc-large-q8_0.gguf"
+# asosiy STT: rubaiSTT v2 medium Q8 (Apache-2.0) + transcribe.cpp v0.4.1 (MIT, Vulkan+CPU) - o'yin ichida DLL (BozorRubai)
+mkdir -p rubai
+if [ ! -s rubai/transcribe.dll ]; then
+  curl -sSL --fail -o rubai.tar.gz "https://github.com/handy-computer/transcribe.cpp/releases/download/v0.4.1/transcribe-native-0.4.1-windows-x86_64-cpu-vulkan.tar.gz"
+  tar -xzf rubai.tar.gz -C rubai --strip-components=1 && rm rubai.tar.gz
+  echo "c00cbe50a845003f986d3ed0ee149c08f576d0f3cc54c5346033608185a000d5  rubai/transcribe.dll" | sha256sum -c -
+fi
+if [ ! -s rubai/rubaistt.gguf ]; then
+  curl -SL --fail -o rubai/rubaistt.gguf.part "https://huggingface.co/nizom333/rubaistt-v2-medium-gguf/resolve/main/rubaistt-v2-medium-Q8_0.gguf"
+  mv rubai/rubaistt.gguf.part rubai/rubaistt.gguf
+fi
+echo "2b7a482a4272699a7f54f8c85b48ea1adaefe6a93561a39f923c01a77104d333  rubai/rubaistt.gguf" | sha256sum -c -
 echo "AI/stt tayyor"

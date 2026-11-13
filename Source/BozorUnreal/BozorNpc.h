@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/TimerHandle.h"
 #include <coroutine>
 #include "BozorNpc.generated.h"
 
@@ -102,6 +103,9 @@ struct FBozorNpcAction
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	TObjectPtr<UAnimSequence> Anim = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
+	TObjectPtr<UAnimSequence> AlternateAnim = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	bool bLoop = false;
@@ -359,8 +363,7 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
-	// MetaHuman BP (child actor) va kiyimni tana pozasiga ulaydi, NPC'ning o'z tanasini yashiradi
-	void LinkMetaHuman();
+	void LinkCharacterParts();
 	virtual void Tick(float DeltaSeconds) override;
 
 	bool IsMoving() const { return GetVelocity().SizeSquared2D() > 20.f * 20.f; }
@@ -400,6 +403,7 @@ private:
 	double BusyUntil = 0.0;
 	double SettleAt = 0.0;
 	FName SettleCategory;
+	FTimerHandle DelayedActionTimer;
 	bool bTurning = false;
 	FQuat TurnGoal = FQuat::Identity;
 	float MinWalk = 50.f;
@@ -422,6 +426,7 @@ private:
 	bool bCartTurning = false;          // manzil orqada: arava g'ildiraklari atrofida aylantirilyapti (agent kutadi)
 	bool bCartTurnFailed = false;       // aylantirib bo'lmadi (yoy yo'lida rasta/odam): WalkTo bu manzildan voz kechadi
 	float CartTurnSign = 1.f, CartTurnBest = 0.f, CartTurnStill = 0.f;
+	float RequestedWalkSpeed = 0.f;
 	int32 CartTurnTries = 0, CartTurnFails = 0;
 	void UpdateCart(float Dt);
 	FVector SteeringTarget(const class UPathFollowingComponent* PF, const FVector& From) const;
@@ -429,8 +434,7 @@ private:
 	float CapsuleHalf() const;
 
 	void StartRole();
-	void Play(FName State, float Fade = 0.3f, float Offset = 0.f);
-	void PlayMove() { Play(TEXT("Move"), 0.25f); }
+	void PlayMove(bool bCancelDelayedAction = true);
 	void Settle();
 	void StopMoving();
 	void StartWalking(const FVector& Target, float Speed);
@@ -461,6 +465,7 @@ private:
 	FBozorCo VisitStall(int32 Q, float Browse, int32 ForceBuy, bool* bOutReached);
 	FBozorCo SitAt(int32 Seat, float Time);
 	const FBozorNpcAction* PickAction(FName Category) const;
+	float PlayAction(const FBozorNpcAction& Action, float Min, float Max);
 	// ro'yxatdagi birinchi mavjud kategoriyani o'ynaydi (yangi kategoriya hali klipsiz bo'lsa eskisiga qaytadi)
 	float DoFirst(const TArray<FName>& Categories, float Min, float Max);
 	FBozorCo FollowerLoop();
@@ -468,6 +473,6 @@ private:
 	FBozorCo SitDown();
 	FBozorCo Slide(FVector From, FVector To, float Time);
 	FBozorCo TalkerLoop();
-	FBozorCo WalkTo(FVector Target, float Speed = 0.f);
+	FBozorCo WalkTo(FVector Target, float Speed = 0.f, bool* bOutReached = nullptr);
 	FBozorCo TurnTo(FVector Forward);
 };

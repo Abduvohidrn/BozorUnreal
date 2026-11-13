@@ -1,8 +1,13 @@
 #include "BozorOyinchi.h"
+#include "BozorAiMiya.h"
+#include "BozorNavoiy.h"
+#include "Sound/SoundWave.h"
 #include "BozorHud.h"
 #include "BozorNpc.h"
 #include "BozorOvoz.h"
 #include "BozorQuloq.h"
+#include "BozorSozlamalar.h"
+#include "BozorUI.h"
 
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
@@ -325,13 +330,31 @@ void ABozorOyinchi::VQoyildi()
 void ABozorOyinchi::PawnClientRestart()
 {
 	Super::PawnClientRestart();
+	KirishniYangila();
+}
+
+void ABozorOyinchi::KirishniYangila()
+{
 	if (const APlayerController* Pc = Cast<APlayerController>(GetController()))
 		if (UEnhancedInputLocalPlayerSubsystem* Sub = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(Pc->GetLocalPlayer()))
 		{
 			Sub->ClearAllMappings();
-			if (ImcDefault) Sub->AddMappingContext(ImcDefault, 0);
+			// o'yinchi sozlamalarda W/A/S/D/Probel ni o'zgartirgan bo'lsa - IMC nusxasi
+			if (ImcDefault) Sub->AddMappingContext(UBozorSozlamalar::Get()->MoslashganImc(ImcDefault), 0);
 			if (ImcMouse) Sub->AddMappingContext(ImcMouse, 0);
 		}
+}
+
+void ABozorOyinchi::TugmaBosildi(FKey Tugma)
+{
+	const UBozorSozlamalar* Sz = UBozorSozlamalar::Get();
+	if (Tugma == EKeys::Escape)
+	{
+		if (UBozorUITizimi* Ui = UBozorUITizimi::Get(this)) Ui->PauzaniAlmashtir(Cast<APlayerController>(GetController()));
+		return;
+	}
+	if (Tugma == Sz->Tugma(TEXT("Gaplashish"))) EBosildi();
+	if (Tugma == Sz->Tugma(TEXT("Qaytadan"))) RBosildi();
 }
 
 void ABozorOyinchi::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -348,10 +371,13 @@ void ABozorOyinchi::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		if (IaLook) In->BindAction(IaLook, ETriggerEvent::Triggered, this, &ABozorOyinchi::Look);
 		if (IaMouseLook) In->BindAction(IaMouseLook, ETriggerEvent::Triggered, this, &ABozorOyinchi::Look);
 	}
-	PlayerInputComponent->BindKey(EKeys::E, IE_Pressed, this, &ABozorOyinchi::EBosildi);
+	// E (Gaplashish), R (Qaytadan) sozlamalarda o'zgaradi - istalgan tugma tutilib TugmaBosildi'da solishtiriladi (Esc - pauza)
+	{
+		FInputKeyBinding& Har = PlayerInputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &ABozorOyinchi::TugmaBosildi);
+		Har.bConsumeInput = false;
+	}
 	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ABozorOyinchi::SichqonchaBosildi);
 	PlayerInputComponent->BindKey(EKeys::Enter, IE_Pressed, this, &ABozorOyinchi::EnterBosildi);
-	PlayerInputComponent->BindKey(EKeys::R, IE_Pressed, this, &ABozorOyinchi::RBosildi);
 	PlayerInputComponent->BindKey(EKeys::V, IE_Pressed, this, &ABozorOyinchi::VBosildi);
 	PlayerInputComponent->BindKey(EKeys::V, IE_Released, this, &ABozorOyinchi::VQoyildi);
 	// 1-9 raqamlari - javob variantlari (to'lovda kupyuralar ham)
@@ -373,9 +399,10 @@ void ABozorOyinchi::Move(const FInputActionValue& Value)
 
 void ABozorOyinchi::Look(const FInputActionValue& Value)
 {
-	const FVector2D V = Value.Get<FVector2D>();
+	const UBozorSozlamalar* Sz = UBozorSozlamalar::Get();
+	const FVector2D V = Value.Get<FVector2D>() * Sz->Sezgirlik;
 	AddControllerYawInput(V.X);
-	AddControllerPitchInput(V.Y);
+	AddControllerPitchInput(Sz->bTeskariY ? -V.Y : V.Y);
 }
 
 void ABozorOyinchi::Tick(float DeltaSeconds)
@@ -490,9 +517,8 @@ bool ABozorOyinchi::SuhbatniBoshla()
 	}
 	KursorniKorsat(true);
 	GetCharacterMovement()->StopMovementImmediately();
-	SotuvchiGapi = Suhbat->KutibOl();
-	GapVaqti = GetWorld()->GetTimeSeconds();
-	Chiqar(FString::Printf(TEXT("Sotuvchi (%s)"), BozorSotuv::FelNomi(R->Fel)), SotuvchiGapi, FColor::Yellow);
+	Chiqar(TEXT("Sotuvchi"), FString::Printf(TEXT("fe'li: %s"), BozorSotuv::FelNomi(R->Fel)), FColor::Yellow);
+	SotuvchiAytdi(Suhbat->KutibOl());
 	return true;
 }
 
@@ -597,18 +623,49 @@ void ABozorOyinchi::SichqonchaBosildi()
 // javob turiga mos harakat va (bor bo'lsa) yozilgan ovoz; xayrlashsa suhbat 2 s dan keyin o'zi yopiladi
 void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 {
-	SotuvchiGapi = Matn;
-	GapVaqti = GetWorld()->GetTimeSeconds();
-	Chiqar(TEXT("Sotuvchi"), Matn, FColor::Yellow);
 	ABozorNpc* V = Suhbat ? Suhbat->GetSotuvchi() : nullptr;
+	UBozorAiMiya* Miya = UBozorAiMiya::Get(this);
+	const int32 Raqam = ++MiyaSorov;
+	// bot va sotuv sinovlari tayyor gaplar bilan (natija takrorlanishi uchun); -AiSinov - sotuv sinovida AI bilan
+	static const bool bAiSinov = FParse::Param(FCommandLine::Get(), TEXT("AiSinov"));
+	// jonli ovoz (Navoiy): ekranda chiqqan yakuniy gapni o'qiydi; sinov/botda - yozilgan ovozlar (natija takrorlanishi uchun)
+	UBozorNavoiy* Navoiy = UBozorNavoiy::Get(this);
+	const bool bJonli = Navoiy && Navoiy->Tayyormi() && V && !Matn.IsEmpty() && (!bTest || bAiSinov) && !bBot;
+	AytVaqt = FPlatformTime::Seconds();
+	if (Miya && Miya->Tayyormi() && V && !Matn.IsEmpty() && (!bTest || bAiSinov) && !bBot)
+	{
+		// sotuvchi "o'ylab turadi": matn LLM'dan qaytguncha (yoki kutish vaqti tugaguncha) uch nuqta
+		SotuvchiGapi = TEXT("...");
+		GapVaqti = GetWorld()->GetTimeSeconds();
+		const FBozorSuhbatHolati& H = Suhbat->GetHolat();
+		// gapda tilga olingan mol nomlari AI javobida ham qolishi kerak
+		TArray<FString> Saqla;
+		for (const FBozorMahsulot& M : H.Mollar)
+			if (!M.Nomi.IsEmpty() && Matn.ToLower().Contains(M.Nomi.ToLower())) Saqla.AddUnique(M.Nomi);
+		TWeakObjectPtr<ABozorOyinchi> Men(this);
+		Miya->QaytaYoz(UBozorAiMiya::Shaxs(V, H.Fel), H.Munosabat, OxirgiGapim, Matn, Saqla, [Men, Raqam, Matn, bJonli](const FString& Javob, bool)
+		{
+			if (!Men.IsValid() || Men->MiyaSorov != Raqam) return;
+			Men->SotuvchiMatni(Javob);
+			if (bJonli) Men->JonliAyt(Raqam, Javob, Matn);
+		});
+	}
+	else
+	{
+		SotuvchiMatni(Matn);
+		if (bJonli) JonliAyt(Raqam, Matn, Matn);
+	}
 	if (!V) return;
+	// shu gap uchun yozilgan ovoz bo'lsa (Ovoz/unreal_eksport.py) - o'shani aytadi, umumiy salom/rahmat klipi kerak emas.
+	// Jonli ovoz bo'lsa - gap tayyor bo'lgach JonliAyt o'qiydi
+	const bool bOvozli = bJonli || ABozorSotuvchiOvozi::SayLine(V, BozorSotuv::FelNomi(Suhbat->GetHolat().Fel), Matn);
 	FName Harakat;
 	switch (Suhbat->GetOxirgiJavob())
 	{
 	case EBozorJavob::Salom:
 	case EBozorJavob::KutibOlish:
 		Harakat = TEXT("V_Greet");
-		ABozorSotuvchiOvozi::Say(V, TEXT("salom"));
+		if (!bOvozli) ABozorSotuvchiOvozi::Say(V, TEXT("salom"));
 		break;
 	case EBozorJavob::Narx:
 	case EBozorJavob::MolSora:
@@ -645,7 +702,7 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	case EBozorJavob::Xayr:
 	case EBozorJavob::XayrSotibOlmay:
 		Harakat = TEXT("V_Thanks");
-		ABozorSotuvchiOvozi::Say(V, TEXT("rahmat"));
+		if (!bOvozli) ABozorSotuvchiOvozi::Say(V, TEXT("rahmat"));
 		TugatishVaqti = GetWorld()->GetTimeSeconds() + 2.0;
 		break;
 	case EBozorJavob::Haydadi:
@@ -656,6 +713,43 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 		break;
 	}
 	if (!Harakat.IsNone()) V->Do(Harakat, 1.5f, 3.f);
+}
+
+void ABozorOyinchi::SotuvchiMatni(const FString& Matn)
+{
+	SotuvchiGapi = Matn;
+	GapVaqti = GetWorld()->GetTimeSeconds();
+	Chiqar(TEXT("Sotuvchi"), Matn, FColor::Yellow);
+	// xayrlashgan bo'lsa - gap ekranda kamida 2 s tursin (AI javobi kechroq kelgan bo'lishi mumkin)
+	if (TugatishVaqti > 0.0) TugatishVaqti = FMath::Max(TugatishVaqti, GapVaqti + 2.0);
+}
+
+void ABozorOyinchi::JonliAyt(int32 Raqam, const FString& Matn, const FString& Asl)
+{
+	ABozorNpc* V = Suhbat ? Suhbat->GetSotuvchi() : nullptr;
+	UBozorNavoiy* Navoiy = UBozorNavoiy::Get(this);
+	if (!V || !Navoiy) return;
+	const FString Fel = BozorSotuv::FelNomi(Suhbat->GetHolat().Fel);
+	// oxiridagi "[Tarozida: 2 kilo]" - o'yin belgisi, sotuvchi buni aytmaydi
+	FString Gap = Matn.TrimEnd();
+	const int32 Q = Gap.Find(TEXT("["), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+	if (Q > 0 && Gap.EndsWith(TEXT("]"))) Gap = Gap.Left(Q).TrimEnd();
+	TWeakObjectPtr<ABozorOyinchi> Men(this);
+	TWeakObjectPtr<ABozorNpc> Sotuvchi(V);
+	bJonliKutish = true;
+	const double MatnVaqt = FPlatformTime::Seconds();
+	Navoiy->Ayt(Fel, V->bFemale, Gap, [Men, Sotuvchi, Raqam, Fel, Asl, Gap, MatnVaqt](USoundWave* Ovoz)
+	{
+		if (!Men.IsValid()) return;
+		if (Men->MiyaSorov == Raqam) Men->bJonliKutish = false;
+		// orada yangi gap boshlangan yoki suhbat tugagan bo'lsa - eski ovoz aytilmaydi
+		if (!Sotuvchi.IsValid() || Men->MiyaSorov != Raqam || !Men->Suhbat || Men->Suhbat->GetSotuvchi() != Sotuvchi.Get()) return;
+		const bool bJonliAytdi = ABozorSotuvchiOvozi::SayWave(Sotuvchi.Get(), Ovoz);
+		if (!bJonliAytdi) ABozorSotuvchiOvozi::SayLine(Sotuvchi.Get(), Fel, Asl);
+		const double Hozir = FPlatformTime::Seconds();
+		UE_LOG(LogBozorOyinchi, Display, TEXT("[AiOvoz] %s: matn %.1f s + ovoz %.1f s = %.1f s kutish, gap %.1f s | %s"), bJonliAytdi ? TEXT("jonli") : TEXT("yozilgan"),
+			MatnVaqt - Men->AytVaqt, Hozir - MatnVaqt, Hozir - Men->AytVaqt, Ovoz ? Ovoz->Duration : 0.f, *Gap);
+	});
 }
 
 void ABozorOyinchi::YangiSotuvchi()
@@ -934,6 +1028,23 @@ void ABozorOyinchi::SotuvTestQadami()
 	const double T = GetWorld()->GetTimeSeconds() - TestVaqt;
 	APlayerController* Pc = Cast<APlayerController>(GetController());
 	const FString Dir = FPaths::ProjectSavedDir() / TEXT("Screenshots/SotuvTest/");
+	static const bool bAiSinov = FParse::Param(FCommandLine::Get(), TEXT("AiSinov"));
+
+	// -AiSinov: LLM va Navoiy (o'rnatilgan bo'lsa) tayyor bo'lguncha kutadi (eng ko'pi 3 daqiqa)
+	if (TestQadam == 0 && bAiSinov)
+	{
+		const double Hozir = GetWorld()->GetTimeSeconds();
+		if (TestKutishBosh < 0.0) TestKutishBosh = Hozir;
+		const UBozorAiMiya* Miya = UBozorAiMiya::Get(this);
+		const UBozorNavoiy* Navoiy = UBozorNavoiy::Get(this);
+		const bool bMiya = !UBozorAiMiya::FayllarBormi() || (Miya && Miya->Tayyormi());
+		const bool bNavoiy = !UBozorNavoiy::FayllarBormi() || (Navoiy && Navoiy->Tayyormi());
+		if (!(bMiya && bNavoiy) && Hozir - TestKutishBosh < 180.0)
+		{
+			TestVaqt = Hozir;
+			return;
+		}
+	}
 
 	if (TestQadam == 0 && T > 2.0)
 	{
@@ -967,7 +1078,12 @@ void ABozorOyinchi::SotuvTestQadami()
 	const int32 N = TestTanlovlar.Num();
 	const int32 Gap = TestQadam - 5;
 	const double GapBosh = 9.5, GapOraliq = 1.3;
-	if (bTestSuratKutib && Gap >= 0 && Gap < N && T > GapBosh + Gap * GapOraliq)
+	// AI sinovida: sotuvchi o'ylab bo'lib (matn chiqdi), ovozini aytib bo'lgach 1 s dan keyin keyingi tanlov
+	ABozorNpc* Sot = Suhbat ? Suhbat->GetSotuvchi() : nullptr;
+	const bool bBand = bJonliKutish || SotuvchiGapi == TEXT("...") || (Sot && ABozorSotuvchiOvozi::Gapiryapti(Sot));
+	if (bAiSinov && bBand) TestKeyingi = T + 1.0;
+	const bool bNavbat = bAiSinov ? (T > GapBosh && T > TestKeyingi && !bBand) : T > GapBosh + Gap * GapOraliq;
+	if (bTestSuratKutib && Gap >= 0 && Gap < N && bNavbat)
 	{
 		const TArray<FBozorTanlov> V = GetTanlovlar();
 		const int32 I = V.IndexOfByPredicate(TestTanlovlar[Gap]);
@@ -986,7 +1102,7 @@ void ABozorOyinchi::SotuvTestQadami()
 		if (TestSuratlar.IsValidIndex(Gap) && !TestSuratlar[Gap].IsEmpty()) FScreenshotRequest::RequestScreenshot(Dir + TestSuratlar[Gap], true, false);
 		++TestQadam;
 	}
-	if (Gap == N && T > GapBosh + Gap * GapOraliq - 0.6) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("4_suhbat.png"), true, false); ++TestQadam; }
+	if (Gap == N && (bAiSinov ? bNavbat : T > GapBosh + Gap * GapOraliq - 0.6)) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("4_suhbat.png"), true, false); ++TestQadam; }
 	// personajni tashqaridan ko'rish: oldiga kamera qo'yiladi, bola unga qarab yuradi
 	if (Gap == N + 1 && Pc && !bSuhbatda)
 	{

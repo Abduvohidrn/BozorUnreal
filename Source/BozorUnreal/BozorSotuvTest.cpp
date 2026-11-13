@@ -4,6 +4,15 @@
 
 #include "BozorSotuv.h"
 #include "BozorQuloq.h"
+#include "BozorAiMiya.h"
+#include "BozorRubai.h"
+#include "HAL/FileManager.h"
+#include "HAL/PlatformProcess.h"
+#include "Misc/FileHelper.h"
+#include "HttpModule.h"
+#include "HttpManager.h"
+#include "Containers/Ticker.h"
+#include "Engine/GameInstance.h"
 #include "Async/TaskGraphInterfaces.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/Paths.h"
@@ -157,6 +166,142 @@ bool FBozorQuloqTest::RunTest(const FString& Parameters)
 	const FString Matn = Natija->GetValue();
 	AddInfo(FString::Printf(TEXT("Quloq: \"%s\" (%.0f ms)"), *Matn, (FPlatformTime::Seconds() - T0) * 1000.0));
 	TestEqual(TEXT("STT matni"), Matn, FString(TEXT("Bugun tur doirasida beshta uchrashuv boʻlib oʻtadi")));
+	return true;
+}
+
+// AI miya sinovi: (1) son tekshiruvi va javobni tozalash - har doim; (2) jonli: llama-server ishga tushadi,
+// 4 xil fe'ldagi sotuvchi bir xil holatlarga javob beradi (AI/miya bo'lmasa - o'tkazib yuboriladi).
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBozorMiyaTest, "Bozor.Miya", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FBozorMiyaTest::RunTest(const FString& Parameters)
+{
+	// --- sonlar
+	TestTrue(TEXT("bir xil son"), UBozorAiMiya::SonlarMosmi(TEXT("Bir kilo 12 000 so'm."), TEXT("Kilosi 12 000, asal!")));
+	TestTrue(TEXT("bo'shliqsiz son"), UBozorAiMiya::SonlarMosmi(TEXT("7 500 so'm."), TEXT("7500. Olsangiz oling.")));
+	TestTrue(TEXT("qaytim kupyuralari"), UBozorAiMiya::SonlarMosmi(TEXT("Mana: 20 000, 5 000 va 1 000 so'm."), TEXT("Oling: 20 000, 5 000 va 1 000 so'm, bolam.")));
+	TestFalse(TEXT("son yo'qoldi"), UBozorAiMiya::SonlarMosmi(TEXT("24 000 so'm, yana 4 000 bering."), TEXT("24 000 so'm.")));
+	TestFalse(TEXT("yangi narx to'qildi"), UBozorAiMiya::SonlarMosmi(TEXT("Narxi shu."), TEXT("Pomidor 8 000 so'mdan.")));
+	TestFalse(TEXT("narx o'zgardi"), UBozorAiMiya::SonlarMosmi(TEXT("11 000 so'm qilaman."), TEXT("10 000 so'm qilaman.")));
+	TestFalse(TEXT("so'z bilan son to'qildi"), UBozorAiMiya::SonlarMosmi(TEXT("Bundan arzoni yo'q. 11 500 so'm."), TEXT("11 500 so'm - asal! O'n mingdan bering!")));
+	TestTrue(TEXT("so'z bilan son yo'q"), UBozorAiMiya::SonlarMosmi(TEXT("Narxi shu."), TEXT("Narxi shu, bolam, yaxshi mol.")));
+	// --- tozalash
+	FBozorShaxs K;
+	K.Ism = TEXT("Gulnora opa");
+	TestEqual(TEXT("qo'shtirnoq va prefiks"), UBozorAiMiya::Tozala(TEXT("Sen: \"qani, 7500 so'm!\""), K), FString(TEXT("Qani, 7 500 so'm!")));
+	TestEqual(TEXT("o'z ismi - yaroqsiz"), UBozorAiMiya::Tozala(TEXT("Gulnora opa sizga aytadi: 5 000."), K), FString());
+	TestEqual(TEXT("ikkinchi qator tashlanadi"), UBozorAiMiya::Tozala(TEXT("Mana, 2 kilo.\nIzoh: bu gap..."), K), FString(TEXT("Mana, 2 kilo.")));
+	TestEqual(TEXT("kasr son buzilmaydi"), UBozorAiMiya::Tozala(TEXT("1,5 kilo - 18000 so'm."), K), FString(TEXT("1,5 kilo - 18 000 so'm.")));
+
+	// --- jonli
+	if (!UBozorAiMiya::FayllarBormi())
+	{
+		AddWarning(TEXT("AI/miya yo'q - jonli qism o'tkazib yuborildi"));
+		return true;
+	}
+	UGameInstance* Gi = NewObject<UGameInstance>(GetTransientPackage());
+	Gi->AddToRoot();
+	UBozorAiMiya* M = NewObject<UBozorAiMiya>(Gi);
+	auto Kut = [](TFunctionRef<bool()> Shart, double Sekund)
+	{
+		const double T0 = FPlatformTime::Seconds();
+		double Oldin = T0;
+		while (!Shart() && FPlatformTime::Seconds() - T0 < Sekund)
+		{
+			const double H = FPlatformTime::Seconds();
+			FHttpModule::Get().GetHttpManager().Tick(float(H - Oldin));
+			FTSTicker::GetCoreTicker().Tick(float(H - Oldin));
+			FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GameThread);
+			Oldin = H;
+			FPlatformProcess::Sleep(0.02f);
+		}
+		return Shart();
+	};
+	M->Boshla();
+	const double T0 = FPlatformTime::Seconds();
+	if (!Kut([M] { return M->Tayyormi(); }, 120.0))
+	{
+		M->Toxtat();
+		Gi->RemoveFromRoot();
+		AddError(TEXT("llama-server 120 s da tayyor bo'lmadi (Saved/Miya/server.log)"));
+		return false;
+	}
+	AddInfo(FString::Printf(TEXT("Server tayyor: %.1f s"), FPlatformTime::Seconds() - T0));
+
+	struct FHolat { EBozorFel Fel; int32 Munosabat; const TCHAR* Bola; const TCHAR* Mano; };
+	const FHolat Holatlar[] = {
+		{EBozorFel::Mehribon, 60, TEXT("Assalomu alaykum!"), TEXT("Va alaykum assalom, bolam! Keling, nima kerak? Bizda pomidor, bodring bor.")},
+		{EBozorFel::Qattiq, 50, TEXT("pomidor necha pul"), TEXT("Bir kilo pomidor 12 000 so'm.")},
+		{EBozorFel::Shoshqaloq, 50, TEXT("ikki kilo torting"), TEXT("Mana, 2 kilo pomidor. Jami 24 000 so'm bo'ldi.")},
+		{EBozorFel::Ayyor, 50, TEXT("qimmat ekan, o'n mingdan bering"), TEXT("Bundan arzoni yo'q. 11 500 so'm.")},
+		{EBozorFel::Mehribon, 60, TEXT("mana ellik ming"), TEXT("Rahmat! Mana qaytimingiz: 20 000, 5 000 va 1 000 so'm.")},
+		{EBozorFel::Qattiq, 20, TEXT("hoy tez bo'l pomidor ber"), TEXT("Kattalarga odob bilan gapirish kerak. Narxi shu.")},
+	};
+	int32 Ai = 0;
+	for (const FHolat& H : Holatlar)
+	{
+		FBozorShaxs Kim = UBozorAiMiya::Shaxs(nullptr, H.Fel);
+		TSharedRef<TOptional<TPair<FString, bool>>> J = MakeShared<TOptional<TPair<FString, bool>>>();
+		const double T1 = FPlatformTime::Seconds();
+		M->QaytaYoz(Kim, H.Munosabat, H.Bola, H.Mano, {}, [J](const FString& Matn, bool bAi) { *J = TPair<FString, bool>(Matn, bAi); });
+		if (!Kut([J] { return J->IsSet(); }, 30.0)) { AddError(FString::Printf(TEXT("javob kelmadi: %s"), H.Mano)); continue; }
+		const TPair<FString, bool>& R = J->GetValue();
+		Ai += R.Value ? 1 : 0;
+		TestTrue(TEXT("sonlar mos"), UBozorAiMiya::SonlarMosmi(H.Mano, R.Key));
+		AddInfo(FString::Printf(TEXT("%s %.0f ms [%s] %s -> %s"), R.Value ? TEXT("AI") : TEXT("tayyor"), (FPlatformTime::Seconds() - T1) * 1000.0,
+			BozorSotuv::FelNomi(H.Fel), H.Mano, *R.Key));
+	}
+	AddInfo(FString::Printf(TEXT("AI javoblari: %d/%d"), Ai, UE_ARRAY_COUNT(Holatlar)));
+	M->Toxtat();
+	Gi->RemoveFromRoot();
+	return true;
+}
+
+
+// STT taqqoslash: Saved/Quloq/*.wav (o'yinda mikrofon bilan yozilganlar) yoki AI/stt/sinov/*.wav ni ikkala model bilan taniydi.
+// Natija: Saved/Quloq/taqqos.tsv (fayl, FastConformer, ms, rubaiSTT, ms). Haqiqiy gapni qo'lda yonma-yon yozib, xatolarni solishtiring
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBozorSttTaqqosTest, "Bozor.SttTaqqos", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FBozorSttTaqqosTest::RunTest(const FString& Parameters)
+{
+	const FString Stt = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("AI/stt"));
+	TArray<FString> Fayllar;
+	for (const FString& Papka : { FPaths::ProjectSavedDir() / TEXT("Quloq"), FPaths::ProjectDir() / TEXT("AI/stt/sinov") })
+	{
+		TArray<FString> F;
+		IFileManager::Get().FindFiles(F, *(Papka / TEXT("*.wav")), true, false);
+		for (const FString& X : F) Fayllar.Add(FPaths::ConvertRelativePathToFull(Papka / X));
+	}
+	if (Fayllar.IsEmpty() || !BozorRubai::Bormi() || !FPaths::FileExists(Stt / TEXT("crispasr.exe")))
+	{
+		AddWarning(TEXT("yozuvlar, AI/stt/rubai yoki crispasr yo'q - o'tkazib yuborildi"));
+		return true;
+	}
+	Fayllar.Sort();
+	double T0 = FPlatformTime::Seconds();
+	if (!BozorRubai::Yukla()) { AddError(TEXT("rubaiSTT yuklanmadi (logda LogBozorRubai)")); return false; }
+	AddInfo(FString::Printf(TEXT("rubaiSTT yuklandi: %.1f s"), FPlatformTime::Seconds() - T0));
+	FString Tsv = TEXT("fayl\tFastConformer\tms\trubaiSTT\tms\n");
+	const FString Vaqtinchalik = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Quloq/_taqqos"));
+	for (const FString& Fayl : Fayllar)
+	{
+		T0 = FPlatformTime::Seconds();
+		int32 Kod = -1;
+		FString Chiqdi, Xato, A;
+		IFileManager::Get().Delete(*(Vaqtinchalik + TEXT(".txt")), false, true, true);
+		FPlatformProcess::ExecProcess(*(Stt / TEXT("crispasr.exe")), *FString::Printf(TEXT("--backend fastconformer-ctc -m \"%s\" -f \"%s\" -t 4 -nt -ng -np --lid-backend off --no-punctuation -otxt -of \"%s\""),
+			*(Stt / TEXT("stt-uz.gguf")), *Fayl, *Vaqtinchalik), &Kod, &Chiqdi, &Xato, *Stt);
+		FFileHelper::LoadFileToString(A, *(Vaqtinchalik + TEXT(".txt")));
+		A.TrimStartAndEndInline();
+		const double MsA = (FPlatformTime::Seconds() - T0) * 1000.0;
+		T0 = FPlatformTime::Seconds();
+		TArray<float> Pcm;
+		bool bOk = false;
+		const FString B = BozorRubai::WavOqi(Fayl, Pcm) ? BozorRubai::Tanit(Pcm, bOk) : FString(TEXT("(WAV emas)"));
+		const double MsB = (FPlatformTime::Seconds() - T0) * 1000.0;
+		AddInfo(FString::Printf(TEXT("%s (%.1f s) | FastConformer %.0f ms: %s | rubaiSTT %.0f ms: %s"), *FPaths::GetCleanFilename(Fayl), Pcm.Num() / 16000.f, MsA, *A, MsB, *B));
+		Tsv += FString::Printf(TEXT("%s\t%s\t%.0f\t%s\t%.0f\n"), *FPaths::GetCleanFilename(Fayl), *A, MsA, *B, MsB);
+	}
+	FFileHelper::SaveStringToFile(Tsv, *(FPaths::ProjectSavedDir() / TEXT("Quloq/taqqos.tsv")), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
 	return true;
 }
 

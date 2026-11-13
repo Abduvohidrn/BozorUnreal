@@ -7,6 +7,7 @@
 class ABozorNpc;
 class UAudioComponent;
 class USoundBase;
+class USoundWave;
 
 // Rastadagi ovoz nuqtasi: rekvizit (tarozi, qop, idish) yoki sotuvchining kassasi. Kinds - shu nuqtada chalinadigan turlar
 USTRUCT(BlueprintType)
@@ -180,6 +181,20 @@ public:
 
 	static void Say(ABozorNpc* Vendor, FName Kind, float Chance = 1.f);
 
+	// O'yinchi bilan suhbatda sotuvchi aytgan gapni ovozlashtiradi (Content/Bozor/Data/ovoz_gaplar.json,
+	// /Game/Bozor/Audio/Dialog/dlg_<fel>_<jins>_<nnn>; BozorKit_hammasi/Ovoz/yarat_bolak.py yaratadi).
+	// Har ovoz (fe'l + jins) - gap shablonlarining bo'laklari va atomlar (raqam so'zlari, mol nomlari, birliklar).
+	// Matn normallanadi (kichik harf, apostrof, raqam -> so'z, "1,5" -> "bir yarim") va iboralar bilan eng uzun
+	// moslik bo'yicha to'liq qoplansa, kliplar sotuvchi og'zidan ketma-ket chalinadi (chaqiriqni to'xtatib), true.
+	// Qoplanmasa false - chaqiruvchi odatdagi Say(salom/rahmat) ga qaytadi.
+	static bool SayLine(ABozorNpc* Vendor, const FString& Fel, const FString& Matn);
+	static FString NormalGap(const FString& Matn);
+	// Jonli ovoz (UBozorNavoiy): tayyor tovushni sotuvchi og'zidan chaladi (chaqiriqni to'xtatib); so'nish/ducking
+	// sozlamalari yozilgan kliplardan olinadi
+	static bool SayWave(ABozorNpc* Vendor, USoundWave* Ovoz);
+	// sotuvchi hozir gapiryaptimi (sinovlar uchun)
+	static bool Gapiryapti(ABozorNpc* Vendor);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	TArray<TObjectPtr<USoundBase>> Clips;
 
@@ -244,7 +259,9 @@ private:
 		double NextTime = 0.0;
 		USoundBase* Last = nullptr;
 		bool bCall = false;
+		TArray<USoundBase*> Navbat;   // suhbat gapining keyingi bo'laklari
 	};
+	void BolakTugadi(UAudioComponent* Src);
 
 	bool TrySay(ABozorNpc* Vendor, FName Kind);
 	FVoice& Get(ABozorNpc* Vendor);
@@ -257,6 +274,21 @@ private:
 
 	static TWeakObjectPtr<ABozorSotuvchiOvozi> Instance;
 	TMap<FString, TArray<USoundBase*>> ByKey;
+
+	struct FDialogOvoz
+	{
+		TMap<FString, FSoftObjectPath> Iboralar;   // NormalGap(ibora) -> klip
+		int32 EngUzun = 1;                          // eng uzun ibora, so'zda
+	};
+	void LoadDialog();
+	void DialogTest();
+	// Matnni ovozning iboralari bilan qoplaydi (chapdan, eng uzun moslik); bo'lmasa bo'sh
+	bool Qopla(const FDialogOvoz& Ovoz, const FString& Normal, TArray<FSoftObjectPath>& Out) const;
+	TMap<FString, FDialogOvoz> Dialog;   // "fel ayol" / "fel erkak" -> iboralar
+	TArray<TPair<FString, FString>> DialogSinov;   // (fel, gap) - -OvozTest uchun namunaviy gaplar
+	UPROPERTY(Transient) TArray<TObjectPtr<USoundBase>> DialogLoaded;   // GC ushlab tursin
+	UPROPERTY(Transient) TArray<TObjectPtr<USoundWave>> Jonli;          // oxirgi jonli gaplar (GC ushlab tursin)
+	FTimerHandle JonliTugash;
 	TMap<TWeakObjectPtr<ABozorNpc>, FVoice> Voices;
 	TArray<TWeakObjectPtr<ABozorNpc>> Vendors;
 	int32 FemaleCount = 0, MaleCount = 0;

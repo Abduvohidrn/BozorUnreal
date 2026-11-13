@@ -12,13 +12,6 @@ const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7ffffff
 const pick = (a) => a[Math.floor(rnd() * a.length)];
 const range = (lo, hi) => Math.round((lo + rnd() * (hi - lo)) * 10) / 10;
 
-// ---- persona: tanaga qarab (MetaHuman tanasi = yosh/jins)
-const PERSONA_BY_BODY = {
-  SKM_MH_KeksaOtaxon_BodyMesh: "keksa_ota", SKM_MH_DehqonOta_BodyMesh: "keksa_ota", SKM_MH_KeksaMomo_BodyMesh: "keksa_momo",
-  SKM_MH_Onaxon_BodyMesh: "ona", SKM_MH_XaridorAyol_BodyMesh: "ona", SKM_MH_YoshSotuvchiQiz_BodyMesh: "qiz", SKM_MH_Bosh_02_BodyMesh: "qiz",
-  SKM_MH_TalabaYigit_BodyMesh: "yigit", SKM_MH_YoshDehqon_BodyMesh: "yigit", SKM_MH_AravakashYigit_BodyMesh: "hammol",
-  SKM_MH_ZamonaviyXaridor_BodyMesh: "erkak", SKM_MH_OrtaYoshliSotuvchi_BodyMesh: "erkak", SKM_MH_KochaSavdogari_BodyMesh: "erkak",
-};
 // tezlik sm/s (tadqiqot 1.4: xaridor 70-100, yo'lovchi 110-140, hammol 130-150, keksa sekin)
 const SPEED = { keksa_ota: [62, 75], keksa_momo: [58, 70], ona: [80, 92], qiz: [88, 100], yigit: [95, 110], erkak: [88, 102], hammol: [130, 145] };
 
@@ -208,7 +201,7 @@ function hammolScript(k) {
 const out = { izoh: "Har NPC: persona, tezlik, boshlanish kechikishi, o'z animatsiyalari va qadamlar. Qadam turlari: GoTo, Anim, Face, Greet, Stall, Sit, Wait (npc_ssenariy_rejasi.md 3-bo'lim). Koordinatalar sm (Unreal).", npcs: {} };
 let wk = 0, hk = 0, ck = 0;
 for (const n of S.npcs) {
-  const persona = PERSONA_BY_BODY[n.body] || (n.female ? "ona" : "erkak");
+  const persona = n.persona || (n.female ? "ona" : "erkak");
   const e = { persona, actions: {} };
   if (n.role === "SOTUVCHI") {
     const kind = persona.startsWith("keksa") ? "keksa" : n.female ? "ayol" : "erkak";

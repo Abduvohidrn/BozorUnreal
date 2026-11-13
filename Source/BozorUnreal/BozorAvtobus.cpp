@@ -409,6 +409,7 @@ void ABozorAvtobusIntro::OyinchiniQoyibYubor(bool bBoshqaruv)
 	ACharacter* C = Oyinchi.Get();
 	if (!C) return;
 	UCharacterMovementComponent* Cm = C->GetCharacterMovement();
+	Cm->StopMovementImmediately();
 	Cm->SetMovementMode(MOVE_Walking);
 	Cm->MaxFlySpeed = 600.f;
 	C->SetActorEnableCollision(true);
@@ -430,7 +431,7 @@ FVector ABozorAvtobusIntro::TushishOxiri(ACharacter* C) const
 	FHitResult Hit;
 	FCollisionQueryParams Q(SCENE_QUERY_STAT(BozorAvtobus), true, C);
 	Q.AddIgnoredActor(Avtobus);
-	const float YerZ = GetWorld()->LineTraceSingleByChannel(Hit, Yolak + FVector(0, 0, 200), Yolak - FVector(0, 0, 300), ECC_Visibility, Q)
+	const float YerZ = GetWorld()->LineTraceSingleByChannel(Hit, Yolak + FVector(0, 0, 55), Yolak - FVector(0, 0, 160), ECC_Pawn, Q)
 		? Hit.ImpactPoint.Z : Bt.GetLocation().Z;
 	return FVector(Yolak.X, Yolak.Y, YerZ + Half + 3.f);
 }
@@ -599,16 +600,21 @@ void ABozorAvtobusIntro::Tick(float Dt)
 		if (T > EshikKutish.Y + (bTest && !bKinoKadr ? 0.8f : 0.f))
 		{
 			if (TestKamera && Pc.IsValid()) Pc->SetViewTarget(Oyinchi.Get());
-			// tushish yo'li: eshik ostonasi (pol sathida) -> yo'lak. Hammasi dunyo koordinatasida
+			// Avtobus polida ostonagacha yuradi, keyin platformaga qadam qo'yadi.
 			ACharacter* C = Oyinchi.Get();
 			if (!C) { Bosqich(EBosqich::Ketish); break; }
 			C->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			const float Half = C->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 			const FTransform Bt = AvtobusTransform();
+			const FVector Oxiri = TushishOxiri(C);
+			const FVector Ostonasi = Bt.TransformPosition(EshikMahalliy + FVector(0.f, 0.f, PolBalandligi + Half + 2.f));
+			const float PlatformagaQadam = YolakkaMasofa * 0.7f;
+			FVector BirinchiQadam = Bt.TransformPosition(EshikMahalliy + FVector(0.f, PlatformagaQadam, 0.f));
+			BirinchiQadam.Z = Oxiri.Z;
 			TushishYoli = {
-				Bt.TransformPosition(EshikMahalliy + FVector(0.f, -10.f, PolBalandligi + Half + 2.f)),
-				Bt.TransformPosition(EshikMahalliy + FVector(0.f, 45.f, PolBalandligi * 0.5f + Half + 2.f)),
-				TushishOxiri(C),
+				Ostonasi,
+				BirinchiQadam,
+				Oxiri,
 			};
 			UCharacterMovementComponent* Cm = C->GetCharacterMovement();
 			Cm->SetMovementMode(MOVE_Flying);   // tortishishsiz: zinadan tushishni yo'l o'zi beradi
@@ -626,28 +632,45 @@ void ABozorAvtobusIntro::Tick(float Dt)
 		APlayerController* P = Pc.Get();
 		if (!C || TushishQadam >= TushishYoli.Num() || T > 8.0)
 		{
+			if (C && TushishQadam < TushishYoli.Num())
+			{
+				UE_LOG(LogBozorAvtobus, Warning, TEXT("[Avtobus] tushish yo'li to'sildi: platformaga o'tkazildi"));
+				C->SetActorLocation(TushishYoli.Last(), false, nullptr, ETeleportType::TeleportPhysics);
+			}
 			OyinchiniQoyibYubor(!bKinoKadr);
 			Eshiklar(false);
 			Bosqich(EBosqich::Ketish);
 			if (bKinoKadr) Kadr(3);
 			break;
 		}
-		const FVector D = TushishYoli[TushishQadam] - C->GetActorLocation();
-		if (D.Size() < 12.f)
-		{
-			++TushishQadam;
-			if (TushishQadam == TushishYoli.Num()) Surat(TEXT("3_bekatda.png"));
-			break;
-		}
-		// AddMovementInput -> CharacterMovement tezlanish beradi, AnimBP yurish animatsiyasini o'ynaydi
-		C->AddMovementInput(D.GetSafeNormal(), 1.f, true);
+		const FVector Chiqish = AvtobusTransform().GetUnitAxis(EAxis::Y);
+		const FRotator Maqsad(-12.f, Chiqish.Rotation().Yaw, 0.f);
 		if (P)
 		{
 			const FRotator Hozir = P->GetControlRotation();
-			FRotator Maqsad = FVector(D.X, D.Y, 0.f).Rotation();
-			Maqsad.Pitch = -8.f;
-			P->SetControlRotation(FMath::RInterpTo(Hozir, Maqsad, Dt, 3.f));
+			P->SetControlRotation(FMath::RInterpConstantTo(Hozir, Maqsad, Dt, 300.f));
+			if (TushishQadam == 0 && FMath::Abs(FMath::FindDeltaAngleDegrees(Hozir.Yaw, Maqsad.Yaw)) > 8.f) break;
 		}
+
+		const FVector D = TushishYoli[TushishQadam] - C->GetActorLocation();
+		const bool bOxirgiQadam = TushishQadam == TushishYoli.Num() - 1;
+		const float Qolgan = FVector::DotProduct(D, Chiqish);
+		if (D.SizeSquared() < FMath::Square(8.f) || (!bOxirgiQadam && Qolgan <= 0.f && FMath::Abs(D.Z) < 10.f))
+		{
+			++TushishQadam;
+			if (bOxirgiQadam)
+			{
+				C->GetCharacterMovement()->StopMovementImmediately();
+				UE_LOG(LogBozorAvtobus, Display, TEXT("[Avtobus] bola platformaga tushdi: %s"), *C->GetActorLocation().ToString());
+				Surat(TEXT("3_bekatda.png"));
+			}
+			break;
+		}
+		// Oxirgi qadamda sekinlashadi; tezlanishni AnimBP yurish uchun ishlatadi.
+		C->GetCharacterMovement()->MaxFlySpeed = bOxirgiQadam
+			? FMath::Clamp(D.Size() * 4.f, FMath::Min(45.f, TushishTezligi), TushishTezligi)
+			: TushishTezligi;
+		C->AddMovementInput(D.GetSafeNormal(), 1.f, true);
 		break;
 	}
 

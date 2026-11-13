@@ -10,6 +10,7 @@ O'ng tomonlama harakat: avtobus +Y ga yuradi, o'ng eshiklari g'arbga (bekatga) q
 
 Commandlet: UnrealEditor-Cmd.exe BozorUnreal.uproject -run=pythonscript -script=Scripts/bekat_yangila.py
 """
+import math
 import os
 
 import unreal
@@ -250,12 +251,133 @@ def place(world, log, mats):
     if raqam:
         intro.set_editor_property("raqam_material", raqam)
     unreal.BozorLevelTools.rerun_construction(intro)
+    boarding_platform(log)
     zebra(mats["MI_Zebra"], log)
     log("bekat: joylandi - bekat", bekat.get_actor_location(), "avtobus", bus.get_actor_location())
 
 
+def remove_curb_segments(road_edges, y_min, y_max):
+    street = topish("Bozor_Kocha")
+    if not street:
+        raise RuntimeError("Bozor_Kocha topilmadi")
+    removed = 0
+    for component in street.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        curb = component.static_mesh
+        if not curb or "Bordyur" not in curb.get_name():
+            continue
+        bounds = curb.get_bounding_box()
+        center = (bounds.min + bounds.max) * 0.5
+        indices = []
+        for i in range(component.get_instance_count()):
+            point = component.get_instance_transform(i, True).transform_location(center)
+            if y_min < point.y < y_max and any(abs(point.x - edge) < 30 for edge in road_edges):
+                indices.append(i)
+        if indices:
+            street.modify()
+            component.modify()
+            for i in reversed(indices):
+                if not component.remove_instance(i):
+                    raise RuntimeError(f"Bordyur segmenti olib tashlanmadi: {i}")
+            removed += len(indices)
+    return removed
+
+
+def boarding_platform(log):
+    """Replace the raised traffic curb at the stop with a continuous landing pad."""
+    removed = remove_curb_segments((-1400,), ZEBRA_Y[1], TOXTASH.y + 750)
+    cube = unreal.load_asset("/Engine/BasicShapes/Cube")
+    concrete = platform_concrete()
+    if not cube or not concrete:
+        raise RuntimeError("Bekat platformasi materiali yoki meshi topilmadi")
+
+    def slab(label, x, y, z, length, width, thickness, pitch=0.0, yaw=0.0):
+        location = unreal.Vector(x, y, z)
+        rotation = unreal.Rotator(0, pitch, yaw)
+        actor = topish(label) or spawn(unreal.StaticMeshActor, location, rotation, label)
+        actor.modify()
+        actor.set_actor_location_and_rotation(location, rotation, False, True)
+        component = actor.static_mesh_component
+        component.modify()
+        component.set_static_mesh(cube)
+        component.set_world_scale3d(unreal.Vector(length / 100, width / 100, thickness / 100))
+        component.set_material(0, concrete)
+        component.set_collision_profile_name("BlockAll")
+
+    y = TOXTASH.y
+    height, thickness = 14.0, 20.0
+    slab("Bekat_Chiqqish_Platformasi", -1490, y + 50, height - thickness / 2, 180, 1100, thickness)
+    ramp_run = 120.0
+    slope = math.degrees(math.atan2(height, ramp_run))
+    ramp_length = math.hypot(height, ramp_run) + 2
+    ramp_z = height / 2 - thickness / 2
+    slab("Bekat_Platforma_Yolak", -1640, y + 50, ramp_z, ramp_length, 1100, thickness, slope)
+    slab("Bekat_Platforma_Janub", -1490, y - 560, ramp_z, ramp_length, 180, thickness, slope, 90)
+    slab("Bekat_Platforma_Shimol", -1490, y + 660, ramp_z, ramp_length, 180, thickness, slope, -90)
+    orient_boarding_bench(topish("Bozor_Kocha"), log)
+    log("bekat: platforma, eski bordyur segmentlari olib tashlandi:", removed)
+
+
+def platform_concrete():
+    """Map concrete in world space so the platform and ramps share the same texel scale."""
+    name = "M_BekatPlatformaBeton"
+    material = load(ROOT + "/" + name)
+    if material:
+        return material
+
+    aligned_texture = load("/Engine/Functions/Engine_MaterialFunctions01/Texturing/WorldAlignedTexture")
+    albedo = load("/Game/Bozor/Textures/T_M_Beton_BaseColor")
+    if not aligned_texture or not albedo:
+        raise RuntimeError("Platforma betoni uchun material manbasi topilmadi")
+
+    material = asset_tools.create_asset(name, ROOT, unreal.Material, unreal.MaterialFactoryNew())
+    nodes = unreal.MaterialEditingLibrary
+    tex = nodes.create_material_expression(material, unreal.MaterialExpressionTextureObject, -600, -100)
+    tex.set_editor_property("texture", albedo)
+    tile = nodes.create_material_expression(material, unreal.MaterialExpressionConstant3Vector, -600, 120)
+    tile.set_editor_property("constant", unreal.LinearColor(200, 200, 200, 1))
+    mapping = nodes.create_material_expression(material, unreal.MaterialExpressionMaterialFunctionCall, -320, -100)
+    mapping.set_material_function(aligned_texture)
+    roughness = nodes.create_material_expression(material, unreal.MaterialExpressionConstant, -220, 160)
+    roughness.set_editor_property("r", 0.85)
+    assert nodes.connect_material_expressions(tex, "", mapping, "TextureObject")
+    assert nodes.connect_material_expressions(tile, "", mapping, "TextureSize")
+    assert nodes.connect_material_property(mapping, "XYZ Texture", unreal.MaterialProperty.MP_BASE_COLOR)
+    assert nodes.connect_material_property(roughness, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    nodes.recompile_material(material)
+    if not eal.save_loaded_asset(material):
+        raise RuntimeError("Platforma betoni saqlanmadi")
+    return material
+
+
+def orient_boarding_bench(street, log):
+    """Turn the standalone stop bench around its mesh centre."""
+    for component in street.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        mesh_asset = component.static_mesh
+        if not mesh_asset or "Skameyka" not in mesh_asset.get_name():
+            continue
+        box = mesh_asset.get_bounding_box()
+        center = (box.min + box.max) * 0.5
+        for index in range(component.get_instance_count()):
+            transform = component.get_instance_transform(index, True)
+            world_center = transform.transform_location(center)
+            if abs(world_center.x + 1600) > 40 or not TOXTASH.y + 150 < world_center.y < TOXTASH.y + 650:
+                continue
+            rotation = transform.rotation.rotator()
+            if abs(rotation.yaw) < 0.1:
+                return
+            street.modify()
+            component.modify()
+            transform.rotation = unreal.Rotator(rotation.roll, rotation.pitch, 0).quaternion()
+            transform.translation += world_center - transform.transform_location(center)
+            if not component.update_instance_transform(index, transform, True, True, True):
+                raise RuntimeError("Bekat skameykasi burilmadi")
+            log("bekat: skameyka markazi atrofida burildi", world_center)
+            return
+
+
 def zebra(mat, log):
     """Bekatdan bozor darvozasiga piyodalar o'tish joyi: yo'l bo'ylab cho'zilgan oq tasmalar (kub, kolliziyasiz), yo'ldan 1.6 sm baland."""
+    log("bekat: zebra yo'lidagi bordyurlar olib tashlandi:", remove_curb_segments((-1400, -400), *ZEBRA_Y))
     kub = unreal.load_asset("/Engine/BasicShapes/Cube")
     uzun = ZEBRA_Y[1] - ZEBRA_Y[0]
     for i, x in enumerate(ZEBRA_X):

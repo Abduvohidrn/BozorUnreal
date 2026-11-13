@@ -256,7 +256,6 @@ def butchers(world, log, mgr, xs):
     for a in actors.get_all_level_actors():
         if str(a.get_folder_path()).startswith(FOLDER) or str(a.get_folder_path()).startswith("NPC/" + FOLDER):
             actors.destroy_actor(a)
-    abp = load(bozor_npc.ABP).generated_class()
     queues = [q for q in mgr.get_editor_property("queues") if q.stall < STALL0 and q.vendor]
     yaw = -90.0                  # yuzi -Y (kirish va xaridorlar tomonga)
     for k, x0 in enumerate(xs):
@@ -266,8 +265,7 @@ def butchers(world, log, mgr, xs):
         a.set_actor_label("Qassob_%02d" % (k + 1))
         a.set_folder_path("NPC/" + FOLDER)
         m = a.get_editor_property("mesh")
-        m.set_editor_property("skeletal_mesh_asset", load("%s/Characters/%s" % (ROOT, char)))
-        m.set_editor_property("anim_class", abp)
+        bozor_npc.cit_dress(a, m, *bozor_npc.cit_parts(char, "Sotuvchi", k))
         m.set_editor_property("enable_update_rate_optimizations", True)
         a.set_editor_property("npc_role", unreal.BozorRole.SOTUVCHI)
         a.set_editor_property("female", female)

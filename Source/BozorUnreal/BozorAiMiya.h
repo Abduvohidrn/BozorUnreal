@@ -20,6 +20,7 @@ struct FBozorShaxs
 	int32 Yosh = 45;
 	bool bAyol = false;
 	EBozorFel Fel = EBozorFel::Mehribon;
+	FBozorXulq Xulq;   // xulq.json dagi shaxsiy xulq-atvor (bo'lsa promptda fe'ldan ustun)
 };
 
 UCLASS()
@@ -38,14 +39,28 @@ public:
 	// AI fayllari joyidami
 	static bool FayllarBormi();
 
-	// sotuvchining shaxsi: jinsi va yoshi NPC'dan, ismi NPC nomidan (har o'yinda bir xil)
+	// sotuvchining shaxsi: jinsi NPC'dan; ismi, yoshi va xulqi xulq.json dan (bo'lmasa NPC nomidan, har o'yinda bir xil)
 	static FBozorShaxs Shaxs(const ABozorNpc* Npc, EBozorFel Fel);
 
 	// Mano (tayyor gap) ni shu sotuvchi uslubida qayta yozadi. Tayyor o'yin oqimida chaqiriladi:
 	// bAi=false - LLM javob bermadi, kechikdi yoki son xato (Matn = Mano).
 	// Saqla - javobda albatta qolishi kerak bo'lgan so'zlar (mol nomlari). Oxiridagi "[Tarozida: ...]" LLM'ga berilmaydi, qayta qo'shiladi
+	// BolaOdob - bolaning shu gapi: -1 qo'pol, 1 odobli (UBozorSuhbat::GetOxirgiOdob) - sotuvchi o'z fe'lida munosabat bildiradi
 	void QaytaYoz(const FBozorShaxs& Kim, int32 Munosabat, const FString& BolaGapi, const FString& Mano, const TArray<FString>& Saqla,
-		TFunction<void(const FString& Matn, bool bAi)> Tayyor);
+		TFunction<void(const FString& Matn, bool bAi)> Tayyor, int32 BolaOdob = 0);
+
+	// Erkin suhbat (ovozli chat kabi): bola savdodan tashqari gap aytdi yoki savol berdi ("qayerdansiz?", "charchadingizmi?") -
+	// sotuvchi o'z shaxsida, suhbat tarixini bilib javob beradi. Pul hisobi yo'q: javobda son/narx bo'lsa rad etiladi
+	// (Zaxira qaytadi, bAi=false). Mollar - rastadagi mollar ("bodring, kartoshka"), gapni savdoga qaytarish uchun
+	void Suhbatlash(const FBozorShaxs& Kim, int32 Munosabat, const TArray<TPair<FString, FString>>& Tarix, const FString& BolaGapi,
+		const FString& Mollar, const FString& Zaxira, TFunction<void(const FString& Matn, bool bAi)> Tayyor);
+
+	// Bolaning gapini TUSHUNISH (ovozli savdo): LLM suhbat holatini (mollar, bosqich, narx, sotuvchining oxirgi gapi) bilib,
+	// gapdan niyatni JSON sxema bo'yicha ajratadi -> FBozorTushuncha. Kalit so'z bilan tushunilgani (Kalit) bilan birlashtiriladi:
+	// sonlar kalit so'zdan ishonchliroq (LLM son to'qishi mumkin), qo'pollik ikkalasidan, niyat - LLM'dan (u "boshqa" desa - kalitdan).
+	// bOk=false - LLM javob bermadi/kechikdi: Kalit qaytadi
+	void Tushun(const FString& BolaGapi, const FBozorSuhbatHolati& Holat, const FString& SotuvchiOxirgiGapi, const FBozorTushuncha& Kalit,
+		TFunction<void(const FBozorTushuncha& T, bool bOk)> Tayyor);
 
 	// serverni qo'lda boshlash/to'xtatish (Bozor.Miya sinovi uchun; o'yinda Initialize/Deinitialize qiladi)
 	bool Boshla();

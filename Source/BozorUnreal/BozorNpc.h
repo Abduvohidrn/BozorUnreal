@@ -314,6 +314,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	int32 WalkStyle = -1;
 
+	// ayolmi: bFemale yoki ayol yurishi (keksa ayolda bFemale ba'zan false) - ovoz va shaxs shu bo'yicha
+	bool Ayolmi() const { return bFemale || WalkStyle == 1 || WalkStyle == 3; }
+
 	// sm/s
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	float WalkSpeed = 85.f;

@@ -195,6 +195,10 @@ private:
 	double GapVaqti = -100.0, XabarVaqti = -100.0;
 	double TugatishVaqti = -1.0;   // xayrlashgandan keyin suhbat o'zi yopiladigan payt
 	int32 MiyaSorov = 0;           // AI miyaga oxirgi so'rov raqami (eskisining javobi kelsa - tashlanadi)
+	// ovozli chat: o'yinchi gapira boshladi (qo'lsiz rejim) - sotuvchi gapirayotgan bo'lsa, gapi bo'linadi
+	void GapBoshlandi();
+	// shu suhbatning tarixi (bola gapi, sotuvchi javobi) - erkin suhbatda LLM oldingi gaplarni eslasin
+	TArray<TPair<FString, FString>> Tarix;
 	bool bNatija = false;
 	void EnterBosildi();
 	void RBosildi();

@@ -31,7 +31,19 @@ namespace
 {
 	FString MiyaPapka() { return FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("AI/miya")); }
 	FString ServerExe() { return MiyaPapka() / TEXT("llama/llama-server.exe"); }
-	FString ModelFayl() { return MiyaPapka() / TEXT("model.gguf"); }
+	// Model: AI/miya/model.txt bo'lsa - uning birinchi qatoridagi GGUF yo'li (masalan kattaroq Gemma 4 12B: o'zbekchasi ancha yaxshi,
+	// lekin ~7 GB videoxotira va javob 1.5-2 s), bo'lmasa AI/miya/model.gguf (Qwen3-4B, yuklab olingan)
+	FString ModelFayl()
+	{
+		TArray<FString> Q;
+		if (FFileHelper::LoadFileToStringArray(Q, *(MiyaPapka() / TEXT("model.txt"))))
+			for (const FString& Y : Q)
+			{
+				const FString T = Y.TrimStartAndEnd();
+				if (!T.IsEmpty() && !T.StartsWith(TEXT("#")) && FPaths::FileExists(T)) return T;
+			}
+		return MiyaPapka() / TEXT("model.gguf");
+	}
 	FString JurnalFayl() { return FPaths::ProjectSavedDir() / TEXT("Miya/jurnal.tsv"); }
 
 	// fe'l: tavsif + namunalar (ma'no -> shu fe'ldagi gap)
@@ -227,32 +239,53 @@ FBozorShaxs UBozorAiMiya::Shaxs(const ABozorNpc* Npc, EBozorFel Fel)
 	K.Yosh = bKeksa ? 60 + int32(H % 10) : 30 + int32(H % 20);
 	K.Ism = K.bAyol ? Ayollar[H % UE_ARRAY_COUNT(Ayollar)] : Erkaklar[H % UE_ARRAY_COUNT(Erkaklar)];
 	if (bKeksa) K.Ism = K.Ism.Replace(TEXT(" opa"), TEXT(" xola")).Replace(TEXT(" aka"), TEXT(" ota"));
+	// shaxsiy xulq-atvor (xulq.json)
+	if (const UBozorSotuvTizimi* Tz = Npc ? UBozorSotuvTizimi::Get(Npc) : nullptr)
+		if (const FBozorRasta* R = Tz->Top(Npc))
+		{
+			K.Xulq = R->Xulq;
+			if (!R->Xulq.Ism.IsEmpty()) K.Ism = R->Xulq.Ism;
+			if (R->Xulq.Yosh > 0) K.Yosh = R->Xulq.Yosh;
+		}
 	return K;
 }
 
 FString UBozorAiMiya::Tizim(const FBozorShaxs& Kim) const
 {
 	const FFelUslub& U = Uslub(Kim.Fel);
+	const FBozorXulq& X = Kim.Xulq;
+	// namunalar: sotuvchining o'zinikilari (xulq.json), bo'lmasa fe'lniki
 	FString Namuna;
-	for (const TPair<FString, FString>& N : U.Namuna)
+	for (const TPair<FString, FString>& N : X.Namunalar.Num() ? X.Namunalar : U.Namuna)
 		Namuna += FString::Printf(TEXT("Ma'no: %s\nSen: %s\n"), *N.Key, *N.Value);
+	// shaxsiy xulq-atvor: kimligi, gapirish odati, yoqtirgan/yoqtirmagan narsalari
+	FString Kimligi;
+	if (X.Bormi())
+	{
+		Kimligi = FString::Printf(TEXT("Sen haqingda: %s\n"), *X.Tavsif);
+		if (!X.Odatlar.IsEmpty()) Kimligi += FString::Printf(TEXT("Gapirish odating: %s\n"), *X.Odatlar);
+		if (!X.Yoqtiradi.IsEmpty()) Kimligi += FString::Printf(TEXT("Yoqtirasan: %s\n"), *X.Yoqtiradi);
+		if (!X.Yoqtirmaydi.IsEmpty()) Kimligi += FString::Printf(TEXT("Yoqtirmaysan: %s\n"), *X.Yoqtirmaydi);
+	}
 	return FString::Printf(TEXT(
 		"Sen o'zbek bozoridagi sotuvchisan%s, %d yoshdasan, %s.\n"
-		"Fe'ling: %s.\n"
+		"Fe'ling: %s.\n%s"
 		"Xaridor - 10-13 yoshli bola. Senga \"ma'no\" beriladi: shu gapning BUTUN ma'nosini o'z fe'lingga mos, jonli o'zbek tilida (lotin yozuvida) qayta ayt. So'zma-so'z takrorlama.\n"
 		"Qoidalar:\n"
 		"- Faqat 1-2 qisqa gap. Faqat sotuvchining gapi, izohsiz, qo'shtirnoqsiz. Hech qanday ism aytma.\n"
 		"- Ma'nodagi barcha sonlarni AYNAN shunday yoz (masalan \"12 000 so'm\"), yangi son, narx yoki chegirma qo'shma.\n"
 		"- Ma'nodagi hech bir qismni tashlab ketma, ma'noda yo'q va'da berma.\n"
+		"- Namunalardagi gaplarni ko'chirma: ulardan faqat uslubingni (murojaat, so'z odatlari) ol. Ma'noga va shu molga mos kelmaydigan gap qo'shma.\n"
+		"- Odat so'zlaringni har gapda takrorlama - ba'zan ishlat. Ma'nodagi savolni albatta savol qilib ayt.\n"
 		"Namunalar (sening uslubing):\n%s"),
 		// ism promptga berilmaydi: model uni gap oxiriga qo'shib qo'yadi ("... Rustam.")
-		TEXT(""), Kim.Yosh, Kim.bAyol ? TEXT("ayol") : TEXT("erkak"), U.Tavsif, *Namuna);
+		TEXT(""), Kim.Yosh, Kim.bAyol ? TEXT("ayol") : TEXT("erkak"), U.Tavsif, *Kimligi, *Namuna);
 }
 
 // ================= qayta yozish
 
 void UBozorAiMiya::QaytaYoz(const FBozorShaxs& Kim, int32 Munosabat, const FString& BolaGapi, const FString& ToliqGap, const TArray<FString>& Saqla,
-	TFunction<void(const FString& Matn, bool bAi)> Tayyor)
+	TFunction<void(const FString& Matn, bool bAi)> Tayyor, int32 BolaOdob)
 {
 	if (!bTayyor || CVarMiya.GetValueOnGameThread() == 0 || ToliqGap.TrimStartAndEnd().IsEmpty())
 	{
@@ -271,8 +304,11 @@ void UBozorAiMiya::QaytaYoz(const FBozorShaxs& Kim, int32 Munosabat, const FStri
 	}
 	++Sorovlar;
 	// kayfiyat foydalanuvchi xabarida emas, tizim promptida: aks holda 4B model uni gapga qo'shadi ("Sovuq. Narxi shu.")
-	const TCHAR* Kayfiyat = Munosabat >= 70 ? TEXT("\nBu bola senga juda odobli gapirdi - unga ayniqsa iliq gapir.")
-		: Munosabat < 30 ? TEXT("\nBu bola senga qo'pol gapirdi - unga sovuqroq, qisqa gapir.") : TEXT("");
+	FString Kayfiyat = Munosabat >= 70 ? TEXT("\nBu bola senga doim odobli gapiryapti - unga ayniqsa iliq gapir.")
+		: Munosabat < 30 ? TEXT("\nBu bola senga qayta-qayta qo'pol gapirdi - unga sovuqroq, qisqa gapir.") : TEXT("");
+	// shu gapdagi qo'pollik: tanbeh ma'noning o'zida keladi (UBozorSuhbat "QopolIzoh"); bu yerda faqat ohang - qisqa va jiddiy.
+	// "munosabat bildir" kabi ko'rsatma berilmaydi: 4B model uni gapga qo'shib yuboradi ("Ranjiganingni bildir, ...")
+	if (BolaOdob < 0) Kayfiyat += TEXT("\nBu gapni jiddiy, xafa ohangda ayt.");
 	// bolaning gapi berilmaydi: 4B model uni o'ziniki qilib takrorlaydi ("Tez bo'l. Pomidor ber."). Jurnalga yoziladi
 	const FString Savol = FString::Printf(TEXT("Ma'no: %s"), *Mano);
 
@@ -289,8 +325,14 @@ void UBozorAiMiya::QaytaYoz(const FBozorShaxs& Kim, int32 Munosabat, const FStri
 	Xabar(TEXT("user"), Savol);
 	Tana->SetArrayField(TEXT("messages"), Xabarlar);
 	Tana->SetNumberField(TEXT("temperature"), 0.4);   // 0.7 da ma'no ko'proq buziladi (2026-11-12 sinovi)
-	Tana->SetNumberField(TEXT("max_tokens"), 80);
+	Tana->SetNumberField(TEXT("max_tokens"), 100);
 	Tana->SetBoolField(TEXT("cache_prompt"), true);
+	// "fikrlaydigan" modellar (Qwen3, Gemma 4) fikrlamasin: javob tezroq, tokenlar javobga sarflansin
+	{
+		TSharedRef<FJsonObject> Kw = MakeShared<FJsonObject>();
+		Kw->SetBoolField(TEXT("enable_thinking"), false);
+		Tana->SetObjectField(TEXT("chat_template_kwargs"), Kw);
+	}
 	FString Body;
 	FJsonSerializer::Serialize(Tana, TJsonWriterFactory<>::Create(&Body));
 
@@ -322,10 +364,12 @@ void UBozorAiMiya::QaytaYoz(const FBozorShaxs& Kim, int32 Munosabat, const FStri
 		// mol nomlari ("bodring, kartoshka ... bor") tashlab ketilmasin: "Keling. Barcha bor." - yaroqsiz
 		const FString Kichik = Matn.ToLower();
 		const bool bSozlar = !Saqla.ContainsByPredicate([&Kichik](const FString& S) { return !Kichik.Contains(S.ToLower()); });
-		const bool bAi = !Matn.IsEmpty() && bSozlar && SonlarMosmi(Mano, Matn);
+		// ma'noda savol bo'lsa ("Nechta?") javobda ham bo'lsin: aks holda bola nima so'ralayotganini bilmay qoladi
+		const bool bSavol = !Mano.Contains(TEXT("?")) || Matn.Contains(TEXT("?"));
+		const bool bAi = !Matn.IsEmpty() && bSozlar && bSavol && SonlarMosmi(Mano, Matn);
 		const double Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
 		if (Men.IsValid() && bAi) ++Men->AiJavoblar;
-		UE_LOG(LogBozorMiya, Log, TEXT("%s %.0f ms [%s] %s -> %s"), bAi ? TEXT("AI") : TEXT("tayyor"), Ms, BozorSotuv::FelNomi(Kim.Fel), *Mano,
+		UE_LOG(LogBozorMiya, Log, TEXT("%s %.0f ms [%s, %s] %s -> %s"), bAi ? TEXT("AI") : TEXT("tayyor"), Ms, *Kim.Ism, BozorSotuv::FelNomi(Kim.Fel), *Mano,
 			Xom.IsEmpty() ? (bOk ? TEXT("(bo'sh)") : TEXT("(javob yo'q)")) : *Xom.Replace(TEXT("\n"), TEXT(" ")));
 
 		// jurnal: keyin miyani o'qitish to'plami uchun (fe'l, bola, ma'no, LLM xom javobi, ishlatildimi, ms)
@@ -339,14 +383,137 @@ void UBozorAiMiya::QaytaYoz(const FBozorShaxs& Kim, int32 Munosabat, const FStri
 	R->ProcessRequest();
 }
 
+// ================= erkin suhbat
+
+void UBozorAiMiya::Suhbatlash(const FBozorShaxs& Kim, int32 Munosabat, const TArray<TPair<FString, FString>>& Tarix, const FString& BolaGapi,
+	const FString& Mollar, const FString& Zaxira, TFunction<void(const FString& Matn, bool bAi)> Tayyor)
+{
+	if (!bTayyor || CVarMiya.GetValueOnGameThread() == 0 || BolaGapi.TrimStartAndEnd().IsEmpty())
+	{
+		Tayyor(Zaxira, false);
+		return;
+	}
+	++Sorovlar;
+	const FFelUslub& U = Uslub(Kim.Fel);
+	const FBozorXulq& X = Kim.Xulq;
+	FString Tizim = FString::Printf(TEXT("Sen o'zbek bozoridagi sotuvchisan, %d yoshdasan, %s. Fe'ling: %s.\n"), Kim.Yosh, Kim.bAyol ? TEXT("ayol") : TEXT("erkak"), U.Tavsif);
+	if (X.Bormi())
+	{
+		Tizim += FString::Printf(TEXT("Sen haqingda: %s\n"), *X.Tavsif);
+		if (!X.Odatlar.IsEmpty()) Tizim += FString::Printf(TEXT("Gapirish odating: %s\n"), *X.Odatlar);
+		if (!X.Yoqtiradi.IsEmpty()) Tizim += FString::Printf(TEXT("Yoqtirasan: %s\n"), *X.Yoqtiradi);
+		if (!X.Yoqtirmaydi.IsEmpty()) Tizim += FString::Printf(TEXT("Yoqtirmaysan: %s\n"), *X.Yoqtirmaydi);
+	}
+	if (!Mollar.IsEmpty()) Tizim += FString::Printf(TEXT("Rastangda: %s bor.\n"), *Mollar);
+	Tizim += TEXT(
+		"Xaridor - 10-13 yoshli bola. U bilan jonli suhbatdasan: bola senga savdodan tashqari gap aytdi yoki savol berdi.\n"
+		"Unga o'z fe'lingcha, samimiy va tabiiy o'zbek tilida (lotin yozuvida) javob ber, xuddi tirik odamdek.\n"
+		"Qoidalar:\n"
+		"- Faqat 1-2 qisqa gap. Faqat sotuvchining gapi, izohsiz, qo'shtirnoqsiz. O'z isming aytma.\n"
+		"- Hech qanday son, narx, og'irlik yoki chegirma aytma. Narx so'ralsa, molning nomini aytib so'rashini ayt.\n"
+		"- Bilmagan narsangni to'qima. Gap savdodan uzoqlashsa, qisqa javob berib, muloyimlik bilan moliga qaytar.\n"
+		"- Bolaga yarashmaydigan, qo'rqinchli yoki kattalarga oid mavzuga kirma: muloyimlik bilan gapni boshqa yoqqa bur.\n"
+		"- \"Sen haqingda\" - seni tushunish uchun; sirlaringni oshkor qilma. Emoji ishlatma.\n"
+		"- Odat so'zlaringni har gapda takrorlama. Savolga aniq, mazmunli javob ber.\n"
+		"Namunalar (o'z uslubingda ayt):\n"
+		"Bola: Charchadingizmi?\nSen: Ha, ertalabdan beri oyoqdaman, lekin xaridor kelsa charchoq ham ketadi.\n"
+		"Bola: Qayerda yashaysiz?\nSen: Shu yaqin mahallada, bolam. Har kuni bozorga piyoda kelaman.\n"
+		"Bola: Siz futbol yaxshi ko'rasizmi?\nSen: Yoshligimda ko'p o'ynardim! Endi esa bozor - mening maydonim.");
+	if (Munosabat >= 70) Tizim += TEXT("\nBu bola senga doim odobli gapiryapti - unga ayniqsa iliq gapir.");
+	else if (Munosabat < 30) Tizim += TEXT("\nBu bola senga qo'pol gapirgan - sovuqroq, qisqa gapir.");
+
+	TArray<TSharedPtr<FJsonValue>> Xabarlar;
+	auto Xabar = [&Xabarlar](const TCHAR* Rol, const FString& Matn)
+	{
+		TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+		O->SetStringField(TEXT("role"), Rol);
+		O->SetStringField(TEXT("content"), Matn);
+		Xabarlar.Add(MakeShared<FJsonValueObject>(O));
+	};
+	Xabar(TEXT("system"), Tizim);
+	// oxirgi 6 navbat: sotuvchi oldin nima deganini eslasin ("Bayaga aytdim-ku...")
+	for (int32 i = FMath::Max(0, Tarix.Num() - 6); i < Tarix.Num(); ++i)
+	{
+		Xabar(TEXT("user"), Tarix[i].Key);
+		Xabar(TEXT("assistant"), Tarix[i].Value);
+	}
+	Xabar(TEXT("user"), BolaGapi);
+	TSharedRef<FJsonObject> Tana = MakeShared<FJsonObject>();
+	Tana->SetArrayField(TEXT("messages"), Xabarlar);
+	Tana->SetNumberField(TEXT("temperature"), 0.6);
+	Tana->SetNumberField(TEXT("max_tokens"), 140);
+	Tana->SetBoolField(TEXT("cache_prompt"), true);
+	// "fikrlaydigan" modellar (Qwen3, Gemma 4) fikrlamasin: javob tezroq, tokenlar javobga sarflansin
+	{
+		TSharedRef<FJsonObject> Kw = MakeShared<FJsonObject>();
+		Kw->SetBoolField(TEXT("enable_thinking"), false);
+		Tana->SetObjectField(TEXT("chat_template_kwargs"), Kw);
+	}
+	FString Body;
+	FJsonSerializer::Serialize(Tana, TJsonWriterFactory<>::Create(&Body));
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> R = FHttpModule::Get().CreateRequest();
+	R->SetURL(FString::Printf(TEXT("http://127.0.0.1:%d/v1/chat/completions"), Port));
+	R->SetVerb(TEXT("POST"));
+	R->SetHeader(TEXT("Content-Type"), TEXT("application/json; charset=utf-8"));
+	R->SetContentAsString(Body);
+	R->SetTimeout(FMath::Max(0.5f, CVarMiyaKutish.GetValueOnGameThread()));
+	const double T0 = FPlatformTime::Seconds();
+	TWeakObjectPtr<UBozorAiMiya> Men(this);
+	R->OnProcessRequestComplete().BindLambda([Men, Kim, BolaGapi, Zaxira, Tayyor, T0](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
+	{
+		FString Xom, Matn;
+		if (bOk && Javob.IsValid() && Javob->GetResponseCode() == 200)
+		{
+			TSharedPtr<FJsonObject> J;
+			const TArray<TSharedPtr<FJsonValue>>* Ch = nullptr;
+			const TSharedPtr<FJsonObject>* Msg = nullptr;
+			if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Javob->GetContentAsString()), J) && J.IsValid()
+				&& J->TryGetArrayField(TEXT("choices"), Ch) && Ch->Num() && (*Ch)[0]->AsObject()->TryGetObjectField(TEXT("message"), Msg))
+				Xom = (*Msg)->GetStringField(TEXT("content"));
+			Matn = Tozala(Xom, Kim);
+		}
+		// pul hisobi faqat o'yinda: erkin javobda narx/pul bilan birga son bo'lmasin ("o'ttiz yildan beri" - mayli,
+		// "o'n ming so'm" - yo'q: o'yindagi narxga zid bo'lishi mumkin)
+		const FString K = Matn.ToLower();
+		const bool bPul = K.Contains(TEXT("so'm")) || K.Contains(TEXT("som ")) || K.Contains(TEXT("pul")) || K.Contains(TEXT("narx"))
+			|| K.Contains(TEXT("arzon")) || K.Contains(TEXT("chegirma")) || K.Contains(TEXT("kilo")) || K.Contains(TEXT("dona"));
+		const bool bAi = !Matn.IsEmpty() && !(bPul && !SonlarMosmi(FString(), Matn));
+		const double Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
+		if (Men.IsValid() && bAi) ++Men->AiJavoblar;
+		UE_LOG(LogBozorMiya, Log, TEXT("%s %.0f ms [%s, erkin] bola: %s -> %s"), bAi ? TEXT("AI") : TEXT("tayyor"), Ms, *Kim.Ism, *BolaGapi,
+			Xom.IsEmpty() ? (bOk ? TEXT("(bo'sh)") : TEXT("(javob yo'q)")) : *Xom.Replace(TEXT("\n"), TEXT(" ")));
+		auto T = [](FString S) { return S.Replace(TEXT("\t"), TEXT(" ")).Replace(TEXT("\n"), TEXT(" ")).Replace(TEXT("\r"), TEXT("")); };
+		FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s\t%s\t%s\t%s\t%s\t%d\t%.0f\n"), *FDateTime::Now().ToString(TEXT("%Y-%m-%d %H:%M:%S")),
+			TEXT("erkin"), *T(BolaGapi), TEXT(""), *T(Xom), bAi ? 1 : 0, Ms),
+			*JurnalFayl(), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM, &IFileManager::Get(), FILEWRITE_Append);
+		Tayyor(bAi ? Matn : Zaxira, bAi);
+	});
+	R->ProcessRequest();
+}
+
 FString UBozorAiMiya::Tozala(const FString& Xom, const FBozorShaxs& Kim)
 {
+	// Gemma 4: "<|channel>thought ... <channel|>javob" - fikrlash bloki tashlanadi
+	FString Javob = Xom;
+	{
+		const int32 Oxiri = Javob.Find(TEXT("<channel|>"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+		if (Oxiri != INDEX_NONE) Javob = Javob.RightChop(Oxiri + 10);
+		Javob = Javob.Replace(TEXT("<|channel>"), TEXT(""));
+	}
 	TArray<FString> Qatorlar;
-	Xom.ParseIntoArrayLines(Qatorlar, true);
+	Javob.ParseIntoArrayLines(Qatorlar, true);
 	FString S;
 	for (const FString& Q : Qatorlar) if (!Q.TrimStartAndEnd().IsEmpty()) { S = Q.TrimStartAndEnd(); break; }
 	for (const TCHAR* Old : {TEXT("Sen:"), TEXT("Sotuvchi:"), TEXT("Javob:")})
 		if (S.StartsWith(Old)) S = S.RightChop(FCString::Strlen(Old)).TrimStart();
+	// emoji va belgilar (🍃 😊 ★): ekranda va Navoiy ovozida keraksiz. O'zbekcha ʻ ’ ‘ (U+02BB, U+2018/9) qoladi
+	{
+		FString Toza;
+		for (TCHAR C : S)
+			if (!(C >= 0xD800 && C <= 0xDFFF) && !(C >= 0x2190 && C <= 0x2BFF) && C != 0xFE0F && C != 0x200D) Toza.AppendChar(C);
+		S = Toza.Replace(TEXT("  "), TEXT(" ")).TrimStartAndEnd();
+	}
 	// qo'shtirnoqlar
 	static const FString Qosh = TEXT("\"'«»“”„");
 	while (S.Len() >= 2 && Qosh.Contains(FString::Chr(S[0])) && Qosh.Contains(FString::Chr(S[S.Len() - 1]))) S = S.Mid(1, S.Len() - 2).TrimStartAndEnd();
@@ -359,7 +526,7 @@ FString UBozorAiMiya::Tozala(const FString& Xom, const FBozorShaxs& Kim)
 	if (!IsmBoshi.IsEmpty() && S.Contains(IsmBoshi)) return FString();
 	if (S.Len() > 220) return FString();
 	// prompt'dan sizib chiqqan so'zlar ("Sovuq. Narxi shu.", "Ma'no: ...")
-	for (const TCHAR* Siz : {TEXT("kayfiyat"), TEXT("ma'no"), TEXT("sovuq."), TEXT("iliq."), TEXT("oddiy."), TEXT("namuna")})
+	for (const TCHAR* Siz : {TEXT("kayfiyat"), TEXT("ma'no"), TEXT("sovuq."), TEXT("iliq."), TEXT("oddiy."), TEXT("namuna"), TEXT("ohangda"), TEXT("ranjiganing"), TEXT("bildir,")})
 		if (S.ToLower().Contains(Siz)) return FString();
 	S = SonlarniBezat(S);
 	if (S.Len()) S[0] = FChar::ToUpper(S[0]);

@@ -138,6 +138,9 @@ private:
 	TObjectPtr<UAudioComponent> Audio;
 
 	TArray<float> Gain, Weight, Seed;
+	// sahnadagi alohida fon ovozlari (AmbientSound, /Bozor/Audio/Fon/...) va asl balandligi: bozor.FonBalandligi ularga ham
+	TArray<TPair<TWeakObjectPtr<UAudioComponent>, float>> ZonaOvozlari;
+	float OxirgiKoef = -1.f;
 	double StartTime = 0.0;
 	bool bPrimed = false;
 	float Indoor = 0.f;             // 0 - ochiq osmon ostida, 1 - tom ostida (silliq)

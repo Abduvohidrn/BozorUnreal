@@ -29,12 +29,13 @@
 
 | # | Ish | Nega | Qanday |
 |---|---|---|---|
-| 2.1 | `Docs/AI_Hisobot_2026-11-12.md` va shu hujjatni commit + push qilish | GitHub'da yo'q | `git add Docs/*.md`, commit, push |
-| 2.2 | NPC migratsiyasi zaxirasini `Saved/` dan olib chiqish | `Saved/` git'ga kirmaydi, fayl yo'qolsa migratsiya ishi ham yo'qoladi | `Saved/Zaxira/BozorNpc.cpp.migratsiya-oldi` → `Arxiv/` (yoki alohida `npc-migratsiya` branch) |
-| 2.3 | Tarozida "indamaslik" yo'lini qo'lda sinash | Bot har doim xatoni aytadi, ko'p/kam baholar ekranda ko'rilmagan | 1-darajada "Mayli, rahmat" ni bosing, natija jadvalida to'q sariq "ko'p" chiqishi kerak |
-| 2.4 | Botga `-Indamas` rejimini qo'shish | 2.3 ni avtomatik sinash uchun | `BotQadami` da `TaroziTekshir` bosqichida flag bo'lsa `TaroziRozi` tanlanadi |
-| 2.5 | `Bozor_Oyin.bat` / `Bozor_Muharrir.bat` yo'llari | Hali yo'q `C:\Program Files\Epic Games\UE_5.8` ni ko'rsatadi | Dvigatel yo'lini `%UE%` o'zgaruvchisiga olish yoki joriy o'rnatishga moslash |
-| 2.6 | Windows mikrofon darajasi | Xom signal cho'qqisi 0.05–0.1, juda past | Sozlamalar → Tovush → Mikrofon → 80–100% |
+| 2.1 | ✅ `Docs/AI_Hisobot_2026-11-12.md` va shu hujjatni commit + push qilish | GitHub'da yo'q edi | `18d12ab` |
+| 2.2 | ✅ NPC migratsiyasi zaxirasini `Saved/` dan olib chiqish | `Saved/` git'ga kirmaydi | `Arxiv/NpcMigratsiya_2026-11-12/`. Mikrofon yozuvlari `D:\BozorUnreal_zaxira\Quloq_2026-11-12` ga nusxalandi |
+| 2.3 | ✅ Tarozida "indamaslik" yo'lini sinash | Bot har doim xatoni aytar edi | `-Indamas` bilan 1–2-darajalar: "ko'p" baho, 2 yulduz, to'q sariq rang ekranda ko'rindi |
+| 2.4 | ✅ Botga `-Indamas` rejimini qo'shish | 2.3 ni avtomatik sinash uchun | `BotQadami`: `TaroziTekshir` da doim `TaroziRozi` |
+| 2.5 | ✅ `Bozor_Oyin.bat` / `Bozor_Muharrir.bat` yo'llari | Mavjud bo'lmagan yo'lni ko'rsatar edi | `Scripts/ue_top.bat` dvigatelni `UE_ROOT` yoki ma'lum joylardan topadi. `Bozor_Oyin.bat 2` - 2-daraja |
+| 2.6 | Windows mikrofon darajasi (sizda) | Xom signal cho'qqisi 0.05–0.1, juda past | Sozlamalar → Tovush → Mikrofon → 80–100% |
+| 2.7 | ✅ Xato: xayrlashilgan sotuvchiga qaytilganda tugmalar chiqmas edi | Eski suhbat "xayr" holatida davom etardi (bot ham tiqilib qoldi) | Qaytib kelganda yangi suhbat boshlanadi. Haydagan sotuvchi gaplashmaydi va buni ekranda aytadi |
 
 ---
 

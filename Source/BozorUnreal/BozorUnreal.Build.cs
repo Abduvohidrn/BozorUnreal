@@ -11,7 +11,7 @@ public class BozorUnreal : ModuleRules
 			"AnimationCore", "GameplayTasks", "PhysicsCore", "UMG", "Slate", "SlateCore", "EnhancedInput", "Json", "CinematicCamera", "MediaAssets", "RHI", "RenderCore"
 		});
 		// mikrofon (UBozorQuloq): AudioCapture plagini Windows uchun WASAPI qismini ulaydi
-		PrivateDependencyModuleNames.AddRange(new string[] { "AudioCaptureCore", "AudioCapture" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "AudioCaptureCore", "AudioCapture", "AudioMixer" });
 
 		// lokal STT: o'yin bilan birga tarqatiladi (AI/stt/yukla.sh tayyorlaydi; git'ga kirmaydi)
 		foreach (string Fayl in new string[] { "crispasr.exe", "openblas.dll", "stt-uz.gguf", "LICENSE", "THIRD_PARTY_NOTICES.txt" })

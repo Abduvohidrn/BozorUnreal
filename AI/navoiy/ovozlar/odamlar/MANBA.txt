@@ -1,0 +1,3 @@
+Sotuvchilar ovoz namunalari (Navoiy shu ovozlardan nusxa oladi - har sotuvchiga boshqa odam ovozi).
+Manba: Mozilla Common Voice, o'zbek tili (uz) - CC0 1.0 (jamoat mulki). Fayl nomidagi raqam - AI/poc/audio/cv_<raqam>.mp3.
+Tayyorlash: 24 kHz mono, boshi/oxiridagi jimlik kesilgan, cho'qqi 0.9 ga normallangan.

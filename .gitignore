@@ -48,6 +48,13 @@ AI/miya/models/
 AI/miya/natija/
 AI/miya/*.gguf
 AI/miya/*.log
+AI/miya/model.txt
 AI/stt/rubai/
 # ===== Navoiy TTS (jonli ovoz): muhit - D:\Trk\Ovoz_tashqi\navoiy ga junction (venv + modellar) =====
 AI/navoiy/muhit
+AI/navoiy/wsl.txt
+# ===== Navoiy TTS sinovi (modellar WSL'da ~/navoiy, bu yerda faqat natija) =====
+AI/tts/natija/
+AI/tts/namuna/
+# yozilgan gap bo'laklari Unreal'ga import qilinadi (Content/Bozor/Audio/Gaplar, LFS) - wav'lar qayta yoziladi
+AI/tts/gaplar/

@@ -192,8 +192,15 @@ public:
 	// Jonli ovoz (UBozorNavoiy): tayyor tovushni sotuvchi og'zidan chaladi (chaqiriqni to'xtatib); so'nish/ducking
 	// sozlamalari yozilgan kliplardan olinadi
 	static bool SayWave(ABozorNpc* Vendor, USoundWave* Ovoz);
+	// oqimli jonli ovoz to'lib borayotganda: shu tovush hozir chalinayotgan bo'lsa, to'xtash vaqtini Qolgan s keyinga suradi
+	static void JonliDavom(USoundWave* Ovoz, float Qolgan);
 	// sotuvchi hozir gapiryaptimi (sinovlar uchun)
 	static bool Gapiryapti(ABozorNpc* Vendor);
+	// o'yinchi sotuvchining gapini bo'ldi (ovozli chatdagi kabi): gap darhol to'xtaydi, navbatdagi bo'laklar tashlanadi
+	static void Jimla(ABozorNpc* Vendor);
+	// Suhbatdagi javob: oldindan yozilgan bo'laklarni (UBozorSuhbat::GetBolaklar, AI/tts/gaplar_yoz.py ->
+	// /Game/Bozor/Audio/Gaplar/<bo'lak>_<ayol|erkak>[_<uslub>]) ketma-ket chaladi. Bitta bo'lak ham topilmasa - jim (false)
+	static bool SayGap(ABozorNpc* Vendor, const TArray<FString>& Bolaklar, const FString& Uslub);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	TArray<TObjectPtr<USoundBase>> Clips;
@@ -201,13 +208,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor", meta = (ClampMin = "0", ClampMax = "2"))
 	float Volume = 1.f;
 
+	// suhbatdagi jonli (Navoiy) gap balandligi ko'paytuvchisi: o'yinchi tinglayotgan gap fon va chaqiriqlardan ajralib tursin
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor", meta = (ClampMin = "0", ClampMax = "4"))
+	float JonliBalandlik = 1.5f;
+
 	// bundan uzoqdagi sotuvchi gapirmaydi (baribir eshitilmaydi), sm
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	float HearDistance = 3000.f;
 
 	// o'yinchi atrofida o'z-o'zidan chaqiriqlar orasidagi vaqt, s
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
-	FVector2D AmbientGap = FVector2D(4.f, 9.f);
+	FVector2D AmbientGap = FVector2D(6.f, 12.f);   // 4-9 s edi: bozor juda shovqinli tuyuldi (2026-11-16)
 
 	// Takrorlanmaslik: bitta haqiqiy yozuv (persona nusxalari bitta manba) butun bozor bo'ylab shuncha soniya ichida qayta
 	// aytilmaydi; hamma gap yaqinda aytilgan bo'lsa sotuvchi jim turadi - takrordan ko'ra sukut tabiiyroq
@@ -242,7 +253,7 @@ public:
 
 	// bir vaqtda eng ko'pi bilan shuncha chaqiriq
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
-	int32 MaxCalls = 3;
+	int32 MaxCalls = 2;
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
@@ -259,11 +270,16 @@ private:
 		double NextTime = 0.0;
 		USoundBase* Last = nullptr;
 		bool bCall = false;
-		TArray<USoundBase*> Navbat;   // suhbat gapining keyingi bo'laklari
+		TArray<USoundBase*> Navbat;   // SayLine: suhbat gapining keyingi bo'laklari (BolakTugadi yuritadi)
+		TArray<USoundBase*> GapNavbat;   // SayGap: yozilgan bo'laklar navbati (GapKesh ushlab turadi), Tick yuritadi
+		int32 GapI = 0;
 	};
 	void BolakTugadi(UAudioComponent* Src);
 
 	bool TrySay(ABozorNpc* Vendor, FName Kind);
+	void NavbatDavom(FVoice& V);
+	USoundBase* Bolak(const FString& Nom);
+	UPROPERTY() TMap<FString, TObjectPtr<USoundBase>> GapKesh;   // bo'lak nomi -> asset (yo'q bo'lsa nullptr)
 	FVoice& Get(ABozorNpc* Vendor);
 	USoundBase* Pick(const FVoice& V, FName Kind, double Now) const;
 	static FString SourceKey(const USoundBase* Clip);

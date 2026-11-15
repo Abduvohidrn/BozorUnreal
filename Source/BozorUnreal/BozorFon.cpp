@@ -1,6 +1,7 @@
 #include "BozorFon.h"
 
 #include "Components/AudioComponent.h"
+#include "HAL/IConsoleManager.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
@@ -10,6 +11,11 @@
 #include "Sound/SoundBase.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBozorFon, Log, All);
+
+// Bozor foni umumiy balandligi: o'yinchilar "juda baland" dedi (2026-11-16) - gaplar va qadamlar ustidan bosib ketardi.
+// 0.5 ~ -6 dB. Sahnadagi aktor Volume'iga tegmay, shu ko'paytuvchi bilan (bir joyda sozlanadi)
+static TAutoConsoleVariable<float> CVarFonBalandligi(TEXT("bozor.FonBalandligi"), 0.5f,
+	TEXT("Bozor fon shovqini balandligi ko'paytuvchisi (1 - asl, 0.5 ~ -6 dB)"));
 
 const FName ABozorFonZonalar::Stems[7] = { "olomon", "sotuvchi", "qadamlar", "shahar", "bozor", "qushlar", "savdo" };
 
@@ -53,6 +59,16 @@ ABozorFonZonalar::ABozorFonZonalar()
 void ABozorFonZonalar::BeginPlay()
 {
 	Super::BeginPlay();
+	// Xaritadagi alohida fon ovozlari (Fon_Zona_Kirish, Fon_Zona_Ovqat - AmbientSound). Ular bu aktorga bog'liq emas edi va
+	// bozor shovqinining asosiy qismi shulardan: o'lchovda bu aktorni o'chirganda ham umumiy shovqin deyarli tushmadi
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+	{
+		TInlineComponentArray<UAudioComponent*> Ac(*It);
+		for (UAudioComponent* A : Ac)
+			if (A != Audio && A->Sound && A->Sound->GetPathName().Contains(TEXT("/Bozor/Audio/Fon/")))
+				ZonaOvozlari.Emplace(A, A->VolumeMultiplier);
+	}
+	UE_LOG(LogBozorFon, Log, TEXT("[BozorFon] alohida fon ovozlari: %d ta (bozor.FonBalandligi bilan boshqariladi)"), ZonaOvozlari.Num());
 	const int32 N = UE_ARRAY_COUNT(Stems);
 	bool bValid = (Sound != nullptr || Mix != nullptr) && Zones.Num() > 0;
 	for (const FBozorFonZona& Z : Zones)
@@ -110,6 +126,15 @@ void ABozorFonZonalar::BeginPlay()
 void ABozorFonZonalar::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	{
+		const float Koef = CVarFonBalandligi.GetValueOnGameThread();
+		if (Koef != OxirgiKoef)
+		{
+			OxirgiKoef = Koef;
+			for (const TPair<TWeakObjectPtr<UAudioComponent>, float>& Z : ZonaOvozlari)
+				if (UAudioComponent* A = Z.Key.Get()) A->SetVolumeMultiplier(Z.Value * Koef);
+		}
+	}
 	FVector Listener = GetActorLocation(), Front, Right;
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{
@@ -138,7 +163,7 @@ void ABozorFonZonalar::Tick(float DeltaSeconds)
 	bPrimed = true;
 	if (Mix)
 	{
-		Audio->SetVolumeMultiplier(Volume * Fade * Dist * Db(Indoor * MixIndoorDb));
+		Audio->SetVolumeMultiplier(Volume * CVarFonBalandligi.GetValueOnGameThread() * Fade * Dist * Db(Indoor * MixIndoorDb));
 		return;
 	}
 	for (int32 i = 0; i < Gain.Num(); ++i)
@@ -153,7 +178,7 @@ void ABozorFonZonalar::Tick(float DeltaSeconds)
 		const float Rate = 1.f / FMath::Lerp(15.f, 40.f, 0.5f + 0.5f * FMath::PerlinNoise1D(Seed[i] + 0.37f));
 		const float Wob = WobbleDb * FMath::Clamp(FMath::PerlinNoise1D(Seed[i] * 7.f + float(Now) * Rate), -1.f, 1.f);
 		const float In = IndoorDb.IsValidIndex(i) ? Indoor * IndoorDb[i] : 0.f;
-		Audio->SetFloatParameter(Stems[i], Volume * Fade * Dist * Gain[i] * Db(Wob + In));
+		Audio->SetFloatParameter(Stems[i], Volume * CVarFonBalandligi.GetValueOnGameThread() * Fade * Dist * Gain[i] * Db(Wob + In));
 	}
 }
 

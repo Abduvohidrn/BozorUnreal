@@ -38,6 +38,27 @@ enum class EBozorFel : uint8
 };
 
 // Bitta savdo rastasi: sotuvchi, uning fe'li va mollari (narxlari shu o'yin uchun tanlangan)
+// Bitta sotuvchining xulq-atvori: Content/Bozor/Data/xulq.json (kalit - NPC nomi, masalan "BozorNpc_267").
+// LLM'ga "kimligi" sifatida beriladi (UBozorAiMiya::Tizim); savdo sozlamalari va tayyor gaplar ham shundan ustun yoziladi.
+// Matnlarda son va son so'zlari ("o'n", "ming") bo'lmasin: LLM ularni javobga qo'shsa, son tekshiruvi javobni rad etadi.
+struct FBozorXulq
+{
+	FString Ism;              // "Malika opa"; bo'sh - NPC nomidan tasodifiy
+	int32 Yosh = 0;           // 0 - NPC ko'rinishidan
+	FString Tavsif;           // kimligi, hayoti (1-2 gap)
+	FString Odatlar;          // qanday gapiradi: so'z odatlari, murojaati
+	FString Yoqtiradi, Yoqtirmaydi;
+	TArray<TPair<FString, FString>> Namunalar;   // ma'no -> shu sotuvchi qanday aytadi
+	int32 BoshMunosabat = 50; // bolaga birinchi munosabati (0..100)
+	// o'z ovozi ("ovoz": {"ohang", "tezlik"}): Ohang - Navoiy namuna ovozini necha yarim tonga siljitish (har sotuvchiga boshqa
+	// tembr); OvozTezlik - o'yinda jonli gapni chalish tezligi (1 dan past - sekinroq va pastroq: keksalar)
+	float Ohang = 0.f;
+	float OvozTezlik = 1.f;
+	// namuna ovoz (AI/navoiy/ovozlar/<namuna>.wav, masalan "odamlar/erkak_cv_137014"); bo'sh - fe'l x jins asl ovozi
+	FString OvozNamuna;
+	bool Bormi() const { return !Tavsif.IsEmpty(); }
+};
+
 USTRUCT(BlueprintType)
 struct FBozorRasta
 {
@@ -55,8 +76,14 @@ struct FBozorRasta
 	UPROPERTY(BlueprintReadOnly) FVector Markaz = FVector::ZeroVector;   // sotuvchi va navbat orasi
 	UPROPERTY(BlueprintReadOnly) FVector Xaridorga = FVector::ForwardVector;   // sotuvchidan xaridor tomonga (gorizontal)
 
-	// fe'lga xos gaplar: javob turi nomi (EBozorJavob) -> variantlar
+	// shu sotuvchining o'z xulq-atvori (xulq.json; bo'lmasa bo'sh - faqat fe'l)
+	FBozorXulq Xulq;
+
+	// fe'lga xos gaplar: javob turi nomi (EBozorJavob) -> variantlar (xulq.json "gaplar" ustidan yoziladi)
 	TMap<FString, TArray<FString>> Gaplar;
+	// sotuv.json "gaplar" (hamma sotuvchiga umumiy; UBozorSotuvTizimi'niki) va ovoz uslubi (Navoiy: mehribon, xotirjam ...)
+	const TMap<FString, TArray<FString>>* Asosiy = nullptr;
+	FString Uslub = TEXT("xotirjam");
 };
 
 UENUM(BlueprintType)
@@ -210,10 +237,17 @@ class BOZORUNREAL_API UBozorSotuvchiMiya : public UObject
 public:
 	virtual FBozorTushuncha Tushun(const FString& Gap, const FBozorSuhbatHolati& Holat) PURE_VIRTUAL(UBozorSotuvchiMiya::Tushun, return {};);
 	virtual FString Yoz(EBozorJavob Javob, const FBozorSuhbatHolati& Holat, int32 Qaytim) PURE_VIRTUAL(UBozorSotuvchiMiya::Yoz, return {};);
+	// oxirgi Yoz gapining oldindan yozilgan ovoz bo'laklari (bo'lmasa bo'sh - gap faqat matn bo'lib qoladi)
+	virtual TArray<FString> Bolaklar() const { return {}; }
+	// qo'shimcha gap (javobdan oldin): "QopolIzoh" - bola qo'pol gapirdi, "OdobIzoh" - odobli gapirdi. Yo'q bo'lsa bo'sh
+	virtual FString Izoh(const FString& Kalit) { return FString(); }
 };
 
 // Kalit so'zlar bo'yicha tushunadi, javoblarni tayyor variantlardan tasodifiy tanlaydi.
-// Fe'lga xos gaplar (FBozorRasta::Gaplar) bo'lsa, avval shulardan tanlaydi
+// Fe'lga xos gaplar (FBozorRasta::Gaplar) bo'lsa, avval shulardan tanlaydi, keyin sotuv.json "gaplar"dan.
+// Tanlangan qolip ovoz bo'laklariga ajratiladi (AI/tts/gaplar_yoz.py ham xuddi shunday ajratib yozadi):
+//   qolip matni o'rinlar orasida - "G_<md5 dan 8 belgi>", son - "S_<minglar>m" + "S_<qoldiq>" (12 500 -> S_12m, S_500),
+//   miqdor - "M_<o'ndan bir>" (2,5 -> M_25), mol - "P_<id>", birlik - "B_<birlik, tutuqsiz>"; ro'yxat orasida - "va"
 UCLASS()
 class BOZORUNREAL_API UBozorTayyorJavob : public UBozorSotuvchiMiya
 {
@@ -222,8 +256,17 @@ class BOZORUNREAL_API UBozorTayyorJavob : public UBozorSotuvchiMiya
 public:
 	virtual FBozorTushuncha Tushun(const FString& Gap, const FBozorSuhbatHolati& Holat) override;
 	virtual FString Yoz(EBozorJavob Javob, const FBozorSuhbatHolati& Holat, int32 Qaytim) override;
+	virtual TArray<FString> Bolaklar() const override { return OxirgiBolaklar; }
+	virtual FString Izoh(const FString& Kalit) override;
 
 	TMap<FString, TArray<FString>> FelGaplari;
+	const TMap<FString, TArray<FString>>* Asosiy = nullptr;
+
+	// qolip matni bo'lagining ovoz kaliti (Python: "G_" + md5(utf8).hexdigest()[:8])
+	static FString MatnKaliti(const FString& Bolak);
+
+private:
+	TArray<FString> OxirgiBolaklar;
 };
 
 // Ota-ona bergan xarid ro'yxatidagi bitta qator
@@ -364,7 +407,8 @@ class BOZORUNREAL_API UBozorSuhbat : public UObject
 	GENERATED_BODY()
 
 public:
-	void Boshla(const FBozorRasta& Rasta, UBozorHamyon* Hamyon, UBozorSotuvchiMiya* Miya);
+	// BoshMunosabat: sotuvchining bolaga boshlang'ich munosabati (UBozorSotuvTizimi::BoshMunosabat - xulq va xotira); -1 - xulqdan
+	void Boshla(const FBozorRasta& Rasta, UBozorHamyon* Hamyon, UBozorSotuvchiMiya* Miya, int32 BoshMunosabat = -1);
 
 	// Sotuvchining birinchi gapi (bola E bosganda) - fe'liga qarab
 	FString KutibOl();
@@ -389,6 +433,14 @@ public:
 	ABozorNpc* GetSotuvchi() const { return Sotuvchi; }
 	// oxirgi javob turi (sotuvchi harakati va ovozi shunga qarab tanlanadi)
 	EBozorJavob GetOxirgiJavob() const { return OxirgiJavob; }
+	// bolaning oxirgi gapi: 1 - odobli, -1 - qo'pol, 0 - oddiy (sotuvchi javobining ohangi uchun - UBozorAiMiya)
+	int32 GetOxirgiOdob() const { return OxirgiOdob; }
+	// oxirgi javob boshidagi munosabat gapi (QopolIzoh/OdobIzoh; yo'q bo'lsa bo'sh). LLM'ga berilmaydi - uni tashlab yuboradi;
+	// LLM javobining oldiga o'zgarmay qo'shiladi (u allaqachon sotuvchi fe'li/xulqida)
+	const FString& GetOxirgiIzoh() const { return OxirgiIzoh; }
+	// oxirgi KutibOl/Bajar javobining ovoz bo'laklari (UBozorTayyorJavob izohi) va sotuvchi uslubi
+	const TArray<FString>& GetBolaklar() const { return Bolaklar; }
+	const FString& GetUslub() const { return Uslub; }
 
 private:
 	FString Javob(EBozorJavob J, int32 Qaytim = 0);
@@ -400,6 +452,11 @@ private:
 	UPROPERTY() TObjectPtr<ABozorNpc> Sotuvchi;
 	bool bSotibOldi = false;   // shu sotuvchidan biror narsa oldimi (xayrlashuv gapi uchun)
 	EBozorJavob OxirgiJavob = EBozorJavob::KutibOlish;
+	int32 OxirgiOdob = 0;
+	bool bOdobIzohOldin = false;   // oldingi javobda odobni maqtagan (ketma-ket takrorlamaslik uchun)
+	FString OxirgiIzoh;
+	TArray<FString> Bolaklar;
+	FString Uslub;
 	// tanlov oynasi holati
 	bool bMiqdorTanlash = false;
 	bool bMolRoyxati = false;
@@ -443,6 +500,11 @@ public:
 	// matn ko'rinishida hamma rasta (konsol "Rastalar" uchun)
 	FString Hisobot() const;
 
+	// Sotuvchining xotirasi (shu o'yin davomida): suhbat oxiridagi munosabat. Yangi suhbat shundan boshlanadi -
+	// qo'pol gapirgan bolani eslab qoladi, odoblisini ham. Biroz kechiradi: boshlang'ich munosabat tomon 30% qaytadi
+	void Eslab(const ABozorNpc* Sotuvchi, int32 Munosabat);
+	int32 BoshMunosabat(const FBozorRasta& R) const;
+
 	// joriy daraja (?Daraja=N yoki -Daraja=N, 1 dan) va jami darajalar soni
 	const FBozorDaraja* GetDaraja() const { return Darajalar.IsValidIndex(DarajaIndeksi) ? &Darajalar[DarajaIndeksi] : nullptr; }
 	int32 DarajalarSoni() const { return Darajalar.Num(); }
@@ -453,9 +515,13 @@ private:
 	void Taxtachalar(UWorld& World);
 
 	UPROPERTY() TArray<FBozorRasta> Rastalar;
+	TMap<TWeakObjectPtr<const ABozorNpc>, int32> Xotira;
 	UPROPERTY() TArray<FBozorDaraja> Darajalar;
+	TMap<FString, TArray<FString>> Gaplar;   // sotuv.json "gaplar" - rastalar Asosiy orqali shunga qaraydi
 	int32 DarajaIndeksi = 0;
 };
+
+class FJsonObject;
 
 namespace BozorSotuv
 {
@@ -464,4 +530,6 @@ namespace BozorSotuv
 	// 1.5 -> "1,5", 2 -> "2"
 	FString Miqdor(float M);
 	const TCHAR* FelNomi(EBozorFel F);
+	// xulq.json dagi bitta sotuvchi yozuvidan shaxsiy qismi (ism, tavsif, odatlar, namunalar, boshMunosabat)
+	void XulqniOqi(const FJsonObject& O, FBozorXulq& X);
 }

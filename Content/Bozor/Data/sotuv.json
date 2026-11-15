@@ -34,43 +34,97 @@
     { "id": "qurt",      "nomi": "qurt",       "birlik": "dona",  "narx": [3000, 5000],     "sozlar": ["qurt", "kurt"],        "kalitlar": ["tovoq_kurt"] }
   ],
 
+  "gaplarIzoh": "Sotuvchi javoblari: kalit - EBozorJavob nomi, qiymat - variantlar. O'rinlar: {mahsulot} {mollar} {birlik} {narx} {summa} {miqdor} {son} {qaytim}. '_iliq' (munosabat 70+) va '_sovuq' (30 dan past) variantlari ham bo'lishi mumkin. Fe'l gaplari (fellar.*.gaplar) bulardan ustun. Ovoz: AI/tts/gaplar_yoz.py har gapni o'rinlar bo'yicha bo'laklab Navoiy bilan yozadi (fe'lning 'uslub'ida) - matn o'zgarsa, qayta yozish va import kerak (Scripts/import_gaplar.py).",
+  "gaplar": {
+    "KutibOlish": ["Keling, bolam! Nima kerak? Bizda {mollar} bor."],
+    "Salom": ["Va alaykum assalom, bolam! Keling, nima kerak?", "Vaalaykum assalom! Keling, {mahsulot} yangi uzilgan."],
+    "MolSora": ["Qaysi biridan olasiz? Bizda {mollar} bor.", "Nima kerak, bolam? {mollar} bor."],
+    "MolTanlandi": ["{mahsulot} - bir {birlik} {narx} so'm.", "{mahsulot} juda yaxshi, bolam. Bir {birlik} {narx} so'm."],
+    "Narx": ["Bir {birlik} {mahsulot} {narx} so'm.", "{narx} so'mdan, bolam. Hammasi yangi."],
+    "TushirdiMan": ["Mayli, siz uchun {narx} so'm qilaman.", "Xo'p, {narx} so'mdan bera qolay."],
+    "TushirmaymanEngPast": ["Yo'q bolam, {narx} so'mdan arzon bo'lmaydi, o'zimga ham shunga tushgan.", "Bundan arzoni yo'q, rostini aytyapman. {narx} so'm."],
+    "TushirmaymanHozircha": ["Narxi shu, bolam, juda yaxshi mol.", "{narx} so'm ham arzon-ku!"],
+    "MiqdorSora": ["Necha {birlik} beray?", "Qancha olasiz, bolam? Necha {birlik}?"],
+    "Tortdim": ["Mana, {miqdor} {birlik} {mahsulot}. Jami {summa} so'm bo'ldi.", "Mana: {miqdor} {birlik}. {summa} so'm bo'ladi, bolam."],
+    "PulYetmaydi": ["Bu yetmaydi, bolam. {summa} so'm kerak, yana {son} so'm bering."],
+    "HamyondaYoq": ["Hamyoningizda buncha pul yo'q-ku, bolam? Bor pulingizni sanab ko'ring."],
+    "PulOldim": ["Rahmat! Mana qaytimingiz: {qaytim}.", "Oldim. Mana qaytimi: {qaytim}. Sanab oling."],
+    "PulOldimAniq": ["Rahmat, bolam, to'ppa-to'g'ri! Osh bo'lsin!"],
+    "QaytimUzr": ["Voy, kechirasiz, bolam, adashibman! Mana yana {son} so'm.", "Rostdan ham! Uzr, bolam, mana {son} so'm."],
+    "QaytimTogri": ["Sanab ko'ring, bolam: to'ppa-to'g'ri berdim.", "Yo'q, bolam, to'g'ri berdim. Yana bir sanang."],
+    "OshBolsin": ["Osh bo'lsin! Yana nima kerak?", "Osh bo'lsin, bolam!"],
+    "TaroziUzr": ["Voy, rostdan ham! Uzr, bolam. Mana, {miqdor} {birlik}, {summa} so'm.", "Ko'zim ilg'amabdi, kechirasiz. To'g'riladim: {miqdor} {birlik} - {summa} so'm."],
+    "TaroziTogri": ["Tarozini qarang, bolam: to'ppa-to'g'ri {miqdor} {birlik}. {summa} so'm.", "Yo'q, bolam, to'g'ri tortdim. {summa} so'm bo'ladi."],
+    "TaroziKelishdi": ["Yaxshi, unda {summa} so'm bo'ladi.", "Xo'p, {summa} so'm, bolam."],
+    "Xayr": ["Yana keling, bolam!", "Osh bo'lsin, yana keling!"],
+    "XayrSotibOlmay": ["Mayli, boshqa safar keling!", "Xo'p, kerak bo'lsa qaytib keling."],
+    "SalomBering": ["Avval salom bersangiz yaxshi bo'lardi, bolam.", "Salom-alik qilmaysizmi, bolam?"],
+    "Tushunmadim": ["Tushunmadim, bolam. {mahsulot} olasizmi?", "Nima dedingiz? Narxini so'rang yoki necha {birlik} kerakligini ayting."],
+    "Tugagan": ["Savdo bo'ldi, bolam. Yana nima kerak?"],
+    "QopolgaRad": ["Bunaqa gapirsangiz, narx tushmaydi, bolam.", "Kattalarga odob bilan gapirish kerak. Narxi shu."],
+    "QopolIzoh": ["Kattalarga odob bilan gapirish kerak, bolam.", "Bunaqa gapirmang, bolam, uyat bo'ladi.", "Avval odob bilan gapirishni o'rganing."],
+    "OdobIzoh": ["Barakalla, odobli bola ekansiz.", "Ofarin, gapingiz chiroyli ekan.", "Odobingizga rahmat, bolam."],
+    "NarxniKotardi": ["Unda {narx} so'm. Xohlasangiz oling.", "Shunaqami? Endi {narx} so'm bo'ladi."],
+    "Haydadi": ["Bunaqa gaplashadigan bo'lsangiz, boshqa joydan oling!", "Bo'ldi, men sizga sotmayman. Boshqa rastaga boring."],
+    "Narx_iliq": ["Siz uchun bir {birlik} {narx} so'm, bolam. Eng yaxshisini tanlab beraman."],
+    "MolTanlandi_iliq": ["{mahsulot}mi? Siz uchun bir {birlik} {narx} so'm, bolam."],
+    "TushirdiMan_iliq": ["Odobingiz uchun {narx} so'm qilaman, bolam!", "Shunday odobli bolaga {narx} so'mdan beraman."],
+    "Xayr_iliq": ["Rahmat, bolam! Ota-onangizga salom ayting!"],
+    "Narx_sovuq": ["{narx}. Narxi yozilgan."],
+    "MolTanlandi_sovuq": ["{mahsulot} - {narx} so'm."],
+    "Tortdim_sovuq": ["{miqdor} {birlik}. {summa} so'm."],
+    "Xayr_sovuq": ["Xo'p."]
+  },
+
   "fellar": {
     "mehribon": {
       "izoh": "Tez tushiradi, iliq gapiradi",
+      "uslub": "mehribon",
       "engPast": 0.80, "qadam": 0.08, "rad": 0.15, "odob": 15, "qopol": -10,
       "gaplar": {
         "KutibOlish": ["Keling, bolam! Nima kerak? Bizda {mollar} bor.", "Assalomu alaykum, o'g'lim! Qarang, {mollar} - hammasi yangi."],
         "Salom": ["Va alaykum assalom, bolam! Keling, nima olasiz?"],
         "TushirdiMan": ["Mayli, siz uchun {narx} so'm qilaman."],
         "TushirdiMan_iliq": ["Siz odobli bola ekansiz, {narx} so'mdan beraman.", "Odobingizga qoyil, bolam! {narx} so'm bo'la qolsin."],
-        "QopolgaRad": ["Voy bolam, kattalarga bunaqa gapirmaydi. Narxi shu."]
+        "QopolgaRad": ["Voy bolam, kattalarga bunaqa gapirmaydi. Narxi shu."],
+        "QopolIzoh": ["Voy bolam, bunaqa gap sizga yarashmaydi.", "Aylanay, kattalarga bunday gapirilmaydi-ku."],
+        "OdobIzoh": ["Voy, odobingizdan aylanay!", "Barakalla, bolam, ota-onangizga rahmat."]
       }
     },
     "qattiq": {
       "izoh": "Kam tushiradi, qisqa gapiradi",
+      "uslub": "xotirjam",
       "engPast": 0.92, "qadam": 0.04, "rad": 0.5, "odob": 8, "qopol": -25,
       "gaplar": {
         "KutibOlish": ["Ha, nima kerak?", "Keling. {mollar} bor. Narxi yozib qo'yilgan."],
         "Salom": ["Vaalaykum assalom. Nima olasiz?"],
         "TushirmaymanHozircha": ["Narxi shu. Tushmaydi.", "Bu narx ham arzon, boshqa joyda qimmatroq."],
-        "TushirdiMan": ["Mayli, {narx}. Bundan pasti yo'q."]
+        "TushirdiMan": ["Mayli, {narx}. Bundan pasti yo'q."],
+        "QopolIzoh": ["Menga bunaqa gapirmang!", "Tilingizni tiying. Kattalar bilan gaplashyapsiz."],
+        "OdobIzoh": ["Hm, odobli ekansiz.", "Yaxshi. Odobingiz bor ekan."]
       }
     },
     "shoshqaloq": {
       "izoh": "Shoshib turadi, savdoni tez tugatmoqchi",
+      "uslub": "qo'rqqan",
       "engPast": 0.88, "qadam": 0.06, "rad": 0.3, "odob": 10, "qopol": -15, "xatoQaytim": 0.15,
       "gaplar": {
         "KutibOlish": ["Ha, tez ayting, nima olasiz?", "Keling-keling, {mollar} bor, qaysi biri kerak?"],
         "MiqdorSora": ["Nechta? Tezroq ayting, bolam."],
-        "TushirdiMan": ["Xo'p, {narx}, bo'ldi, oling!"]
+        "TushirdiMan": ["Xo'p, {narx}, bo'ldi, oling!"],
+        "QopolIzoh": ["Voy, bunaqa gapirmang, vaqtim yo'q!", "Odob bilan gapiring, tezroq!"],
+        "OdobIzoh": ["Xo'p-xo'p, odobli bola ekansiz!", "Barakalla, tez ham, odobli ham!"]
       }
     },
     "ayyor": {
       "izoh": "Muloyim, lekin ba'zan qaytimni kam beradi",
+      "uslub": "kinoyali",
       "engPast": 0.85, "qadam": 0.05, "rad": 0.35, "odob": 12, "qopol": -12, "xatoQaytim": 0.5,
       "gaplar": {
         "KutibOlish": ["Ooo, keling, keling! Eng zo'r {mollar} faqat menda!", "Keling, bolam, sizga eng yaxshisini tanlab beraman."],
-        "TushirmaymanHozircha": ["Voy, bundan arzon bersam o'zim zarar qilaman-ku!"]
+        "TushirmaymanHozircha": ["Voy, bundan arzon bersam o'zim zarar qilaman-ku!"],
+        "QopolIzoh": ["Voy-voy, shirin bola ham shunday gapiradimi?", "Bunaqa gapirsangiz, shirin mol ham achchiq bo'ladi!"],
+        "OdobIzoh": ["Voy, shunday odobli xaridorni ko'rmaganman!", "Asalim, gapingiz molimdan ham shirin!"]
       }
     }
   },

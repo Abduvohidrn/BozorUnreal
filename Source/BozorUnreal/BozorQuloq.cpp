@@ -51,6 +51,7 @@ bool UBozorQuloq::Boshla()
 	if (bTushunyapti) { Xato = TEXT("Oldingi gap hali tushunilmoqda..."); return false; }
 	if (!Tayyormi()) { Xato = TEXT("Mikrofon bilan gapirish o'rnatilmagan (AI/stt topilmadi)"); return false; }
 	if (!Och()) return false;
+	bAvto = false;   // tugma bilan: gap oxiri - tugma qo'yilganda
 	// fonda yozilayotgan bo'lsa - oxirgi ~0.5 s (tugma bosilishidan oldingi bo'g'in) yozuvda qoladi
 	if (!bYozmoqda)
 	{
@@ -110,9 +111,23 @@ void UBozorQuloq::Yigish()
 	if (!Synth->GetAudioData(Bufer)) return;
 	Xom.Append(Bufer);
 	float Eng = 0.f;
-	for (float S : Bufer) Eng = FMath::Max(Eng, FMath::Abs(S));
+	double E = 0.0;
+	for (float S : Bufer) { Eng = FMath::Max(Eng, FMath::Abs(S)); E += double(S) * S; }
+	Rms = Bufer.Num() ? float(FMath::Sqrt(E / Bufer.Num())) : -1.f;
 	// mikrofon odatda juda past keladi - ko'rsatkich uchun kuchaytiriladi
 	Balandlik = FMath::Max(FMath::Min(1.f, Eng * 8.f), Balandlik * 0.85f);
+}
+
+void UBozorQuloq::SetQolsiz(bool bHa)
+{
+	bQolsiz = bHa && Tayyormi();
+	NutqDavomi = Jimlik = 0.f;
+	if (bQolsiz) Isit(true);
+}
+
+float UBozorQuloq::Esik() const
+{
+	return FMath::Max(MinEsik, Shovqin * NisbatEsik) * AksSado;
 }
 
 void UBozorQuloq::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -121,17 +136,49 @@ void UBozorQuloq::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	if (!bTinglayapti)
 	{
 		Balandlik *= 0.85f;
-		// fon: faqat oxirgi 0.5 s saqlanadi (keyingi gapning boshi uchun)
+		// fon: faqat oxirgi 0.6 s saqlanadi (keyingi gapning boshi uchun)
 		if (bYozmoqda)
 		{
+			Rms = -1.f;
 			Yigish();
-			Balandlik = 0.f;
-			const int32 Saqla = int32(0.5f * Chastota) * Kanallar;
+			if (!bQolsiz) Balandlik = 0.f;
+			const int32 Saqla = int32(0.6f * Chastota) * Kanallar;
 			if (Xom.Num() > Saqla) Xom.RemoveAt(0, Xom.Num() - Saqla, EAllowShrinking::No);
+			// Qo'lsiz rejim (ovozli chat kabi): gap boshlanishini o'zi sezadi. Esik - fon shovqinidan NisbatEsik baravar baland
+			// (shovqin tez pasayadi, sekin ko'tariladi: gap shovqinga aylanib qolmasin); sotuvchi gapirayotganda karnaydan
+			// mikrofonga qaytgan ovoz gap deb olinmasin - AksSado ko'paytiradi va gap uzoqroq davom etishi kerak
+			if (bQolsiz && !bTushunyapti && Rms >= 0.f)
+			{
+				if (Rms > Esik())
+				{
+					NutqDavomi += DeltaTime;
+					if (NutqDavomi >= (AksSado > 1.f ? 0.25f : 0.12f))
+					{
+						bTinglayapti = bAvto = true;
+						Jimlik = 0.f;
+						NutqDavomi = 0.f;
+						UE_LOG(LogBozorQuloq, Log, TEXT("Gap boshlandi (o'zi): rms %.4f, shovqin %.4f, esik %.4f"), Rms, Shovqin, Esik());
+						if (NutqBoshlandi) NutqBoshlandi();
+					}
+				}
+				else
+				{
+					NutqDavomi = 0.f;
+					Shovqin = Shovqin <= 0.f ? Rms : FMath::Lerp(Shovqin, Rms, Rms < Shovqin ? 0.3f : 0.02f);
+				}
+			}
 		}
 		return;
 	}
+	Rms = -1.f;
 	Yigish();
+	// qo'lsiz rejimda gap oxiri: JimlikTugash s jimlik (o'yinchi o'ylab qolsa ham gapi bo'linib ketmasin - juda qisqa emas)
+	if (bAvto && !bOxiri && Rms >= 0.f)
+	{
+		if (Rms < Esik() * 0.8f) Jimlik += DeltaTime;
+		else Jimlik = 0.f;
+		if (Jimlik >= JimlikTugash) Tugat();
+	}
 	if (bOxiri && FPlatformTime::Seconds() >= OxiriVaqti) Yakunla();
 	else if (!bOxiri && Xom.Num() > EngUzun * Chastota * Kanallar) Tugat();
 }
@@ -152,7 +199,8 @@ void UBozorQuloq::Yakunla()
 		Synth->StopCapturing();
 		bYozmoqda = false;
 	}
-	bTinglayapti = bOxiri = false;
+	bOxirgiAvto = bAvto;
+	bTinglayapti = bOxiri = bAvto = false;
 
 	// eng baland kanal (stereo mikrofonning bir kanali ko'pincha bo'sh - o'rtachasi ovozni yarmiga tushiradi)
 	const int32 Kadrlar = Xom.Num() / Kanallar;
@@ -213,10 +261,10 @@ void UBozorQuloq::Yakunla()
 	{
 		double E = 0.0;
 		for (float S : Ovoz) E += double(S) * S;
-		const float Rms = Ovoz.Num() ? float(FMath::Sqrt(E / Ovoz.Num())) : 0.f;
-		if (Rms < 0.012f)
+		const float OrtaRms = Ovoz.Num() ? float(FMath::Sqrt(E / Ovoz.Num())) : 0.f;
+		if (OrtaRms < 0.012f)
 		{
-			UE_LOG(LogBozorQuloq, Log, TEXT("Yozuvda gap yo'q (%.2f s, o'rtacha %.4f)"), Sekund, Rms);
+			UE_LOG(LogBozorQuloq, Log, TEXT("Yozuvda gap yo'q (%.2f s, o'rtacha %.4f)"), Sekund, OrtaRms);
 			if (NatijaKeldi) NatijaKeldi(FString());
 			return;
 		}

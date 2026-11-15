@@ -13,6 +13,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/CommandLine.h"
+#include "HAL/IConsoleManager.h"
+#include "Misc/Paths.h"
+#include "AudioMixerBlueprintLibrary.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Sound/SoundBase.h"
@@ -24,6 +27,11 @@
 #include "Serialization/JsonSerializer.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBozorOvoz, Log, All);
+
+// Qadam balandligi: o'lchovda qadamlar bozor fonidan ~7 dB past edi (fon pasaytirilgandan keyin ham) - eshitilmasdi.
+// 3x bilan yengil qadam fon ustidan biroz ajralib turadi (2026-11-16)
+static TAutoConsoleVariable<float> CVarQadamBalandligi(TEXT("bozor.QadamBalandligi"), 3.f,
+	TEXT("O'yinchi qadamlari balandligi ko'paytuvchisi (1 - asl)"));
 
 TWeakObjectPtr<ABozorSotuvchiOvozi> ABozorSotuvchiOvozi::Instance;
 
@@ -56,8 +64,8 @@ void ABozorSotuvchiOvozi::BeginPlay()
 	}
 	if (ByKey.Num() == 0)
 	{
-		UE_LOG(LogBozorOvoz, Warning, TEXT("[BozorOvoz] sotuvchi kliplari yo'q - ovozlar o'chirildi"));
-		SetActorTickEnabled(false);
+		// suhbat gaplari (SayGap) baribir ishlaydi
+		UE_LOG(LogBozorOvoz, Warning, TEXT("[BozorOvoz] sotuvchi kliplari yo'q - chaqiriqlar o'chirildi"));
 		return;
 	}
 	NextAmbient = GetWorld()->GetTimeSeconds() + FMath::FRandRange(1.f, 3.f);
@@ -74,7 +82,7 @@ void ABozorSotuvchiOvozi::EndPlay(const EEndPlayReason::Type Reason)
 void ABozorSotuvchiOvozi::Say(ABozorNpc* Vendor, FName Kind, float Chance)
 {
 	ABozorSotuvchiOvozi* O = Instance.Get();
-	if (!O || !O->IsActorTickEnabled() || !Vendor) return;
+	if (!O || O->ByKey.IsEmpty() || !Vendor) return;
 	if (Kind == TEXT("savdo")) Chance *= O->SavdoChance;
 	else if (Kind == TEXT("rahmat")) Chance *= O->RahmatChance;
 	if (FMath::FRand() < Chance) O->TrySay(Vendor, Kind);
@@ -276,7 +284,7 @@ bool ABozorSotuvchiOvozi::SayLine(ABozorNpc* Vendor, const FString& Fel, const F
 	ABozorSotuvchiOvozi* O = Instance.Get();
 	if (!O || !Vendor || O->Dialog.Num() == 0) return false;
 	// erkak sotuvchidan ayol ovozi (yoki aksincha) chiqmasin
-	const FDialogOvoz* D = O->Dialog.Find(Fel + (Vendor->bFemale ? TEXT(" ayol") : TEXT(" erkak")));
+	const FDialogOvoz* D = O->Dialog.Find(Fel + (Vendor->Ayolmi() ? TEXT(" ayol") : TEXT(" erkak")));
 	if (!D) return false;
 	const FString Kalit = NormalGap(Matn);
 	TArray<FSoftObjectPath> Yollar;
@@ -297,6 +305,7 @@ bool ABozorSotuvchiOvozi::SayLine(ABozorNpc* Vendor, const FString& Fel, const F
 	}
 	FVoice& V = O->Get(Vendor);
 	V.Navbat.Reset();
+	V.GapNavbat.Reset();
 	V.Src->Stop();   // suhbat gapi chaqiriqdan muhimroq (Stop BolakTugadi'ni chaqirsa ham navbat bo'sh)
 	V.Src->SetVolumeMultiplier(O->Volume);
 	V.Src->SetPitchMultiplier(1.f);   // yozilgan ohang - xarakterning o'zi, o'zgartirmaymiz
@@ -307,7 +316,7 @@ bool ABozorSotuvchiOvozi::SayLine(ABozorNpc* Vendor, const FString& Fel, const F
 	V.bCall = false;
 	V.NextTime = O->GetWorld()->GetTimeSeconds() + Uzunlik + 0.06f * Bolaklar.Num() + 0.5;
 	UE_LOG(LogBozorOvoz, Display, TEXT("[BozorOvoz] suhbat: %s (%s %s) %d bo'lak, %.1f s: %s"), *Vendor->GetActorNameOrLabel(), *Fel,
-		Vendor->bFemale ? TEXT("ayol") : TEXT("erkak"), Bolaklar.Num(), Uzunlik, *Kalit);
+		Vendor->Ayolmi() ? TEXT("ayol") : TEXT("erkak"), Bolaklar.Num(), Uzunlik, *Kalit);
 	return true;
 }
 
@@ -327,24 +336,61 @@ bool ABozorSotuvchiOvozi::SayWave(ABozorNpc* Vendor, USoundWave* Ovoz)
 	while (O->Jonli.Num() > 6) O->Jonli.RemoveAt(0);
 	FVoice& V = O->Get(Vendor);
 	V.Navbat.Reset();
+	V.GapNavbat.Reset();
 	V.Src->Stop();
-	V.Src->SetVolumeMultiplier(O->Volume);
-	V.Src->SetPitchMultiplier(1.f);
+	// suhbatdagi jonli gap - o'yinchi aynan shuni tinglayapti: bozor shovqini va chaqiriqlardan balandroq
+	V.Src->SetVolumeMultiplier(O->Volume * O->JonliBalandlik);
+	// sotuvchining o'z ovoz tezligi (xulq.json "ovoz.tezlik"): keksalar sekinroq va pastroq. Chalish shuncha uzayadi -
+	// to'xtash vaqtlari (pastda va JonliDavom) shunga bo'linadi
+	const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(Vendor);
+	const FBozorRasta* R = Tz ? Tz->Top(Vendor) : nullptr;
+	const float Tez = R ? R->Xulq.OvozTezlik : 1.f;
+	V.Src->SetPitchMultiplier(Tez);
 	V.Src->SetSound(Ovoz);
 	V.Src->Play();
 	V.Last = Ovoz;
 	V.bCall = false;
 	const double Now = O->GetWorld()->GetTimeSeconds();
-	V.NextTime = Now + Ovoz->Duration + 0.5;
+	V.NextTime = Now + Ovoz->Duration / Tez + 0.5;
 	// procedural tovush ma'lumoti tugagach ham jim "chalinib" turadi - vaqti kelganda o'zimiz to'xtatamiz
 	TWeakObjectPtr<UAudioComponent> Src(V.Src);
 	TWeakObjectPtr<USoundWave> W(Ovoz);
 	O->GetWorldTimerManager().SetTimer(O->JonliTugash, FTimerDelegate::CreateLambda([Src, W]()
 	{
 		if (Src.IsValid() && W.IsValid() && Src->Sound == W.Get()) Src->Stop();
-	}), Ovoz->Duration + 0.15f, false);
+	}), Ovoz->Duration / Tez + 0.15f, false);
 	UE_LOG(LogBozorOvoz, Display, TEXT("[BozorOvoz] jonli: %s %.1f s"), *Vendor->GetActorNameOrLabel(), Ovoz->Duration);
 	return true;
+}
+
+void ABozorSotuvchiOvozi::JonliDavom(USoundWave* Ovoz, float Qolgan)
+{
+	ABozorSotuvchiOvozi* O = Instance.Get();
+	if (!O || !Ovoz) return;
+	for (TPair<TWeakObjectPtr<ABozorNpc>, FVoice>& P : O->Voices)
+	{
+		FVoice& V = P.Value;
+		if (!V.Src || V.Src->Sound != Ovoz) continue;
+		V.NextTime = O->GetWorld()->GetTimeSeconds() + Qolgan / FMath::Max(0.5f, V.Src->PitchMultiplier) + 0.5;
+		TWeakObjectPtr<UAudioComponent> Src(V.Src);
+		TWeakObjectPtr<USoundWave> W(Ovoz);
+		O->GetWorldTimerManager().SetTimer(O->JonliTugash, FTimerDelegate::CreateLambda([Src, W]()
+		{
+			if (Src.IsValid() && W.IsValid() && Src->Sound == W.Get()) Src->Stop();
+		}), FMath::Max(0.05f, Qolgan / FMath::Max(0.5f, V.Src->PitchMultiplier) + 0.15f), false);
+		return;
+	}
+}
+
+void ABozorSotuvchiOvozi::Jimla(ABozorNpc* Vendor)
+{
+	ABozorSotuvchiOvozi* O = Instance.Get();
+	FVoice* V = O && Vendor ? O->Voices.Find(Vendor) : nullptr;
+	if (!V || !V->Src) return;
+	V->Navbat.Reset();
+	V->GapNavbat.Reset();
+	V->Src->FadeOut(0.12f, 0.f);   // keskin kesilsa "chirt" eshitiladi
+	O->GetWorldTimerManager().ClearTimer(O->JonliTugash);
 }
 
 bool ABozorSotuvchiOvozi::Gapiryapti(ABozorNpc* Vendor)
@@ -372,6 +418,15 @@ void ABozorSotuvchiOvozi::BolakTugadi(UAudioComponent* Src)
 void ABozorSotuvchiOvozi::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	// suhbat gaplari: bo'lak tugashi bilan keyingisi
+	for (TPair<TWeakObjectPtr<ABozorNpc>, FVoice>& P : Voices)
+	{
+		FVoice& V = P.Value;
+		if (V.GapNavbat.IsEmpty() || !V.Src || V.Src->IsPlaying()) continue;
+		if (V.GapI < V.GapNavbat.Num()) NavbatDavom(V);
+		else V.GapNavbat.Reset();
+	}
+	if (ByKey.IsEmpty()) return;
 	const double Now = GetWorld()->GetTimeSeconds();
 	FVector L;
 	if (!ListenerLocation(L)) return;
@@ -410,7 +465,7 @@ bool ABozorSotuvchiOvozi::TrySay(ABozorNpc* Vendor, FName Kind)
 	if (!ListenerLocation(L) || FVector::DistSquared(Vendor->GetActorLocation(), L) > HearDistance * HearDistance) return false;
 	const double Now = GetWorld()->GetTimeSeconds();
 	FVoice& V = Get(Vendor);
-	if (V.Src->IsPlaying() || Now < V.NextTime) return false;
+	if (V.Src->IsPlaying() || Now < V.NextTime || V.Navbat.Num() || V.GapNavbat.Num()) return false;   // suhbat gapi o'rtasida baqirmaydi
 	const bool bCall = Kind == Chaqiriq;
 	if (bCall && ActiveCalls() >= MaxCalls) return false;
 	const bool bSavdo = Kind == TEXT("savdo");
@@ -428,6 +483,61 @@ bool ABozorSotuvchiOvozi::TrySay(ABozorNpc* Vendor, FName Kind)
 	V.NextTime = Now + Clip->GetDuration() + (bCall ? CallCooldown * FMath::FRandRange(0.8f, 1.6f) : 0.3f);
 	UE_LOG(LogBozorOvoz, Verbose, TEXT("[BozorOvoz] %s: %s"), *Vendor->GetActorNameOrLabel(), *Clip->GetName());
 	return true;
+}
+
+bool ABozorSotuvchiOvozi::SayGap(ABozorNpc* Vendor, const TArray<FString>& Bolaklar, const FString& Uslub)
+{
+	ABozorSotuvchiOvozi* O = Instance.Get();
+	if (!O || !Vendor || Bolaklar.IsEmpty()) return false;
+	FVoice& V = O->Get(Vendor);
+	// ayol personalar (a1..a3) bitta ayol ovozida, erkaklar (e1, e2) bitta erkak ovozida - farqi pitch'da (NavbatDavom)
+	const FString Ovoz = V.Persona.StartsWith(TEXT("e")) ? TEXT("erkak") : TEXT("ayol");
+	const FString U = Uslub.Replace(TEXT("'"), TEXT(""));
+	TArray<USoundBase*> Navbat;
+	TArray<FString> Yoq;
+	for (const FString& B : Bolaklar)
+	{
+		// qolip matni - sotuvchi uslubida (bo'lmasa xotirjam), son/mol/birlik/miqdor - uslubsiz
+		const bool bMatn = B.StartsWith(TEXT("G_"));
+		USoundBase* S = O->Bolak(B + TEXT("_") + Ovoz + (bMatn ? TEXT("_") + U : FString()));
+		if (!S && bMatn) S = O->Bolak(B + TEXT("_") + Ovoz + TEXT("_xotirjam"));
+		if (S) Navbat.Add(S);
+		else Yoq.Add(B);
+	}
+	if (Yoq.Num())
+	{
+		UE_LOG(LogBozorOvoz, Display, TEXT("[BozorOvoz] gap ovozsiz: %d/%d bo'lak topilmadi (%s): %s"), Yoq.Num(), Bolaklar.Num(), *Ovoz, *FString::Join(Yoq, TEXT(" ")));
+		return false;
+	}
+	V.Navbat.Reset();
+	V.Src->Stop();
+	V.GapNavbat = MoveTemp(Navbat);
+	V.GapI = 0;
+	V.bCall = false;
+	O->NavbatDavom(V);
+	UE_LOG(LogBozorOvoz, Log, TEXT("[BozorOvoz] gap: %s, %d bo'lak, %s/%s"), *Vendor->GetActorNameOrLabel(), V.GapNavbat.Num(), *V.Persona, *U);
+	return true;
+}
+
+void ABozorSotuvchiOvozi::NavbatDavom(FVoice& V)
+{
+	static const TMap<FString, float> Pitch = { {TEXT("a2"), 1.07f}, {TEXT("a3"), 0.93f}, {TEXT("e2"), 0.92f} };
+	const float* P = Pitch.Find(V.Persona);
+	USoundBase* S = V.GapNavbat[V.GapI++];
+	V.Src->SetSound(S);
+	V.Src->SetVolumeMultiplier(Volume);
+	V.Src->SetPitchMultiplier(P ? *P : 1.f);
+	V.Src->Play();
+	V.Last = S;
+	V.NextTime = GetWorld()->GetTimeSeconds() + S->GetDuration() + 2.f;   // gapdan keyin darhol baqirmaydi
+}
+
+USoundBase* ABozorSotuvchiOvozi::Bolak(const FString& Nom)
+{
+	if (const TObjectPtr<USoundBase>* S = GapKesh.Find(Nom)) return *S;
+	USoundBase* S = LoadObject<USoundBase>(nullptr, *FString::Printf(TEXT("/Game/Bozor/Audio/Gaplar/%s.%s"), *Nom, *Nom), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	GapKesh.Add(Nom, S);
+	return S;
 }
 
 int32 ABozorSotuvchiOvozi::ActiveCalls() const
@@ -726,7 +836,8 @@ void ABozorQadamOvozlari::Tick(float DeltaSeconds)
 	}
 	// suyakdan qadam chiqmay qoldi (juda sekin, oyoq deyarli ko'tarilmaydi) - jim yurmasin: masofa bo'yicha,
 	// oxirgi qadam bosgan oyoqning teskarisidan (chap-o'ng navbati saqlansin)
-	if (Stride >= Gap)
+	// (deyarli to'xtab qolganda - bir joyda turib burilish, devorga tiralib qolish - zaxira qadam yo'q)
+	if (Stride >= Gap && Speed >= 40.f)
 	{
 		int32 Next = 0;
 		for (int32 i = 1; i < Feet.Num(); ++i) if (Feet[i].LastStep < Feet[Next].LastStep) Next = i;
@@ -760,6 +871,13 @@ void ABozorQadamOvozlari::Step(ACharacter* C, const FVector& Foot, float Speed, 
 	Stride = 0.f;
 	FVector Point;
 	FName Surface = SurfaceAt(C, Foot, Point);
+	// ikki sirt chegarasida oyoqlar har xil sirtda bo'lsa (chap - asfalt, o'ng - beton) har qadamda boshqa ovoz chiqardi:
+	// gavda ostidagi sirt ustun - chegaradan o'tib bo'lgach qadamlar yangi sirtga o'tadi
+	{
+		FVector Markaz;
+		const FName Gavda = SurfaceAt(C, FVector(C->GetActorLocation().X, C->GetActorLocation().Y, Foot.Z), Markaz);
+		if (Gavda != Surface && ByKind.Contains(Gavda)) Surface = Gavda;
+	}
 	const TArray<USoundBase*>* List = ByKind.Find(Surface);
 	if (!List || List->Num() == 0)
 	{
@@ -785,9 +903,11 @@ void ABozorQadamOvozlari::Step(ACharacter* C, const FVector& Foot, float Speed, 
 	// sekin yurganda ~60%, o'yinchining to'liq yurish tezligida 100% (MaxWalkSpeed 220 - RunSpeed'ga hech yetmaydi)
 	const UCharacterMovementComponent* Move = C->GetCharacterMovement();
 	const float Full = FMath::Max(Move ? Move->MaxWalkSpeed : RunSpeed, 1.f);
-	const float Loud = FMath::Lerp(0.6f, 1.f, FMath::Clamp(Speed / Full, 0.f, 1.f));
-	const float Vol = Volume * Loud * Gain * FMath::FRandRange(0.9f, 1.1f);   // har qadam ±10%
-	const float Pitch = FMath::FRandRange(0.92f, 1.08f);
+	const float Tez = FMath::Clamp(Speed / Full, 0.f, 1.f);
+	const float Loud = FMath::Lerp(0.6f, 1.f, Tez);
+	const float Vol = Volume * CVarQadamBalandligi.GetValueOnGameThread() * Loud * Gain * FMath::FRandRange(0.9f, 1.1f);   // har qadam ±10%
+	// sekin yurganda yumshoqroq va pastroq, yugurganda o'tkirroq (zarb kuchli - ohang biroz baland)
+	const float Pitch = FMath::FRandRange(0.94f, 1.04f) + 0.05f * Tez;
 
 	// PlaySoundAtLocation o'rniga (u ichida shuni qiladi): filtrlar Play'dan oldin qo'yilsin - birinchi zarb ham filtrlangan bo'lsin
 	FAudioDevice::FCreateComponentParams Params(GetWorld(), C);
@@ -804,7 +924,7 @@ void ABozorQadamOvozlari::Step(ACharacter* C, const FVector& Foot, float Speed, 
 		// chastotalar har qadamda ozgina boshqacha - bir xil sintez rangi takrorlanmasin
 		A->SetHighPassFilterFrequency(FMath::FRandRange(150.f, 210.f));
 		A->SetHighPassFilterEnabled(true);
-		A->SetLowPassFilterFrequency(FMath::FRandRange(6500.f, 11000.f));
+		A->SetLowPassFilterFrequency(FMath::FRandRange(5000.f, 8000.f) + 4000.f * Tez);
 		A->SetLowPassFilterEnabled(true);
 		A->Play();
 	}
@@ -818,11 +938,28 @@ void ABozorQadamOvozlari::UpdateTest(ACharacter* C, double Now)
 {
 	const double T = Now - TestStart;
 	if (T < 3.0) return;                       // xarita yuklanib, qahramon yerga tushsin
+	// umumiy ovoz chiqishi yoziladi (Saved/Ovoz/qadam_ovoz.wav): qadamlar fon ustidan qanchalik eshitilishini o'lchash uchun
+	static bool bYozuv = false;
+	if (!bYozuv)
+	{
+		bYozuv = true;
+		UAudioMixerBlueprintLibrary::StartRecordingOutput(this, 0.f);
+		UE_LOG(LogBozorOvoz, Display, TEXT("[OvozYozuv] boshlandi"));
+	}
 	if (T < 28.0)
 	{
 		C->AddMovementInput(FVector::ForwardVector, T < 15.0 ? 0.35f : 1.f);
 		return;
 	}
+	static bool bYozuvTugadi = false;
+	if (!bYozuvTugadi)
+	{
+		bYozuvTugadi = true;
+		UAudioMixerBlueprintLibrary::StopRecordingOutput(this, EAudioRecordingExportType::WavFile, TEXT("qadam_ovoz"),
+			FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Ovoz")));
+		UE_LOG(LogBozorOvoz, Display, TEXT("[OvozYozuv] tugadi"));
+	}
+	if (T < 29.5) return;   // fayl yozilib bo'lsin
 	FString S;
 	for (const TPair<FName, int32>& P : TestSteps) S += FString::Printf(TEXT(" %s=%d"), *P.Key.ToString(), P.Value);
 	FString R;

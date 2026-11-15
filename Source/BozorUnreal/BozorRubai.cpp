@@ -49,7 +49,7 @@ namespace
 	};
 
 	FCriticalSection Qulf;
-	FDll D;
+	FDll Fn;
 	transcribe_model* Mdl = nullptr;
 	transcribe_session* Ses = nullptr;
 	bool bUrinildi = false;   // yuklash bir marta sinaladi (xato bo'lsa - qayta urinmaydi)
@@ -57,7 +57,7 @@ namespace
 	template <typename T>
 	bool Ol(T& Out, const TCHAR* Nomi)
 	{
-		Out = reinterpret_cast<T>(FPlatformProcess::GetDllExport(D.Handle, Nomi));
+		Out = reinterpret_cast<T>(FPlatformProcess::GetDllExport(Fn.Handle, Nomi));
 		if (!Out) UE_LOG(LogBozorRubai, Warning, TEXT("transcribe.dll: %s topilmadi"), Nomi);
 		return Out != nullptr;
 	}
@@ -69,32 +69,32 @@ namespace
 		bUrinildi = true;
 		const double T0 = FPlatformTime::Seconds();
 		FPlatformProcess::PushDllDirectory(*Papka());
-		D.Handle = FPlatformProcess::GetDllHandle(*Dll());
+		Fn.Handle = FPlatformProcess::GetDllHandle(*Dll());
 		FPlatformProcess::PopDllDirectory(*Papka());
-		if (!D.Handle) { UE_LOG(LogBozorRubai, Warning, TEXT("transcribe.dll yuklanmadi: %s"), *Dll()); return false; }
-		const bool bHammasi = Ol(D.InitBackends, TEXT("transcribe_init_backends")) & Ol(D.LoadParamsInit, TEXT("transcribe_model_load_params_init"))
-			& Ol(D.LoadFile, TEXT("transcribe_model_load_file")) & Ol(D.ModelFree, TEXT("transcribe_model_free"))
-			& Ol(D.SessionParamsInit, TEXT("transcribe_session_params_init")) & Ol(D.SessionInit, TEXT("transcribe_session_init"))
-			& Ol(D.SessionFree, TEXT("transcribe_session_free")) & Ol(D.RunParamsInit, TEXT("transcribe_run_params_init"))
-			& Ol(D.Run, TEXT("transcribe_run")) & Ol(D.FullText, TEXT("transcribe_full_text"))
-			& Ol(D.StatusString, TEXT("transcribe_status_string")) & Ol(D.ModelBackend, TEXT("transcribe_model_backend"));
+		if (!Fn.Handle) { UE_LOG(LogBozorRubai, Warning, TEXT("transcribe.dll yuklanmadi: %s"), *Dll()); return false; }
+		const bool bHammasi = Ol(Fn.InitBackends, TEXT("transcribe_init_backends")) & Ol(Fn.LoadParamsInit, TEXT("transcribe_model_load_params_init"))
+			& Ol(Fn.LoadFile, TEXT("transcribe_model_load_file")) & Ol(Fn.ModelFree, TEXT("transcribe_model_free"))
+			& Ol(Fn.SessionParamsInit, TEXT("transcribe_session_params_init")) & Ol(Fn.SessionInit, TEXT("transcribe_session_init"))
+			& Ol(Fn.SessionFree, TEXT("transcribe_session_free")) & Ol(Fn.RunParamsInit, TEXT("transcribe_run_params_init"))
+			& Ol(Fn.Run, TEXT("transcribe_run")) & Ol(Fn.FullText, TEXT("transcribe_full_text"))
+			& Ol(Fn.StatusString, TEXT("transcribe_status_string")) & Ol(Fn.ModelBackend, TEXT("transcribe_model_backend"));
 		if (!bHammasi) return false;
 
 		// hisoblash modullari (Vulkan, CPU) shu papkadan; Vulkan bo'lmasa - o'zi CPU'ga tushadi
-		transcribe_status S = D.InitBackends(TCHAR_TO_UTF8(*Papka()));
-		if (S != TRANSCRIBE_OK) { UE_LOG(LogBozorRubai, Warning, TEXT("init_backends: %hs"), D.StatusString(S)); return false; }
+		transcribe_status S = Fn.InitBackends(TCHAR_TO_UTF8(*Papka()));
+		if (S != TRANSCRIBE_OK) { UE_LOG(LogBozorRubai, Warning, TEXT("init_backends: %hs"), Fn.StatusString(S)); return false; }
 		transcribe_model_load_params Lp;
-		D.LoadParamsInit(&Lp);
-		S = D.LoadFile(TCHAR_TO_UTF8(*Model()), &Lp, &Mdl);
-		if (S != TRANSCRIBE_OK || !Mdl) { UE_LOG(LogBozorRubai, Warning, TEXT("model yuklanmadi: %hs"), D.StatusString(S)); Mdl = nullptr; return false; }
+		Fn.LoadParamsInit(&Lp);
+		S = Fn.LoadFile(TCHAR_TO_UTF8(*Model()), &Lp, &Mdl);
+		if (S != TRANSCRIBE_OK || !Mdl) { UE_LOG(LogBozorRubai, Warning, TEXT("model yuklanmadi: %hs"), Fn.StatusString(S)); Mdl = nullptr; return false; }
 		transcribe_session_params Sp;
-		D.SessionParamsInit(&Sp);
+		Fn.SessionParamsInit(&Sp);
 		Sp.n_threads = FMath::Clamp(FPlatformMisc::NumberOfCores() / 2, 2, 8);
-		S = D.SessionInit(Mdl, &Sp, &Ses);
+		S = Fn.SessionInit(Mdl, &Sp, &Ses);
 		if (S != TRANSCRIBE_OK || !Ses)
 		{
-			UE_LOG(LogBozorRubai, Warning, TEXT("sessiya ochilmadi: %hs"), D.StatusString(S));
-			D.ModelFree(Mdl);
+			UE_LOG(LogBozorRubai, Warning, TEXT("sessiya ochilmadi: %hs"), Fn.StatusString(S));
+			Fn.ModelFree(Mdl);
 			Mdl = nullptr;
 			Ses = nullptr;
 			return false;
@@ -104,12 +104,12 @@ namespace
 			TArray<float> Jim;
 			Jim.SetNumZeroed(16000);
 			transcribe_run_params Rp;
-			D.RunParamsInit(&Rp);
+			Fn.RunParamsInit(&Rp);
 			Rp.language = "uz";
 			Rp.timestamps = TRANSCRIBE_TIMESTAMPS_NONE;
-			D.Run(Ses, Jim.GetData(), Jim.Num(), &Rp);
+			Fn.Run(Ses, Jim.GetData(), Jim.Num(), &Rp);
 		}
-		UE_LOG(LogBozorRubai, Log, TEXT("rubaiSTT tayyor (%hs, %.1f s)"), D.ModelBackend(Mdl), FPlatformTime::Seconds() - T0);
+		UE_LOG(LogBozorRubai, Log, TEXT("rubaiSTT tayyor (%hs, %.1f s)"), Fn.ModelBackend(Mdl), FPlatformTime::Seconds() - T0);
 		return true;
 	}
 }
@@ -138,18 +138,18 @@ FString BozorRubai::Tanit(const TArray<float>& Pcm, bool& bOk)
 	FScopeLock L(&Qulf);
 	if (!YuklaQulfda()) return FString();
 	transcribe_run_params Rp;
-	D.RunParamsInit(&Rp);
+	Fn.RunParamsInit(&Rp);
 	Rp.language = "uz";
 	Rp.timestamps = TRANSCRIBE_TIMESTAMPS_NONE;   // model kartasi: vaqt belgilari rejimida boshiga ortiqcha bo'g'in qo'shadi
 	if (CVarSttMaslahat.GetValueOnAnyThread() != 0) Rp.prompt = Maslahat;
-	const transcribe_status S = D.Run(Ses, Pcm.GetData(), Pcm.Num(), &Rp);
+	const transcribe_status S = Fn.Run(Ses, Pcm.GetData(), Pcm.Num(), &Rp);
 	if (S != TRANSCRIBE_OK)
 	{
-		UE_LOG(LogBozorRubai, Warning, TEXT("transcribe_run: %hs"), D.StatusString(S));
+		UE_LOG(LogBozorRubai, Warning, TEXT("transcribe_run: %hs"), Fn.StatusString(S));
 		return FString();
 	}
 	bOk = true;
-	const char* Matn = D.FullText(Ses);
+	const char* Matn = Fn.FullText(Ses);
 	return Matn ? FString(UTF8_TO_TCHAR(Matn)).TrimStartAndEnd() : FString();
 }
 
@@ -184,8 +184,8 @@ bool BozorRubai::WavOqi(const FString& Fayl, TArray<float>& Pcm)
 void BozorRubai::Bosh()
 {
 	FScopeLock L(&Qulf);
-	if (Ses && D.SessionFree) D.SessionFree(Ses);
-	if (Mdl && D.ModelFree) D.ModelFree(Mdl);
+	if (Ses && Fn.SessionFree) Fn.SessionFree(Ses);
+	if (Mdl && Fn.ModelFree) Fn.ModelFree(Mdl);
 	Ses = nullptr;
 	Mdl = nullptr;
 	// DLL ochiq qoladi: ggml backend'lari jarayon oxirigacha ro'yxatda turadi

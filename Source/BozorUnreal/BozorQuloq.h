@@ -28,6 +28,16 @@ public:
 	// sinov: tayyor audio faylni (wav/mp3) xuddi shu yo'l bilan matnga aylantirish
 	void Fayldan(const FString& Fayl);
 
+	// Qo'lsiz rejim (ovozli chat kabi): tugmasiz - gap boshlanishi va tugashini ovoz balandligidan o'zi sezadi (VAD).
+	// Gap boshlansa NutqBoshlandi (sotuvchi gapini bo'lish uchun), JimlikTugash s jimlikdan keyin STT
+	void SetQolsiz(bool bHa);
+	bool Qolsizmi() const { return bQolsiz; }
+	// karnaydan mikrofonga qaytgan ovoz (sotuvchi gapirayotganda): esik shuncha baravar ko'tariladi
+	void SetAksSado(float K) { AksSado = FMath::Max(1.f, K); }
+	// oxirgi yozuv qo'lsiz rejimda o'zi boshlangan (bo'sh natija - shovqin bo'lgan, o'yinchiga xabar shart emas)
+	bool AvtoGapmi() const { return bOxirgiAvto; }
+	TFunction<void()> NutqBoshlandi;
+
 	// tugma bosib turilibdi (oxirgi 0.35 s "dum" yozilayotganda - false)
 	bool Tinglayapti() const { return bTinglayapti && !bOxiri; }
 	bool Tushunyapti() const { return bTushunyapti || bOxiri; }
@@ -43,6 +53,17 @@ public:
 	// eng uzun gap, s
 	UPROPERTY(EditAnywhere, Category = "Bozor")
 	float EngUzun = 12.f;
+
+	// qo'lsiz rejim: shuncha s jimlik - gap tugadi
+	UPROPERTY(EditAnywhere, Category = "Bozor|Qolsiz")
+	float JimlikTugash = 0.8f;
+
+	// gap esigi: fon shovqinidan shuncha baravar baland (va kamida MinEsik, RMS)
+	UPROPERTY(EditAnywhere, Category = "Bozor|Qolsiz")
+	float NisbatEsik = 3.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Bozor|Qolsiz")
+	float MinEsik = 0.004f;
 
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -70,4 +91,15 @@ private:
 	float Balandlik = 0.f;
 	int32 Raqam = 0;
 	FString Xato;
+
+	// qo'lsiz rejim (VAD)
+	float Esik() const;
+	bool bQolsiz = false;
+	bool bAvto = false;        // joriy yozuv o'zi boshlangan
+	bool bOxirgiAvto = false;
+	float Rms = -1.f;          // oxirgi Yigish bufer RMS (-1 - yangi ma'lumot yo'q)
+	float Shovqin = 0.f;       // fon shovqini (RMS)
+	float NutqDavomi = 0.f;    // esikdan baland ovoz necha s davom etyapti
+	float Jimlik = 0.f;        // gap ichida necha s jimlik
+	float AksSado = 1.f;
 };

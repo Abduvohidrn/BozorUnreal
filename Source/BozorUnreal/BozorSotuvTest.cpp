@@ -15,6 +15,10 @@
 #include "Engine/GameInstance.h"
 #include "Async/TaskGraphInterfaces.h"
 #include "Misc/AutomationTest.h"
+#include "Dom/JsonObject.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "HAL/IConsoleManager.h"
 #include "Misc/Paths.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
@@ -102,6 +106,20 @@ namespace
 		{TEXT("arzanroq bering"), Bq::NarxAytildi, Hr::Savdolashish, -1, Erk, Erk},
 		{TEXT("raxmat xayr"), Bq::NarxAytildi, Hr::Xayr, -1, Erk, Erk},
 		{TEXT("necha puldan ekan"), Bq::NarxAytildi, Hr::NarxAytish, -1, Erk, Erk},
+		// "bitta" (o'yinda sotuvchi tushunmay "Nechta?" deb qayta-qayta so'ragan gaplar, 2026-11-16)
+		{TEXT("ha, unda bitta bering, aka."), Bq::NarxAytildi, Hr::Tortish, 1, Erk, 1},
+		{TEXT("aka, bitta non bering. zabil qilmang, bo'ldi, bitta non bering."), Bq::NarxAytildi, Hr::Tortish, 1, Erk, 1},
+		{TEXT("xo'p, shuni ham bitta berang."), Bq::NarxAytildi, Hr::Tortish, 1, Erk, Erk},
+		{TEXT("bittagina pomidor bering"), Bq::Boshlanish, Hr::Tortish, 1, 0, Erk},
+		{TEXT("uchta bodring bering"), Bq::Boshlanish, Hr::Tortish, 3, 1, Erk},
+		// qo'pollik: haqorat, "sen", yalang buyruq - odob so'zidan ustun
+		{TEXT("ikki kilo pomidor ber"), Bq::Boshlanish, Hr::Tortish, 2, 0, -1},
+		{TEXT("sen ahmoqmisan, pomidor necha pul"), Bq::Boshlanish, Hr::NarxAytish, -1, 0, -1},
+		{TEXT("aka, siz tentakmisiz, pomidor qancha"), Bq::Boshlanish, Hr::NarxAytish, -1, 0, -1},
+		{TEXT("arzon qil, xasis"), Bq::NarxAytildi, Hr::Savdolashish, -1, Erk, -1},
+		{TEXT("pomidor qancha, iltimos"), Bq::Boshlanish, Hr::NarxAytish, -1, 0, 1},
+		{TEXT("opajon, bodring necha pul?"), Bq::Boshlanish, Hr::NarxAytish, -1, 1, 1},
+		{TEXT("bodring necha pul"), Bq::Boshlanish, Hr::NarxAytish, -1, 1, 0},
 	};
 
 	FString Nom(EBozorHarakat V) { return StaticEnum<EBozorHarakat>()->GetNameStringByValue((int64)V); }
@@ -135,6 +153,48 @@ bool FBozorTushunTest::RunTest(const FString& Parameters)
 		else AddError(FString::Printf(TEXT("\"%s\": %s"), C.Gap, *FString::Join(Xato, TEXT(", "))));
 	}
 	AddInfo(FString::Printf(TEXT("Tushun: %d/%d to'g'ri"), Togri, (int32)UE_ARRAY_COUNT(Hollar)));
+	return true;
+}
+
+// Odob: sotuvchi bolaning ohangiga munosabat bildiradimi - qo'pol gapga har doim tanbeh (QopolIzoh), munosabat tushadi;
+// odobli gapga ba'zan maqtov (OdobIzoh), ketma-ket emas; oddiy gapga hech narsa
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBozorOdobTest, "Bozor.Odob", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FBozorOdobTest::RunTest(const FString& Parameters)
+{
+	TMap<FString, TArray<FString>> Umumiy = {
+		{TEXT("Salom"), {TEXT("Vaalaykum assalom.")}}, {TEXT("Narx"), {TEXT("Bir {birlik} {mahsulot} {narx} so'm.")}},
+		{TEXT("KutibOlish"), {TEXT("Keling.")}}, {TEXT("SalomBering"), {TEXT("Salom bering.")}},
+		{TEXT("QopolIzoh"), {TEXT("UMUMIY-TANBEH.")}}, {TEXT("OdobIzoh"), {TEXT("UMUMIY-MAQTOV.")}}};
+	FBozorRasta R;
+	R.Mollar = {Mol(TEXT("pomidor"), TEXT("kilo"), {TEXT("pomidor")})};
+	R.Mollar[0].Narx = 10000;
+	R.Gaplar = {{TEXT("QopolIzoh"), {TEXT("FEL-TANBEH.")}}, {TEXT("OdobIzoh"), {TEXT("FEL-MAQTOV.")}}};
+	R.Asosiy = &Umumiy;
+	UBozorHamyon* Hamyon = NewObject<UBozorHamyon>();
+	UBozorSuhbat* S = NewObject<UBozorSuhbat>();
+	S->Boshla(R, Hamyon, NewObject<UBozorTayyorJavob>(), 50);
+	S->Yoz(TEXT("assalomu alaykum"));
+	const FString Oddiy = S->Yoz(TEXT("pomidor necha pul"));
+	TestFalse(TEXT("oddiy gapga munosabat yo'q"), Oddiy.Contains(TEXT("TANBEH")) || Oddiy.Contains(TEXT("MAQTOV")));
+	const int32 M0 = S->GetHolat().Munosabat;
+	const FString Qopol = S->Yoz(TEXT("pomidor necha pul, ahmoq"));
+	TestTrue(FString::Printf(TEXT("qo'pol gapga fe'l tanbehi: \"%s\""), *Qopol), Qopol.StartsWith(TEXT("FEL-TANBEH.")) && S->GetOxirgiIzoh() == TEXT("FEL-TANBEH."));
+	TestTrue(TEXT("qo'pol gapdan keyin munosabat tushdi"), S->GetHolat().Munosabat < M0);
+	TestEqual(TEXT("oxirgi odob -1"), S->GetOxirgiOdob(), -1);
+	// odobli gap 30 marta: maqtov ba'zan (40%), lekin hech qachon ketma-ket emas
+	int32 Maqtov = 0;
+	bool bOldin = false, bKetma = false;
+	for (int32 i = 0; i < 30; ++i)
+	{
+		const bool bBor = S->Yoz(TEXT("iltimos, pomidor necha pul")).StartsWith(TEXT("FEL-MAQTOV."));
+		Maqtov += bBor ? 1 : 0;
+		bKetma |= bBor && bOldin;
+		bOldin = bBor;
+	}
+	TestTrue(FString::Printf(TEXT("odobli gapga ba'zan maqtov (%d/30)"), Maqtov), Maqtov >= 3 && Maqtov <= 20);
+	TestFalse(TEXT("maqtov ketma-ket takrorlanmaydi"), bKetma);
+	AddInfo(FString::Printf(TEXT("qo'pol: \"%s\" | maqtov %d/30 | munosabat %d -> %d"), *Qopol, Maqtov, M0, S->GetHolat().Munosabat));
 	return true;
 }
 
@@ -302,6 +362,158 @@ bool FBozorSttTaqqosTest::RunTest(const FString& Parameters)
 		Tsv += FString::Printf(TEXT("%s\t%s\t%.0f\t%s\t%.0f\n"), *FPaths::GetCleanFilename(Fayl), *A, MsA, *B, MsB);
 	}
 	FFileHelper::SaveStringToFile(Tsv, *(FPaths::ProjectSavedDir() / TEXT("Quloq/taqqos.tsv")), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+	return true;
+}
+
+
+// Xulq-atvor: bir xil ma'noni har xil sotuvchilarga (xulq.json) LLM orqali aytdiradi - javoblar har birining o'z uslubida
+// bo'lishi va sonlar o'zgarmasligi kerak. Natija: Saved/Miya/xulq_sinov.tsv (sotuvchi, ma'no, javob, AI/tayyor)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBozorXulqTest, "Bozor.Xulq", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FBozorXulqTest::RunTest(const FString& Parameters)
+{
+	FString Matn;
+	TSharedPtr<FJsonObject> Ildiz;
+	const FString Yol = FPaths::ProjectContentDir() / TEXT("Bozor/Data/xulq.json");
+	if (!FFileHelper::LoadFileToString(Matn, *Yol) || !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Matn), Ildiz) || !Ildiz)
+	{
+		AddError(TEXT("xulq.json o'qilmadi"));
+		return false;
+	}
+	const TSharedPtr<FJsonObject> Sotuvchilar = Ildiz->GetObjectField(TEXT("sotuvchilar"));
+	TestTrue(TEXT("sotuvchilar bor"), Sotuvchilar.IsValid() && Sotuvchilar->Values.Num() > 0);
+	// har yozuv: ism, tavsif, kamida bitta namuna, fe'l to'g'ri
+	TArray<FBozorShaxs> Shaxslar;
+	for (const auto& P : Sotuvchilar->Values)
+	{
+		const TSharedPtr<FJsonObject> O = P.Value->AsObject();
+		FBozorShaxs K;
+		BozorSotuv::XulqniOqi(*O, K.Xulq);
+		K.Ism = K.Xulq.Ism;
+		K.Yosh = K.Xulq.Yosh;
+		K.bAyol = K.Ism.EndsWith(TEXT(" opa")) || K.Ism.EndsWith(TEXT(" xola"));
+		FString Fel;
+		O->TryGetStringField(TEXT("fel"), Fel);
+		const int64 V = StaticEnum<EBozorFel>()->GetValueByNameString(Fel.Left(1).ToUpper() + Fel.Mid(1));
+		TestTrue(FString::Printf(TEXT("%s: fe'l '%s' to'g'ri"), *P.Key, *Fel), V != INDEX_NONE);
+		if (V != INDEX_NONE) K.Fel = static_cast<EBozorFel>(V);
+		TestTrue(FString::Printf(TEXT("%s: ism, tavsif va namuna bor"), *P.Key), !K.Ism.IsEmpty() && K.Xulq.Bormi() && K.Xulq.Namunalar.Num() > 0);
+		for (const TPair<FString, FString>& N : K.Xulq.Namunalar)
+			TestTrue(FString::Printf(TEXT("%s: namunadagi sonlar ma'noga mos (%s)"), *P.Key, *N.Value), UBozorAiMiya::SonlarMosmi(N.Key, N.Value));
+		Shaxslar.Add(MoveTemp(K));
+	}
+	AddInfo(FString::Printf(TEXT("%d ta sotuvchi xulqi"), Shaxslar.Num()));
+
+	if (!UBozorAiMiya::FayllarBormi())
+	{
+		AddWarning(TEXT("AI/miya yo'q - LLM qismi o'tkazib yuborildi"));
+		return true;
+	}
+	UGameInstance* Gi = NewObject<UGameInstance>(GetTransientPackage());
+	Gi->AddToRoot();
+	UBozorAiMiya* M = NewObject<UBozorAiMiya>(Gi);
+	auto Kut = [](TFunctionRef<bool()> Shart, double Sekund)
+	{
+		const double T0 = FPlatformTime::Seconds();
+		double Oldin = T0;
+		while (!Shart() && FPlatformTime::Seconds() - T0 < Sekund)
+		{
+			const double H = FPlatformTime::Seconds();
+			FHttpModule::Get().GetHttpManager().Tick(float(H - Oldin));
+			FTSTicker::GetCoreTicker().Tick(float(H - Oldin));
+			FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GameThread);
+			Oldin = H;
+			FPlatformProcess::Sleep(0.02f);
+		}
+		return Shart();
+	};
+	M->Boshla();
+	if (!Kut([M] { return M->Tayyormi(); }, 120.0))
+	{
+		M->Toxtat();
+		Gi->RemoveFromRoot();
+		AddError(TEXT("llama-server 120 s da tayyor bo'lmadi"));
+		return false;
+	}
+	// sinovda kutish ko'proq (videokarta band bo'lsa ham javob kelsin)
+	IConsoleVariable* Kutish = IConsoleManager::Get().FindConsoleVariable(TEXT("bozor.MiyaKutish"));
+	const float EskiKutish = Kutish ? Kutish->GetFloat() : 4.f;
+	if (Kutish) Kutish->Set(15.f);
+	const TCHAR* Manolar[] = {
+		TEXT("Bir kilo olma 15 000 so'm."),
+		TEXT("Bundan arzoni yo'q. 12 500 so'm."),
+		TEXT("Yana keling!") };
+	FString Tsv = TEXT("sotuvchi\tfe'l\tma'no\tjavob\tAI\n");
+	int32 Ai = 0, Jami = 0;
+	for (const FBozorShaxs& K : Shaxslar)
+		for (const TCHAR* Mano : Manolar)
+		{
+			TSharedRef<TOptional<TPair<FString, bool>>> J = MakeShared<TOptional<TPair<FString, bool>>>();
+			M->QaytaYoz(K, K.Xulq.BoshMunosabat, TEXT(""), Mano, {}, [J](const FString& Javob, bool bAi) { *J = TPair<FString, bool>(Javob, bAi); });
+			if (!Kut([J] { return J->IsSet(); }, 30.0)) { AddError(FString::Printf(TEXT("%s: javob kelmadi"), *K.Ism)); continue; }
+			const TPair<FString, bool>& R = J->GetValue();
+			++Jami;
+			Ai += R.Value ? 1 : 0;
+			TestTrue(TEXT("sonlar mos"), UBozorAiMiya::SonlarMosmi(Mano, R.Key));
+			AddInfo(FString::Printf(TEXT("%s [%s] %s -> %s%s"), *K.Ism, BozorSotuv::FelNomi(K.Fel), Mano, *R.Key, R.Value ? TEXT("") : TEXT(" (tayyor)")));
+			Tsv += FString::Printf(TEXT("%s\t%s\t%s\t%s\t%d\n"), *K.Ism, BozorSotuv::FelNomi(K.Fel), Mano, *R.Key, R.Value ? 1 : 0);
+		}
+	// bolaning ohangi: bir xil ma'no qo'pol (-1), oddiy (0) va odobli (1) gapga - sotuvchi har birida boshqacha munosabat bildirishi kerak
+	for (const TCHAR* Ism : {TEXT("Tursun ota"), TEXT("Gulchehra opa"), TEXT("Jasur aka"), TEXT("Doniyor aka")})
+	{
+		const FBozorShaxs* K = Shaxslar.FindByPredicate([Ism](const FBozorShaxs& X) { return X.Ism == Ism; });
+		if (!K) continue;
+		for (int32 Odob = -1; Odob <= 1; ++Odob)
+		{
+			// munosabat gapi (QopolIzoh/OdobIzoh) LLM'ga berilmaydi (ABozorOyinchi uni javob oldiga qo'shadi) - bu yerda faqat
+			// qo'pol gapdagi jiddiy ohang va savolning saqlanishi
+			const TCHAR* Mano = TEXT("Bir kilo pomidor 8 500 so'm. Necha kilo kerak?");
+			TSharedRef<TOptional<TPair<FString, bool>>> J = MakeShared<TOptional<TPair<FString, bool>>>();
+			M->QaytaYoz(*K, 50, TEXT(""), Mano, {}, [J](const FString& Javob, bool bAi) { *J = TPair<FString, bool>(Javob, bAi); }, Odob);
+			if (!Kut([J] { return J->IsSet(); }, 30.0)) continue;
+			const TPair<FString, bool>& R = J->GetValue();
+			++Jami;
+			Ai += R.Value ? 1 : 0;
+			TestTrue(TEXT("savol saqlangan"), R.Key.Contains(TEXT("?")));
+			AddInfo(FString::Printf(TEXT("[ohang %+d] %s -> %s%s"), Odob, Ism, *R.Key, R.Value ? TEXT("") : TEXT(" (tayyor)")));
+			Tsv += FString::Printf(TEXT("%s (ohang %+d)\t%s\t%s\t%s\t%d\n"), Ism, Odob, BozorSotuv::FelNomi(K->Fel), Mano, *R.Key, R.Value ? 1 : 0);
+		}
+	}
+	// erkin suhbat (ovozli chat): savdodan tashqari gaplar - sotuvchi o'z shaxsida javob beradi, son/narx aytmaydi, tarixni eslaydi
+	struct FErkin { const TCHAR* Ism; const TCHAR* Mollar; TArray<const TCHAR*> Gaplar; };
+	const FErkin Erkinlar[] = {
+		{TEXT("Qodir ota"), TEXT("sarimsoq"), {TEXT("Ota, siz bu bozorda qachondan beri ishlaysiz?"), TEXT("Oldin bozor qanaqa edi?"), TEXT("Rahmat, qiziq ekan.")}},
+		{TEXT("Sherzod aka"), TEXT("ko'kat"), {TEXT("Aka, ko'katlaringiz qayerdan keladi?"), TEXT("Rostdanmi? Tog'dan-a?")}},
+		{TEXT("Mohira opa"), TEXT("olma, anor, behi"), {TEXT("Opa, bugun kayfiyatingiz zo'r-ku!"), TEXT("Qaysi mevangiz eng shirin?")}},
+		{TEXT("Tursun ota"), TEXT("limon, apelsin"), {TEXT("Ota, nega xafa ko'rinasiz?")}},
+	};
+	int32 ErkinAi = 0, ErkinJami = 0;
+	for (const FErkin& E : Erkinlar)
+	{
+		const FBozorShaxs* K = Shaxslar.FindByPredicate([&E](const FBozorShaxs& X) { return X.Ism == E.Ism; });
+		if (!K) continue;
+		TArray<TPair<FString, FString>> Tarix;
+		for (const TCHAR* Gap : E.Gaplar)
+		{
+			TSharedRef<TOptional<TPair<FString, bool>>> J = MakeShared<TOptional<TPair<FString, bool>>>();
+			M->Suhbatlash(*K, 50, Tarix, Gap, E.Mollar, TEXT("Tushunmadim."), [J](const FString& Javob, bool bAi) { *J = TPair<FString, bool>(Javob, bAi); });
+			if (!Kut([J] { return J->IsSet(); }, 30.0)) continue;
+			const TPair<FString, bool>& R = J->GetValue();
+			++ErkinJami;
+			ErkinAi += R.Value ? 1 : 0;
+			// erkin javobda narx bo'lmasin ("qirq yil" - mayli, "o'n ming so'm" - yo'q)
+			TestFalse(TEXT("erkin javobda narx yo'q"), R.Value && R.Key.Contains(TEXT("so'm")) && !UBozorAiMiya::SonlarMosmi(FString(), R.Key));
+			AddInfo(FString::Printf(TEXT("[erkin] %s | bola: %s -> %s%s"), E.Ism, Gap, *R.Key, R.Value ? TEXT("") : TEXT(" (tayyor)")));
+			Tsv += FString::Printf(TEXT("%s (erkin)\t%s\t%s\t%s\t%d\n"), E.Ism, BozorSotuv::FelNomi(K->Fel), Gap, *R.Key, R.Value ? 1 : 0);
+			Tarix.Emplace(Gap, R.Key);
+		}
+	}
+	AddInfo(FString::Printf(TEXT("Erkin suhbat AI javoblari: %d/%d"), ErkinAi, ErkinJami));
+	if (Kutish) Kutish->Set(EskiKutish);
+	AddInfo(FString::Printf(TEXT("AI javoblari: %d/%d"), Ai, Jami));
+	FFileHelper::SaveStringToFile(Tsv, *(FPaths::ProjectSavedDir() / TEXT("Miya/xulq_sinov.tsv")), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+	M->Toxtat();
+	Gi->RemoveFromRoot();
 	return true;
 }
 

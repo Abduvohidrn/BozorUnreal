@@ -478,6 +478,7 @@ float ABozorNpc::DoFirst(const TArray<FName>& Categories, float Min, float Max)
 	{
 		if (const FBozorNpcAction* Action = PickAction(C)) return PlayAction(*Action, Min, Max);
 	}
+	if (OyinchiSuhbat.IsValid()) UE_LOG(LogBozorNpc, Log, TEXT("[SavdoAnim] %s DoFirst: klip yo'q -> PlayMove"), *GetName());
 	if (Categories.Num() > 0) PlayMove();
 	return Min;
 }
@@ -485,6 +486,7 @@ float ABozorNpc::DoFirst(const TArray<FName>& Categories, float Min, float Max)
 float ABozorNpc::Do(FName Category, float Min, float Max)
 {
 	if (const FBozorNpcAction* Action = PickAction(Category)) return PlayAction(*Action, Min, Max);
+	if (OyinchiSuhbat.IsValid()) UE_LOG(LogBozorNpc, Log, TEXT("[SavdoAnim] %s Do(%s): klip yo'q -> PlayMove"), *GetName(), *Category.ToString());
 	PlayMove();
 	return Min;
 }
@@ -509,8 +511,13 @@ float ABozorNpc::PlayAction(const FBozorNpcAction& Action, float Min, float Max)
 	const float Duration = Action.bLoop ? FMath::FRandRange(Min, Max) : FMath::Clamp(Length, Min, Max);
 	const float Rate = bSeatTransition ? Length / FMath::Max(Duration, UE_SMALL_NUMBER) : 1.f;
 	const float Offset = Action.bLoop && !bSeatTransition ? FMath::FRandRange(0.f, Length * 0.7f) : 0.f;
-	if (Duration <= 0.f || !Inst->PlaySlotAnimationAsDynamicMontage(Clip, SlotName,
-		0.3f, bSeatTransition ? 0.05f : 0.25f, Rate, Action.bLoop && !bSeatTransition ? 1000 : 1, -1.f, Offset))
+	const bool bOyndi = Duration > 0.f && Inst->PlaySlotAnimationAsDynamicMontage(Clip, SlotName,
+		0.3f, bSeatTransition ? 0.05f : 0.25f, Rate, Action.bLoop && !bSeatTransition ? 1000 : 1, -1.f, Offset);
+	// o'yinchi bilan savdo: har harakat logga (Scripts/savdo_sinov.ps1 ketma-ketlikni shundan tekshiradi)
+	if (OyinchiSuhbat.IsValid())
+		UE_LOG(LogBozorNpc, Log, TEXT("[SavdoAnim] %s %s -> %s (uzunlik %.2f, davom %.2f, loop %d, o'ynadi %d)"), *GetName(), *Action.Category.ToString(),
+			*Clip->GetName(), Length, Duration, Action.bLoop, bOyndi);
+	if (!bOyndi)
 	{
 		PlayMove();
 		return Duration;

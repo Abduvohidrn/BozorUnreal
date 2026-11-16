@@ -188,6 +188,7 @@ private:
 	void MolBer(ABozorNpc* V);
 	void MolYangila(float Dt);
 	void MolTozala();
+	FVector MolQolJoyi() const;
 	FVector FpGa(const FVector& Dunyo, float Masofa) const;
 	FVector DunyoGa(const FVector& Fp) const;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> BerilganMol;
@@ -195,6 +196,8 @@ private:
 	double MolBosh = -1.0;
 	float MolH = 2.5f, MolOlcham = 1.f;
 	FVector MolUchishBosh = FVector::ZeroVector;
+	FVector MolQolBosh = FVector::ZeroVector;   // mol uchib ketgan paytda bola qo'lining nishoni (u yerdan o'ngga siljiydi)
+	FQuat MolBurBosh = FQuat::Identity;         // qo'lga tushgan paytdagi burilishi (u yerdan kameraga nisbatan tik holatga)
 	FVector MolTutqich = FVector::ZeroVector;   // mesh'ning qo'lda ushlanadigan nuqtasi (xalta - dastasi/tepasi, dona - markazi)
 	bool bMolFp = false;
 	// yakuniy gapni (LLM qayta yozgan bo'lsa ham) Navoiy bilan ovozlashtiradi; bo'lmasa - yozilgan bo'lakli ovoz (Asl gap bo'yicha)

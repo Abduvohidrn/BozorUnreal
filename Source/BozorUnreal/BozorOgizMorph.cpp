@@ -92,14 +92,15 @@ FString UBozorOgizMorph::OgizQosh(USkeletalMesh* Mesh, float Burchak)
 			if (!O.bTopildi) return Hisobot + TEXT(": og'iz topilmadi");
 			// og'iz chizig'idagi ustma-ust uchlar (lablar alohida bo'lsa - juft, payvandlangan bo'lsa - yo'q)
 			TVertexAttributesConstRef<FVector3f> P0 = MD->GetVertexPositions();
-			TArray<FVector3f> Chiziq;
+			// (BozorHud.cpp'dagi global Chiziq rangi bilan unity build'da to'qnashmasin)
+			TArray<FVector3f> OgizChizigi;
 			for (const FVertexID V : MD->Vertices().GetElementIDs())
-				if (FMath::Abs(P0[V].Z - O.OgizZ) < 0.6f && P0[V].Y > O.OldY - 4.f) Chiziq.Add(P0[V]);
+				if (FMath::Abs(P0[V].Z - O.OgizZ) < 0.6f && P0[V].Y > O.OldY - 4.f) OgizChizigi.Add(P0[V]);
 			int32 Juft = 0;
-			for (int32 I = 0; I < Chiziq.Num(); ++I)
-				for (int32 K = I + 1; K < Chiziq.Num(); ++K) Juft += FVector3f::DistSquared(Chiziq[I], Chiziq[K]) < 0.0004f ? 1 : 0;
+			for (int32 I = 0; I < OgizChizigi.Num(); ++I)
+				for (int32 K = I + 1; K < OgizChizigi.Num(); ++K) Juft += FVector3f::DistSquared(OgizChizigi[I], OgizChizigi[K]) < 0.0004f ? 1 : 0;
 			Hisobot += FString::Printf(TEXT(" iyak=%.1f og'iz=%.1f burun=%.1f old=%.1f bo'g'im=(%.1f, %.1f) og'iz atrofida %d uch, %d ustma-ust\n  profil:%s\n "),
-				O.IyakZ, O.OgizZ, O.BurunZ, O.OldY, O.BogimY, O.BogimZ, Chiziq.Num(), Juft, *GProfil);
+				O.IyakZ, O.OgizZ, O.BurunZ, O.OldY, O.BogimY, O.BogimZ, OgizChizigi.Num(), Juft, *GProfil);
 		}
 		Mesh->ModifyMeshDescription(Lod);
 		FSkeletalMeshAttributes A(*MD);

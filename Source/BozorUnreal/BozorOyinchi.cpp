@@ -804,10 +804,15 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	const bool bOvozli = bJonli || ABozorSotuvchiOvozi::SayLine(V, BozorSotuv::FelNomi(Suhbat->GetHolat().Fel), Matn)
 		|| (!bAiYoz && ABozorSotuvchiOvozi::SayGap(V, Suhbat->GetBolaklar(), Suhbat->GetUslub()));
 	FName Harakat;
+	// Scripts/savdo_sinov.ps1 shu qatorlardan sotuvchi harakatlari ketma-ketligini tekshiradi
+	UE_LOG(LogBozorOyinchi, Log, TEXT("[SavdoAnim] javob=%s"), *StaticEnum<EBozorJavob>()->GetNameStringByValue(int64(Suhbat->GetOxirgiJavob())));
 	switch (Suhbat->GetOxirgiJavob())
 	{
-	case EBozorJavob::Salom:
 	case EBozorJavob::KutibOlish:
+		// ta'zim OyinchiBilanBoshla'da boshlangan - qayta chaqirilsa klip boshidan qayta boshlanib uziladi
+		if (!bOvozli) ABozorSotuvchiOvozi::Say(V, TEXT("salom"));
+		break;
+	case EBozorJavob::Salom:
 		Harakat = TEXT("V_Greet");
 		if (!bOvozli) ABozorSotuvchiOvozi::Say(V, TEXT("salom"));
 		break;
@@ -835,16 +840,22 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 		MolBer(V);
 		break;
 	case EBozorJavob::Tortdim:
-	case EBozorJavob::QaytimUzr:
 	case EBozorJavob::TaroziUzr:
-		Harakat = TEXT("V_Offer");
+		// tarozida tortadi (NPC savdosidagi kabi); V_Offer - uzatish klipi, mol esa faqat pul olingach beriladi (MolBer)
+		Harakat = TEXT("V_Weigh");
+		ABozorRastaOvozlari::PlayNear(this, { TEXT("tarozi_pip"), TEXT("tarozi_tosh") },
+			V->GetActorLocation() + V->GetActorForwardVector() * 40.f + FVector(0.f, 0.f, 15.f), 300.f, TEXT("tarozi_pip"), V);
+		break;
+	case EBozorJavob::QaytimUzr:
+		Harakat = TEXT("V_Offer");   // qolgan qaytimni uzatadi
 		break;
 	case EBozorJavob::QaytimTogri:
 	case EBozorJavob::TaroziTogri:
 		Harakat = TEXT("V_No");
 		break;
 	case EBozorJavob::OshBolsin:
-		Harakat = TEXT("V_Thanks");
+		// "Osh bo'lsin! Yana nima kerak?" - bosh irg'aydi; ta'zim xayrlashuvda (ikki ta'zim ketma-ket bo'lmasin)
+		Harakat = TEXT("V_Yes");
 		break;
 	case EBozorJavob::Xayr:
 	case EBozorJavob::XayrSotibOlmay:
@@ -859,7 +870,14 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	default:
 		break;
 	}
-	if (!Harakat.IsNone()) V->Do(Harakat, 1.5f, 3.f);
+	if (!Harakat.IsNone())
+	{
+		// mol hali sotuvchi qo'lida bo'lsa (MolYangila: 0.55 x MolH da uchadi) - keyingi harakat uzatish tugagach,
+		// aks holda yangi klip qo'lni mol bilan birga tortib oladi ("Rahmat!" tez bosilganda)
+		const float Kut = MolSotuvchi.Get() == V && MolBosh >= 0.0 ? 0.55f * MolH + 0.3f - float(GetWorld()->GetTimeSeconds() - MolBosh) : 0.f;
+		if (Kut > 0.f) V->DoLater(Harakat, Kut + 2.f, Kut);
+		else V->Do(Harakat, 1.5f, 3.f);
+	}
 }
 
 // ================= mol uzatish
@@ -912,7 +930,11 @@ void ABozorOyinchi::MolBer(ABozorNpc* V)
 						if (R.Mollar[i].Id == H.Mahsulot.Id && R.MolMeshlari.IsValidIndex(i)) MolMesh = R.MolMeshlari[i];
 	const bool bXalta = !MolMesh;
 	if (!MolMesh) MolMesh = V->XaltaMesh();
-	if (!MolMesh) return;
+	if (!MolMesh)
+	{
+		UE_LOG(LogBozorOyinchi, Warning, TEXT("[MolBer] %s: %s uchun mesh ham, xalta ham yo'q - mol uzatilmaydi"), *V->GetActorNameOrLabel(), *H.Mahsulot.Nomi);
+		return;
+	}
 	BerilganMol = NewObject<UStaticMeshComponent>(this, TEXT("BerilganMol"));
 	BerilganMol->SetStaticMesh(MolMesh);
 	BerilganMol->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -925,10 +947,18 @@ void ABozorOyinchi::MolBer(ABozorNpc* V)
 	const FBox Ch = MolMesh->GetBoundingBox();
 	MolTutqich = bXalta ? FVector(Ch.GetCenter().X, Ch.GetCenter().Y, Ch.Max.Z) : Ch.GetCenter();
 	MolSotuvchi = V;
-	MolH = V->Do(TEXT("V_Handout"), 2.f, 3.f);
+	// to'liq uzunlikda (Cashier_Handout 4 s: qo'l ~0.4 s da cho'ziladi va oxirigacha ushlab turadi - 3 s da kesilsa qo'l keskin qaytardi)
+	MolH = V->Do(TEXT("V_Handout"), 2.f, 4.5f);
 	MolBosh = GetWorld()->GetTimeSeconds();
 	bMolFp = false;
 	UE_LOG(LogBozorOyinchi, Display, TEXT("[MolBer] %s: %s (%s), uzatish %.1f s"), *V->GetActorNameOrLabel(), *MolMesh->GetName(), *H.Mahsulot.Nomi, MolH);
+}
+
+// qo'lga olingan mol ushlab turiladigan joy (FP): o'ngda, ko'z balandligidan sal pastda - ekranda suhbat panelidan o'ngda.
+// Xalta dastasidan kaftga osiladi: qo'l pastroq bo'lsa tanasi ekrandan chiqib, yeng ortida qolardi
+FVector ABozorOyinchi::MolQolJoyi() const
+{
+	return Kamera->GetComponentLocation() + Kamera->GetForwardVector() * 30.f + Kamera->GetUpVector() * 6.f + Kamera->GetRightVector() * 15.f;
 }
 
 void ABozorOyinchi::MolTozala()
@@ -972,10 +1002,18 @@ void ABozorOyinchi::MolYangila(float Dt)
 	}
 	if (T < Uch)
 	{
-		// mol sotuvchi qo'lidan bolaning qo'li ko'ringan joyga (dunyo fazosida) uchadi
-		if (MolUchishBosh.IsZero() || T - Dt < Uzat) MolUchishBosh = BerilganMol->GetComponentLocation();
+		// mol sotuvchi qo'lidan bolaning qo'li ko'ringan joyga (dunyo fazosida) uchadi; qo'l shu payt o'ngdagi ushlab turish
+		// joyiga siljiydi - mol o'sha yerda ilinadi (ekran markazida - suhbat paneli ostida - qolmaydi)
+		if (MolUchishBosh.IsZero() || T - Dt < Uzat)
+		{
+			MolUchishBosh = BerilganMol->GetComponentLocation();
+			MolQolBosh = Qollar->QolNishon;
+		}
+		Qollar->QolNishon = FMath::Lerp(MolQolBosh, MolQolJoyi(), Silliq(Uzat, Uch, T));
 		const FVector Tutqich = BerilganMol->GetComponentRotation().RotateVector(MolTutqich * BerilganMol->GetComponentScale().X);
-		BerilganMol->SetWorldLocation(FMath::Lerp(MolUchishBosh, DunyoGa(KaftFp) - Tutqich, Silliq(Uzat, Uch, T)));
+		// kamon bo'ylab: sotuvchi qo'li yashiklar ortida qolsa, to'g'ri chiziq yashiklar ichidan o'tib mol peshtaxtada birdan paydo bo'lardi
+		const float A = Silliq(Uzat, Uch, T);
+		BerilganMol->SetWorldLocation(FMath::Lerp(MolUchishBosh, DunyoGa(KaftFp) - Tutqich, A) + FVector(0.f, 0.f, 35.f * FMath::Sin(PI * A)));
 		Qollar->QolAlfa = 1.f;
 		static bool bUchSurat = false;
 		if (bTest && !bUchSurat && T > Uzat + 0.15f)
@@ -991,6 +1029,7 @@ void ABozorOyinchi::MolYangila(float Dt)
 		// FP'da FOV torroq - shuncha kichik qo'yiladi, keyin tabiiy kattalikkacha o'sadi
 		bMolFp = true;
 		MolUchishBosh = FVector::ZeroVector;
+		MolBurBosh = BerilganMol->GetComponentQuat();
 		BerilganMol->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
 		BerilganMol->MarkRenderStateDirty();
 	}
@@ -1000,12 +1039,34 @@ void ABozorOyinchi::MolYangila(float Dt)
 	// FP'da kameraga yaqin turadi - kichikroq: F^2 (uchishdagi ko'rinish bilan bir xil) dan 0.55 gacha
 	const float S = MolOlcham * FMath::Lerp(F * F, 0.55f, Osish) * (1.f - 0.6f * Tushish);
 	BerilganMol->SetWorldScale3D(FVector(S));
+	// qo'lda kameraga nisbatan tik turadi (bola ko'tarib ko'rsatadi): dunyoga nisbatan osilsa, pastga qaraganda
+	// xaltaning tanasi ekranning pastki chetidan chiqib ketardi
+	const FQuat Tik = FRotator(Kamera->GetComponentRotation().Pitch, Kamera->GetComponentRotation().Yaw, 0.f).Quaternion();
+	BerilganMol->SetWorldRotation(FQuat::Slerp(MolBurBosh, Tik, Silliq(Uch, Uch + 0.3f, T)));
 	const FRotator Bur = BerilganMol->GetComponentRotation();
 	BerilganMol->SetWorldLocation(KaftFp + Old * 2.f - Bur.RotateVector(MolTutqich * S) + Past * 30.f * Tushish);
-	// qo'l mol bilan pastga - ko'krak oldiga silliq qaytadi, keyin animatsiyadagi joyiga
-	// (o'ngda, suhbat paneli ostida qolmasin)
-	Qollar->QolNishon = FMath::VInterpTo(Qollar->QolNishon, Kam + Old * 28.f + Past * 2.f + Kamera->GetRightVector() * 15.f, Dt, 4.f);
+	// qo'l mol bilan o'ngdagi joyida turadi (uchish paytida o'sha yerga borgan), keyin animatsiyadagi joyiga
+	Qollar->QolNishon = MolQolJoyi();
 	Qollar->QolAlfa = 1.f - Silliq(Uch + 1.6f, Uch + 2.4f, T);
+	// qo'ldagi mol ekranning qayerida: suhbat paneli (ABozorHud::SotuvChiz - markazda, kengligi min(1200 S, ekran - 80 S)) ostida
+	// qolmasligi kerak. Scripts/savdo_sinov.ps1 shu qatorni tekshiradi
+	for (const float Payt : { Uch + 0.15f, Uch + 0.5f, Uch + 1.f })
+		if (T - Dt <= Payt && T > Payt)
+		if (const APlayerController* Pc = Cast<APlayerController>(GetController()))
+		{
+			int32 Vx = 0, Vy = 0;
+			FVector2D E, U;
+			Pc->GetViewportSize(Vx, Vy);
+			// markazi va yuqori cheti (xalta kaftdan osiladi - markazi pastda bo'lishi tabiiy, tepasi ko'rinishi kerak)
+			const FVector Tepa = BerilganMol->Bounds.Origin + Kamera->GetUpVector() * BerilganMol->Bounds.BoxExtent.Z;
+			if (Vx > 0 && Pc->ProjectWorldLocationToScreen(DunyoGa(BerilganMol->Bounds.Origin), E) && Pc->ProjectWorldLocationToScreen(DunyoGa(Tepa), U))
+			{
+				const float S0 = Vy / 1080.f;
+				const float PanelW = FMath::Min(1200.f * S0, Vx - 80.f * S0);
+				UE_LOG(LogBozorOyinchi, Log, TEXT("[SavdoAnim] qo'ldagi mol (+%.2f s) ekranda x=%.2f y=%.2f tepasi y=%.2f, panel x=%.2f..%.2f"),
+					T - Uch, E.X / Vx, E.Y / Vy, U.Y / Vy, (Vx - PanelW) * 0.5f / Vx, (Vx + PanelW) * 0.5f / Vx);
+			}
+		}
 	if (bTest)
 	{
 		// -SotuvTest: uzatish sahnasining lahzalari

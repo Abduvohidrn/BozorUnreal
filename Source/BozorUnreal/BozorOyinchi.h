@@ -35,12 +35,21 @@ class BOZORUNREAL_API UBozorQolMesh : public USkeletalMeshComponent
 public:
 	virtual void FinalizeBoneTransform() override;
 
+	// O'ng qo'l nishonga cho'ziladi (sotuvchi uzatgan molni olish): QolNishon - dunyo nuqtasi (FP fazosida, ya'ni qo'llar
+	// chiziladigan joyda), QolAlfa 0..1 - animatsiyadagi joydan nishongacha
+	FVector QolNishon = FVector::ZeroVector;
+	float QolAlfa = 0.f;
+
 private:
 	void GavdaniYigish();
+	void QolniCHoz();
 
 	FBozorTabiiyQol TabiiyQol;
 	TArray<int32> Yigiladigan;
 	const USkeletalMesh* YigishMeshi = nullptr;
+	TArray<int32> OngQolZanjiri;   // upperarm_r ning barcha avlodlari (ota-onadan keyin)
+	int32 Yelka = INDEX_NONE, Tirsak = INDEX_NONE, Kaft = INDEX_NONE;
+	const USkeletalMesh* IkMeshi = nullptr;
 };
 
 // Tana: Auto-Rig Pro skeletida ko'z, lab va boshqa yuz suyaklari boshga emas, ildizga ulangan - animatsiya ularni
@@ -173,6 +182,21 @@ private:
 	// sotuvchi javobi: matn, harakat va ovoz. AI miya bo'lsa - matnni sotuvchining fe'lida qayta yozdirib, keyin ko'rsatadi
 	void SotuvchiAytdi(const FString& Matn);
 	void SotuvchiMatni(const FString& Matn);
+	// Mol uzatish sahnasi (pul olingach): sotuvchi V_Handout bilan molni (kilo - xaltada, dona - o'zi) uzatadi, bola o'ng qo'lini
+	// cho'zib oladi, bir zum ushlab turadi, keyin sumkasiga soladi. Qo'llar FP fazosida chiziladi (FOV 70, masshtab 0.6) -
+	// dunyo nuqtasi bilan qo'l bir joyda ko'rinishi uchun FpGa/DunyoGa kamera fazosida o'giradi
+	void MolBer(ABozorNpc* V);
+	void MolYangila(float Dt);
+	void MolTozala();
+	FVector FpGa(const FVector& Dunyo, float Masofa) const;
+	FVector DunyoGa(const FVector& Fp) const;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> BerilganMol;
+	TWeakObjectPtr<ABozorNpc> MolSotuvchi;
+	double MolBosh = -1.0;
+	float MolH = 2.5f, MolOlcham = 1.f;
+	FVector MolUchishBosh = FVector::ZeroVector;
+	FVector MolTutqich = FVector::ZeroVector;   // mesh'ning qo'lda ushlanadigan nuqtasi (xalta - dastasi/tepasi, dona - markazi)
+	bool bMolFp = false;
 	// yakuniy gapni (LLM qayta yozgan bo'lsa ham) Navoiy bilan ovozlashtiradi; bo'lmasa - yozilgan bo'lakli ovoz (Asl gap bo'yicha)
 	void JonliAyt(int32 Raqam, const FString& Matn, const FString& Asl);
 	void YaqinSotuvchiniTop();

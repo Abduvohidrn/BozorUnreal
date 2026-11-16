@@ -3,8 +3,14 @@
 
 #include "Async/Async.h"
 #include "AudioCaptureCore.h"
+#include "HttpModule.h"
+#include "Interfaces/IHttpRequest.h"
+#include "Interfaces/IHttpResponse.h"
+#include "Dom/JsonObject.h"
+#include "Serialization/JsonSerializer.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
+#include "Misc/CommandLine.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
@@ -15,6 +21,34 @@ namespace
 	FString SttPapka() { return FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("AI/stt")); }
 	FString SttExe() { return SttPapka() / TEXT("crispasr.exe"); }
 	FString SttModel() { return SttPapka() / TEXT("stt-uz.gguf"); }
+
+	// Masofaviy Rubai (ofis DGX Spark, rubaistt_v2_medium, RTF ~0.05): AI/stt/masofaviy.json {"url": "...", "kalit": "..."}
+	// yoki RUBAI_URL / RUBAI_KALIT. Fayl git'ga kirmaydi. -SttLokal - chetlab o'tish. Bir marta o'qiladi
+	struct FMasofaviyRubai { FString Url, Kalit; bool bBor = false; };
+	const FMasofaviyRubai& Masofaviy()
+	{
+		static FMasofaviyRubai M = []()
+		{
+			FMasofaviyRubai R;
+			if (FParse::Param(FCommandLine::Get(), TEXT("SttLokal"))) return R;
+			FString Matn;
+			TSharedPtr<FJsonObject> J;
+			if (FFileHelper::LoadFileToString(Matn, *(SttPapka() / TEXT("masofaviy.json")))
+				&& FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Matn), J) && J.IsValid())
+			{
+				J->TryGetStringField(TEXT("url"), R.Url);
+				J->TryGetStringField(TEXT("kalit"), R.Kalit);
+			}
+			const FString EU = FPlatformMisc::GetEnvironmentVariable(TEXT("RUBAI_URL")), EK = FPlatformMisc::GetEnvironmentVariable(TEXT("RUBAI_KALIT"));
+			if (!EU.IsEmpty()) R.Url = EU;
+			if (!EK.IsEmpty()) R.Kalit = EK;
+			R.Url.RemoveFromEnd(TEXT("/"));
+			R.bBor = !R.Url.IsEmpty() && !R.Kalit.IsEmpty();
+			if (R.bBor) UE_LOG(LogBozorQuloq, Log, TEXT("STT: masofaviy Rubai %s (javob bermasa - lokal)"), *R.Url);
+			return R;
+		}();
+		return M;
+	}
 
 	// 16 kHz, 16 bit, mono WAV
 	bool WavYoz(const FString& Fayl, const TArray<float>& Ovoz)
@@ -40,7 +74,7 @@ UBozorQuloq::UBozorQuloq()
 
 bool UBozorQuloq::Tayyormi()
 {
-	return (FPaths::FileExists(SttExe()) && FPaths::FileExists(SttModel())) || BozorRubai::Tanlangan();
+	return (FPaths::FileExists(SttExe()) && FPaths::FileExists(SttModel())) || BozorRubai::Tanlangan() || Masofaviy().bBor;
 }
 
 bool UBozorQuloq::Boshla()
@@ -87,7 +121,8 @@ void UBozorQuloq::Isit(bool bHa)
 	if (bHa)
 	{
 		// rubaiSTT ~0.8 GB: suhbat boshlanganda fonda yuklanadi - birinchi gap kutib qolmasin
-		if (BozorRubai::Tanlangan()) Async(EAsyncExecution::Thread, []() { BozorRubai::Yukla(); });
+		// (masofaviy Rubai bo'lsa - yuklanmaydi: videokarta o'yin va LLM'ga qolsin; server ishlamasa birinchi gapda yuklanadi)
+		if (BozorRubai::Tanlangan() && !Masofaviy().bBor) Async(EAsyncExecution::Thread, []() { BozorRubai::Yukla(); });
 		if (!Och()) { bFon = false; return; }
 		if (!bYozmoqda)
 		{
@@ -295,6 +330,62 @@ void UBozorQuloq::Fayldan(const FString& Fayl)
 }
 
 void UBozorQuloq::Tanit(const FString& Audio, const FString& Asos, float Sekund)
+{
+	bTushunyapti = true;
+	// avval ofis serveri; javob bermasa yoki xato - lokal STT (pastdagi yo'l)
+	const FMasofaviyRubai& M = Masofaviy();
+	TArray<uint8> Wav;
+	if (M.bBor && FFileHelper::LoadFileToArray(Wav, *Audio))
+	{
+		const FString Chegara = FString::Printf(TEXT("----BozorChegara%08x"), FMath::Rand());
+		TArray<uint8> Tana;
+		auto Qosh = [&Tana](const FString& S) { FTCHARToUTF8 U(*S); Tana.Append(reinterpret_cast<const uint8*>(U.Get()), U.Length()); };
+		Qosh(FString::Printf(TEXT("--%s\r\nContent-Disposition: form-data; name=\"language\"\r\n\r\nuz\r\n"), *Chegara));
+		Qosh(FString::Printf(TEXT("--%s\r\nContent-Disposition: form-data; name=\"response_format\"\r\n\r\njson\r\n"), *Chegara));
+		// server ffmpeg bilan istalgan formatni o'qiydi (Fayldan mp3 ham berishi mumkin)
+		const FString Kengaytma = FPaths::GetExtension(Audio).ToLower();
+		Qosh(FString::Printf(TEXT("--%s\r\nContent-Disposition: form-data; name=\"file\"; filename=\"gap.%s\"\r\nContent-Type: %s\r\n\r\n"), *Chegara,
+			*Kengaytma, Kengaytma == TEXT("mp3") ? TEXT("audio/mpeg") : TEXT("audio/wav")));
+		Tana.Append(Wav);
+		Qosh(FString::Printf(TEXT("\r\n--%s--\r\n"), *Chegara));
+		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> R = FHttpModule::Get().CreateRequest();
+		R->SetURL(M.Url + TEXT("/v1/audio/transcriptions"));
+		R->SetVerb(TEXT("POST"));
+		R->SetHeader(TEXT("Authorization"), TEXT("Bearer ") + M.Kalit);
+		R->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary=") + Chegara);
+		R->SetContent(MoveTemp(Tana));
+		R->SetTimeout(8.f);
+		const double T0 = FPlatformTime::Seconds();
+		TWeakObjectPtr<UBozorQuloq> Men(this);
+		R->OnProcessRequestComplete().BindLambda([Men, Audio, Asos, Sekund, T0](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
+		{
+			UBozorQuloq* Q = Men.Get();
+			if (!Q) return;
+			FString Matn;
+			TSharedPtr<FJsonObject> J;
+			const bool bJavob = bOk && Javob.IsValid() && Javob->GetResponseCode() == 200
+				&& FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Javob->GetContentAsString()), J) && J.IsValid() && J->TryGetStringField(TEXT("text"), Matn);
+			const double Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
+			if (!bJavob)
+			{
+				UE_LOG(LogBozorQuloq, Warning, TEXT("Masofaviy Rubai javob bermadi (%d, %.0f ms) - lokal STT"), Javob.IsValid() ? Javob->GetResponseCode() : 0, Ms);
+				Q->MahalliyTanit(Audio, Asos, Sekund);
+				return;
+			}
+			Matn.TrimStartAndEndInline();
+			UE_LOG(LogBozorQuloq, Log, TEXT("STT (Rubai server): %.1f s ovoz -> %.0f ms: \"%s\""), Sekund, Ms, *Matn);
+			FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s\t%s\t%.0f\t%s\t%s\n"), *FDateTime::Now().ToString(), *FPaths::GetCleanFilename(Audio), Ms, *Matn, TEXT("RubaiServer")),
+				*(FPaths::GetPath(Asos) / TEXT("jurnal.tsv")), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM, &IFileManager::Get(), FILEWRITE_Append);
+			Q->bTushunyapti = false;
+			if (Q->NatijaKeldi) Q->NatijaKeldi(Matn);
+		});
+		R->ProcessRequest();
+		return;
+	}
+	MahalliyTanit(Audio, Asos, Sekund);
+}
+
+void UBozorQuloq::MahalliyTanit(const FString& Audio, const FString& Asos, float Sekund)
 {
 	bTushunyapti = true;
 	const int32 Iplar = FMath::Clamp(FPlatformMisc::NumberOfCores() / 2, 2, 4);

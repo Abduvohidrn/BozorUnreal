@@ -28,6 +28,8 @@ public class BozorUnreal : ModuleRules
 		if (Target.bBuildEditor)
 		{
 			PrivateDependencyModuleNames.Add("UnrealEd");
+			// UBozorOgizMorph: bosh mesh'lariga og'iz morph target'ini yozish (MeshDescription)
+			PrivateDependencyModuleNames.AddRange(new string[] { "MeshDescription", "SkeletalMeshDescription" });
 		}
 	}
 }

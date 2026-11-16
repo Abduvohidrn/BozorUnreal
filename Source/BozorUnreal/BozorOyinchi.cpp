@@ -87,9 +87,62 @@ void FBozorTabiiyQol::Qoy(USkeletalMeshComponent* Mesh)
 
 void UBozorQolMesh::FinalizeBoneTransform()
 {
+	QolniCHoz();
 	TabiiyQol.Qoy(this);
 	GavdaniYigish();
 	Super::FinalizeBoneTransform();
+}
+
+// O'ng qo'l IK (yelka-tirsak-kaft): tirsak hozirgi bukilish tomonida qoladi, qo'lning qolgan suyaklari (aylanish suyaklari,
+// barmoqlar) ota-onasiga nisbatan avvalgi joyida ergashadi
+void UBozorQolMesh::QolniCHoz()
+{
+	if (QolAlfa <= 0.001f) return;
+	const USkeletalMesh* M = GetSkeletalMeshAsset();
+	if (!M) return;
+	const FReferenceSkeleton& Ref = M->GetRefSkeleton();
+	if (IkMeshi != M)
+	{
+		IkMeshi = M;
+		Yelka = Ref.FindBoneIndex(TEXT("upperarm_r"));
+		Tirsak = Ref.FindBoneIndex(TEXT("lowerarm_r"));
+		Kaft = Ref.FindBoneIndex(TEXT("hand_r"));
+		OngQolZanjiri.Reset();
+		for (int32 i = 1; i < Ref.GetNum(); ++i)
+		{
+			bool bAvlod = false;
+			for (int32 P = Ref.GetParentIndex(i); P != INDEX_NONE && !bAvlod; P = Ref.GetParentIndex(P)) bAvlod = P == Yelka;
+			if (bAvlod) OngQolZanjiri.Add(i);
+		}
+	}
+	TArray<FTransform>& Cs = GetEditableComponentSpaceTransforms();
+	if (Yelka == INDEX_NONE || Tirsak == INDEX_NONE || Kaft == INDEX_NONE || Kaft >= Cs.Num()) return;
+	TArray<FTransform> Eski;
+	Eski.Reserve(OngQolZanjiri.Num());
+	for (const int32 I : OngQolZanjiri) Eski.Add(Cs[I]);
+	const FTransform EskiYelka = Cs[Yelka];
+
+	FTransform A = Cs[Yelka], B = Cs[Tirsak], C = Cs[Kaft];
+	const FVector Nishon = FMath::Lerp(C.GetLocation(), GetComponentTransform().InverseTransformPosition(QolNishon), FMath::Clamp(QolAlfa, 0.f, 1.f));
+	const FVector Orta = (A.GetLocation() + C.GetLocation()) * 0.5f;
+	const FVector Qutb = B.GetLocation() + (B.GetLocation() - Orta).GetSafeNormal() * 30.f;
+	AnimationCore::SolveTwoBoneIK(A, B, C, Qutb, Nishon, false, 1.f, 1.f);
+	Cs[Yelka] = A;
+	Cs[Tirsak] = B;
+	Cs[Kaft] = C;
+	// avlodlar: ota-onaga nisbatan avvalgi joyi saqlanadi (Tirsak va Kaft IK'dan)
+	auto EskiCs = [&](int32 I) -> const FTransform&
+	{
+		if (I == Yelka) return EskiYelka;
+		return Eski[OngQolZanjiri.IndexOfByKey(I)];
+	};
+	for (int32 k = 0; k < OngQolZanjiri.Num(); ++k)
+	{
+		const int32 I = OngQolZanjiri[k];
+		if (I == Tirsak || I == Kaft || I >= Cs.Num()) continue;
+		const int32 P = Ref.GetParentIndex(I);
+		Cs[I] = Eski[k].GetRelativeTransform(EskiCs(P)) * Cs[P];
+	}
 }
 
 // Kameraga faqat qo'llar ko'rinsin: ikki umrov suyagidan pastdagi qo'llardan boshqa hamma suyak (gavda, oyoq,
@@ -269,6 +322,23 @@ void ABozorOyinchi::BeginPlay()
 
 	bTest =FParse::Param(FCommandLine::Get(), TEXT("SotuvTest"));
 	bBot = FParse::Param(FCommandLine::Get(), TEXT("DarajaTest"));
+	// -QuloqFayl=<audio>: mikrofonsiz STT sinovi (masofaviy Rubai yoki lokal) - natija logda "STT (...)" qatorida, keyin o'yin yopiladi
+	FString QuloqFayl;
+	if (FParse::Value(FCommandLine::Get(), TEXT("QuloqFayl="), QuloqFayl))
+	{
+		TWeakObjectPtr<ABozorOyinchi> Men(this);
+		FTimerHandle H;
+		GetWorldTimerManager().SetTimer(H, FTimerDelegate::CreateLambda([Men, QuloqFayl]()
+		{
+			if (!Men.IsValid()) return;
+			Men->Quloq->NatijaKeldi = [Men](const FString& Matn)
+			{
+				UE_LOG(LogBozorOyinchi, Display, TEXT("[QuloqFayl] natija: \"%s\""), *Matn);
+				if (Men.IsValid()) UKismetSystemLibrary::QuitGame(Men.Get(), nullptr, EQuitPreference::Quit, false);
+			};
+			Men->Quloq->Fayldan(QuloqFayl);
+		}), 4.f, false);
+	}
 	// daraja: pul, ro'yxat, eslatma
 	if (const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this))
 		if (const FBozorDaraja* D = Tz->GetDaraja())
@@ -433,8 +503,8 @@ void ABozorOyinchi::Tick(float DeltaSeconds)
 	if (bQolsiz) Quloq->SetAksSado(bSotuvchiGapiryapti ? 3.f : 1.f);
 	if (Quloq->Tinglayapti())
 	{
-		const int32 Chiziq = FMath::Clamp(FMath::RoundToInt(Quloq->GetBalandlik() * 12.f), 0, 10);
-		const FString Chiziqlar = FString::ChrN(FMath::Max(1, Chiziq), TEXT('|'));
+		const int32 ChiziqSoni = FMath::Clamp(FMath::RoundToInt(Quloq->GetBalandlik() * 12.f), 0, 10);
+		const FString Chiziqlar = FString::ChrN(FMath::Max(1, ChiziqSoni), TEXT('|'));
 		Xabar = bQolsiz ? FString::Printf(TEXT("Eshityapman...  %s"), *Chiziqlar) : FString::Printf(TEXT("Gapiring...  %s  (V ni qo'yib yuboring)"), *Chiziqlar);
 		XabarVaqti = GetWorld()->GetTimeSeconds();
 	}
@@ -451,6 +521,7 @@ void ABozorOyinchi::Tick(float DeltaSeconds)
 			: TEXT("Tinglayapman - bemalol gapiravering");
 		XabarVaqti = GetWorld()->GetTimeSeconds();
 	}
+	MolYangila(DeltaSeconds);
 	if (bTest) SotuvTestQadami();
 	if (bBot) BotQadami();
 	if (!bSuhbatda) YaqinSotuvchiniTop();
@@ -759,8 +830,11 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	case EBozorJavob::SalomBering:
 		Harakat = TEXT("V_No");
 		break;
-	case EBozorJavob::Tortdim:
 	case EBozorJavob::PulOldim:
+		// pul olindi - molni uzatadi (sahna V_Handout'ni o'zi o'ynaydi)
+		MolBer(V);
+		break;
+	case EBozorJavob::Tortdim:
 	case EBozorJavob::QaytimUzr:
 	case EBozorJavob::TaroziUzr:
 		Harakat = TEXT("V_Offer");
@@ -788,10 +862,167 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	if (!Harakat.IsNone()) V->Do(Harakat, 1.5f, 3.f);
 }
 
+// ================= mol uzatish
+
+namespace
+{
+	// FP qo'llar FOV'i va dunyo FOV'i: bir xil ekran nuqtasi uchun kamera fazosidagi yon/tik ulushi shu nisbatda
+	float FovNisbati(const UCameraComponent* K)
+	{
+		return K->bEnableFirstPersonFieldOfView
+			? FMath::Tan(FMath::DegreesToRadians(K->FirstPersonFieldOfView * 0.5f)) / FMath::Tan(FMath::DegreesToRadians(K->FieldOfView * 0.5f))
+			: 1.f;
+	}
+}
+
+FVector ABozorOyinchi::FpGa(const FVector& Dunyo, float Masofa) const
+{
+	const FVector K = Kamera->GetComponentLocation();
+	const FRotator R = Kamera->GetComponentRotation();
+	const FVector L = R.UnrotateVector(Dunyo - K);
+	const float F = FovNisbati(Kamera);
+	const FVector Yon(1.f, L.Y / FMath::Max(L.X, 1.f) * F, L.Z / FMath::Max(L.X, 1.f) * F);
+	return K + R.RotateVector(Yon.GetSafeNormal() * Masofa);
+}
+
+// FP nuqtasi ekranda turgan joyga dunyo nuqtasi; masofa - ko'rinadigan o'lcham mos kelsin (dunyo FOV'i kengroq)
+FVector ABozorOyinchi::DunyoGa(const FVector& Fp) const
+{
+	const FVector K = Kamera->GetComponentLocation();
+	const FRotator R = Kamera->GetComponentRotation();
+	const FVector L = R.UnrotateVector(Fp - K);
+	const float F = FovNisbati(Kamera);
+	const FVector Yon(1.f, L.Y / FMath::Max(L.X, 1.f) / F, L.Z / FMath::Max(L.X, 1.f) / F);
+	return K + R.RotateVector(Yon.GetSafeNormal() * L.Size() / F);
+}
+
+void ABozorOyinchi::MolBer(ABozorNpc* V)
+{
+	MolTozala();
+	if (!V || !Suhbat) return;
+	const FBozorSuhbatHolati& H = Suhbat->GetHolat();
+	// kilo - xaltada, dona - rastadagi o'zi (bo'lmasa xalta)
+	UStaticMesh* MolMesh = nullptr;
+	const bool bKilo = H.Mahsulot.Birlik.Equals(TEXT("kilo"), ESearchCase::IgnoreCase);
+	if (!bKilo)
+		if (const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this))
+			for (const FBozorRasta& R : Tz->GetRastalar())
+				if (R.Sotuvchi == V)
+					for (int32 i = 0; i < R.Mollar.Num(); ++i)
+						if (R.Mollar[i].Id == H.Mahsulot.Id && R.MolMeshlari.IsValidIndex(i)) MolMesh = R.MolMeshlari[i];
+	const bool bXalta = !MolMesh;
+	if (!MolMesh) MolMesh = V->XaltaMesh();
+	if (!MolMesh) return;
+	BerilganMol = NewObject<UStaticMeshComponent>(this, TEXT("BerilganMol"));
+	BerilganMol->SetStaticMesh(MolMesh);
+	BerilganMol->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BerilganMol->SetMobility(EComponentMobility::Movable);
+	BerilganMol->RegisterComponent();
+	// xalta ~30 sm, dona (non, qovun) eng katta o'lchami ~22 sm
+	const float Kattasi = MolMesh->GetBoundingBox().GetSize().GetMax();
+	MolOlcham = Kattasi > 1.f ? FMath::Clamp((bXalta ? 30.f : 22.f) / Kattasi, 0.02f, 4.f) : 1.f;
+	BerilganMol->SetWorldScale3D(FVector(MolOlcham));
+	const FBox Ch = MolMesh->GetBoundingBox();
+	MolTutqich = bXalta ? FVector(Ch.GetCenter().X, Ch.GetCenter().Y, Ch.Max.Z) : Ch.GetCenter();
+	MolSotuvchi = V;
+	MolH = V->Do(TEXT("V_Handout"), 2.f, 3.f);
+	MolBosh = GetWorld()->GetTimeSeconds();
+	bMolFp = false;
+	UE_LOG(LogBozorOyinchi, Display, TEXT("[MolBer] %s: %s (%s), uzatish %.1f s"), *V->GetActorNameOrLabel(), *MolMesh->GetName(), *H.Mahsulot.Nomi, MolH);
+}
+
+void ABozorOyinchi::MolTozala()
+{
+	if (BerilganMol) BerilganMol->DestroyComponent();
+	BerilganMol = nullptr;
+	MolSotuvchi = nullptr;
+	MolBosh = -1.0;
+	if (Qollar) Qollar->QolAlfa = 0.f;
+}
+
+void ABozorOyinchi::MolYangila(float Dt)
+{
+	if (MolBosh < 0.0 || !BerilganMol) return;
+	ABozorNpc* V = MolSotuvchi.Get();
+	const float T = float(GetWorld()->GetTimeSeconds() - MolBosh);
+	const float Uzat = 0.55f * MolH;            // sotuvchi qo'li eng cho'zilgan payt
+	const float Uch = Uzat + 0.3f;              // mol bolaning qo'liga yetadi
+	const FVector KaftFp = Qollar->GetSocketLocation(TEXT("hand_r"));
+	const FVector Kam = Kamera->GetComponentLocation(), Old = Kamera->GetForwardVector(), Past = -Kamera->GetUpVector();
+	auto Silliq = [](float A, float B, float X) { const float S = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return S * S * (3.f - 2.f * S); };
+	if (T < Uzat)
+	{
+		if (!V) { MolTozala(); return; }
+		// sotuvchining o'ng qo'lida (bolaga sal yaqin); xalta dastasidan osiladi, dona markazidan ushlanadi
+		const FVector Q = V->GetMesh()->GetSocketLocation(TEXT("hand_r"));
+		const FRotator Bur(0.f, V->GetActorRotation().Yaw, 0.f);
+		BerilganMol->SetWorldLocationAndRotation(Q + (Kam - Q).GetSafeNormal2D() * 5.f - Bur.RotateVector(MolTutqich * MolOlcham), Bur);
+		// bola qo'lini molga cho'zadi (ekranda mol turgan joyga). Ko'zdan 30 sm: bola modeli 0.66 masshtabda, qo'li ~40 sm -
+		// uzoqroq nishonga IK yetmay qo'l pastda qolardi
+		Qollar->QolNishon = FpGa(BerilganMol->GetComponentLocation(), 30.f);
+		Qollar->QolAlfa = Silliq(0.45f * Uzat, Uzat, T);
+		if (bTest)
+		{
+			static int32 Surat = 0;
+			const float Paytlar[] = { 0.5f * Uzat, Uzat - 0.05f };
+			if (Surat < UE_ARRAY_COUNT(Paytlar) && T > Paytlar[Surat])
+				FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / FString::Printf(TEXT("Screenshots/SotuvTest/6_uzatish_%d.png"), Surat++), false, false);
+		}
+		return;
+	}
+	if (T < Uch)
+	{
+		// mol sotuvchi qo'lidan bolaning qo'li ko'ringan joyga (dunyo fazosida) uchadi
+		if (MolUchishBosh.IsZero() || T - Dt < Uzat) MolUchishBosh = BerilganMol->GetComponentLocation();
+		const FVector Tutqich = BerilganMol->GetComponentRotation().RotateVector(MolTutqich * BerilganMol->GetComponentScale().X);
+		BerilganMol->SetWorldLocation(FMath::Lerp(MolUchishBosh, DunyoGa(KaftFp) - Tutqich, Silliq(Uzat, Uch, T)));
+		Qollar->QolAlfa = 1.f;
+		static bool bUchSurat = false;
+		if (bTest && !bUchSurat && T > Uzat + 0.15f)
+		{
+			bUchSurat = true;
+			FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/SotuvTest/6_uzatish_2_uchish.png"), false, false);
+		}
+		return;
+	}
+	if (!bMolFp)
+	{
+		// endi qo'lda: FP fazosida qo'l bilan birga chiziladi (devor/peshtaxtaga kirib ketmaydi). Ko'rinadigan o'lcham sakramasin:
+		// FP'da FOV torroq - shuncha kichik qo'yiladi, keyin tabiiy kattalikkacha o'sadi
+		bMolFp = true;
+		MolUchishBosh = FVector::ZeroVector;
+		BerilganMol->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
+		BerilganMol->MarkRenderStateDirty();
+	}
+	const float F = FovNisbati(Kamera);
+	const float Osish = Silliq(Uch, Uch + 0.4f, T);
+	const float Tushish = Silliq(Uch + 1.9f, Uch + 2.4f, T);   // sumkaga
+	// FP'da kameraga yaqin turadi - kichikroq: F^2 (uchishdagi ko'rinish bilan bir xil) dan 0.55 gacha
+	const float S = MolOlcham * FMath::Lerp(F * F, 0.55f, Osish) * (1.f - 0.6f * Tushish);
+	BerilganMol->SetWorldScale3D(FVector(S));
+	const FRotator Bur = BerilganMol->GetComponentRotation();
+	BerilganMol->SetWorldLocation(KaftFp + Old * 2.f - Bur.RotateVector(MolTutqich * S) + Past * 30.f * Tushish);
+	// qo'l mol bilan pastga - ko'krak oldiga silliq qaytadi, keyin animatsiyadagi joyiga
+	// (o'ngda, suhbat paneli ostida qolmasin)
+	Qollar->QolNishon = FMath::VInterpTo(Qollar->QolNishon, Kam + Old * 28.f + Past * 2.f + Kamera->GetRightVector() * 15.f, Dt, 4.f);
+	Qollar->QolAlfa = 1.f - Silliq(Uch + 1.6f, Uch + 2.4f, T);
+	if (bTest)
+	{
+		// -SotuvTest: uzatish sahnasining lahzalari
+		const FString Dir = FPaths::ProjectSavedDir() / TEXT("Screenshots/SotuvTest/");
+		static int32 Surat = 0;
+		const float Paytlar[] = { Uch + 0.15f, Uch + 1.f, Uch + 2.1f };
+		if (Surat < UE_ARRAY_COUNT(Paytlar) && T > Paytlar[Surat]) FScreenshotRequest::RequestScreenshot(Dir + FString::Printf(TEXT("7_mol_%d_qolda.png"), Surat++), false, false);
+	}
+	if (T > Uch + 2.4f) MolTozala();
+}
+
 void ABozorOyinchi::SotuvchiMatni(const FString& Matn)
 {
 	SotuvchiGapi = Matn;
 	GapVaqti = GetWorld()->GetTimeSeconds();
+	// gap ekranga chiqdi - ovoz hali yo'q bo'lsa ham sotuvchining og'zi qimirlaydi (ovoz kelsa uning konverti boshqaradi)
+	if (Suhbat && Suhbat->GetSotuvchi()) ABozorSotuvchiOvozi::JimGapir(Suhbat->GetSotuvchi(), Matn);
 	Chiqar(TEXT("Sotuvchi"), Matn, FColor::Yellow);
 	// suhbat tarixi (erkin suhbatda LLM eslasin); "[Tarozida: ...]" - o'yin belgisi, gap emas
 	if (!OxirgiGapim.IsEmpty() && Matn != TEXT("..."))
@@ -826,6 +1057,22 @@ void ABozorOyinchi::JonliAyt(int32 Raqam, const FString& Matn, const FString& As
 	const FBozorRasta* R = Tizim ? Tizim->Top(V) : nullptr;
 	const float Ohang = R ? R->Xulq.Ohang : 0.f;
 	const FString Namuna = R ? R->Xulq.OvozNamuna : FString();
+	// server ovozi xulqdan; Malika ovozlarida javob turiga qarab kayfiyat (xursand/afsus). Temp - natijaviy tezlik, chalishdagi
+	// pitch (xulq "tezlik") ham tempni o'zgartiradi - serverdan temp/pitch so'raladi
+	FString ServerOvoz = R ? R->Xulq.ServerOvoz : FString();
+	if (ServerOvoz.StartsWith(TEXT("malika_kore")) && Suhbat)
+	{
+		switch (Suhbat->GetOxirgiJavob())
+		{
+		case EBozorJavob::OshBolsin: case EBozorJavob::QaytimTogri: case EBozorJavob::TushirdiMan: case EBozorJavob::PulOldim:
+			ServerOvoz = TEXT("malika_kore_xursand"); break;
+		case EBozorJavob::QaytimUzr: case EBozorJavob::TaroziUzr: case EBozorJavob::PulYetmaydi: case EBozorJavob::HamyondaYoq:
+		case EBozorJavob::TushirmaymanEngPast: case EBozorJavob::XayrSotibOlmay:
+			ServerOvoz = TEXT("malika_kore_afsus"); break;
+		default: break;
+		}
+	}
+	const float ServerTezlik = R && R->Xulq.Temp > 0.f ? R->Xulq.Temp / FMath::Max(0.5f, R->Xulq.OvozTezlik) : 0.f;
 	Navoiy->Ayt(Fel, V->Ayolmi(), Gap, [Men, Sotuvchi, Raqam, Fel, Asl, Gap, MatnVaqt](USoundWave* Ovoz)
 	{
 		if (!Men.IsValid()) return;
@@ -837,7 +1084,7 @@ void ABozorOyinchi::JonliAyt(int32 Raqam, const FString& Matn, const FString& As
 		const double Hozir = FPlatformTime::Seconds();
 		UE_LOG(LogBozorOyinchi, Display, TEXT("[AiOvoz] %s: matn %.1f s + ovoz %.1f s = %.1f s kutish, gap %.1f s | %s"), bJonliAytdi ? TEXT("jonli") : TEXT("yozilgan"),
 			MatnVaqt - Men->AytVaqt, Hozir - MatnVaqt, Hozir - Men->AytVaqt, Ovoz ? Ovoz->Duration : 0.f, *Gap);
-	}, Ohang, Namuna);
+	}, Ohang, Namuna, ServerOvoz, ServerTezlik);
 }
 
 void ABozorOyinchi::YangiSotuvchi()

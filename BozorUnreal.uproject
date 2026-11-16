@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{D97778E1-4F65-258A-FED3-D298886C453D}",
+	"EngineAssociation": "5.8",
 	"Category": "",
 	"Description": "Dehqon bozori: Unity'dan Unreal'ga ko'chirilgan sinov loyihasi (Third Person)",
 	"Modules": [

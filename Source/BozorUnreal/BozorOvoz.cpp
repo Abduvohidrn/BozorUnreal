@@ -2,6 +2,10 @@
 
 #include "BozorNpc.h"
 #include "BozorSotuv.h"
+#include "BozorOgizMorph.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
+#include "UnrealClient.h"
 #include "AudioDevice.h"
 #include "TimerManager.h"
 #include "Components/AudioComponent.h"
@@ -53,6 +57,11 @@ void ABozorSotuvchiOvozi::BeginPlay()
 	Super::BeginPlay();
 	Instance = this;
 	LoadDialog();
+	if (FParse::Param(FCommandLine::Get(), TEXT("OgizSinov")))
+	{
+		FTimerHandle H;
+		GetWorldTimerManager().SetTimer(H, FTimerDelegate::CreateUObject(this, &ABozorSotuvchiOvozi::OgizSinov, 0), 6.f, false);
+	}
 	for (USoundBase* C : Clips)
 	{
 		if (!C) continue;
@@ -393,6 +402,22 @@ void ABozorSotuvchiOvozi::Jimla(ABozorNpc* Vendor)
 	O->GetWorldTimerManager().ClearTimer(O->JonliTugash);
 }
 
+void ABozorSotuvchiOvozi::JimGapir(ABozorNpc* Vendor, const FString& Matn)
+{
+	ABozorSotuvchiOvozi* O = Instance.Get();
+	if (!O || !Vendor) return;
+	// "[Tarozida: ...]" - o'yin belgisi, aytilmaydi
+	FString Gap = Matn;
+	const int32 Q = Gap.Find(TEXT("["));
+	if (Q > 0) Gap.LeftInline(Q);
+	Gap.TrimStartAndEndInline();
+	if (Gap.IsEmpty() || Gap == TEXT("...")) return;
+	FVoice& V = O->Get(Vendor);
+	if (V.Src->IsPlaying()) return;
+	// ~15 harf/s (o'zbekcha so'zlashuv tezligi), gap oxiridagi nuqta - qisqa to'xtash
+	V.JimGacha = O->GetWorld()->GetTimeSeconds() + FMath::Clamp(Gap.Len() * 0.065f, 0.6f, 9.f);
+}
+
 bool ABozorSotuvchiOvozi::Gapiryapti(ABozorNpc* Vendor)
 {
 	ABozorSotuvchiOvozi* O = Instance.Get();
@@ -418,6 +443,7 @@ void ABozorSotuvchiOvozi::BolakTugadi(UAudioComponent* Src)
 void ABozorSotuvchiOvozi::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	OgizYangila(DeltaSeconds);
 	// suhbat gaplari: bo'lak tugashi bilan keyingisi
 	for (TPair<TWeakObjectPtr<ABozorNpc>, FVoice>& P : Voices)
 	{
@@ -567,9 +593,188 @@ ABozorSotuvchiOvozi::FVoice& ABozorSotuvchiOvozi::Get(ABozorNpc* Vendor)
 	A->SetRelativeLocation(FVector(15.f, 0.f, 155.f - Half));
 	A->RegisterComponent();
 	A->OnAudioFinishedNative.AddUObject(this, &ABozorSotuvchiOvozi::BolakTugadi);   // suhbat gapining keyingi bo'lagi
+	// og'iz uchun ovoz balandligi konverti: delegate Play'dan oldin bog'langan bo'lsagina hisoblanadi
+	A->OnAudioSingleEnvelopeValueNative.AddWeakLambda(this, [this](const UAudioComponent* C, const USoundWave*, const float E)
+	{
+		for (TPair<TWeakObjectPtr<ABozorNpc>, FVoice>& P : Voices)
+			if (P.Value.Src == C)
+			{
+				P.Value.Konvert = E;
+				P.Value.KonvertVaqt = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
+				return;
+			}
+	});
 	V.Src = A;
 	UE_LOG(LogBozorOvoz, Log, TEXT("[BozorOvoz] %s: %s, %s"), *Vendor->GetActorNameOrLabel(), *V.Persona, *V.Section);
 	return Voices.Add(Vendor, MoveTemp(V));
+}
+
+void ABozorSotuvchiOvozi::OgizYangila(float Dt)
+{
+	const double Now = GetWorld()->GetTimeSeconds();
+	for (TPair<TWeakObjectPtr<ABozorNpc>, FVoice>& P : Voices)
+	{
+		FVoice& V = P.Value;
+		ABozorNpc* Npc = P.Key.Get();
+		if (!Npc || !V.Src) continue;
+		if (!V.bBoshlarTopildi)
+		{
+			V.bBoshlarTopildi = true;
+			TArray<USkeletalMeshComponent*> Qismlar;
+			Npc->GetComponents(Qismlar);
+			for (USkeletalMeshComponent* Q : Qismlar)
+				if (Q->GetSkeletalMeshAsset() && Q->GetSkeletalMeshAsset()->FindMorphTarget(UBozorOgizMorph::MorphNomi)) V.Boshlar.Add(Q);
+		}
+		if (V.Boshlar.IsEmpty()) continue;
+		float Maqsad = 0.f;
+		if (!V.Src->IsPlaying() && Now < V.JimGacha)
+		{
+			// ovozsiz gap: bo'g'in ritmi, gap oxirida yopiladi
+			V.Faza += Dt * (9.f + 4.f * FMath::PerlinNoise1D(Now * 0.7f + Npc->GetUniqueID()));
+			Maqsad = (0.2f + 0.6f * FMath::Abs(FMath::Sin(V.Faza))) * FMath::Clamp(float(V.JimGacha - Now) / 0.2f, 0.f, 1.f);
+		}
+		else if (V.Src->IsPlaying())
+		{
+			V.JimGacha = -100.0;   // haqiqiy ovoz boshlandi
+			if (Now - V.KonvertVaqt < 0.25)
+			{
+				// konvert: so'nuvchi eng kattasiga nisbatan (baland/past gapirgan sotuvchi ham bir xil ochadi), jimlikda yopiq
+				V.KonvertMaks = FMath::Max(V.KonvertMaks * FMath::Exp(-Dt * 0.5f), V.Konvert);
+				const float N = V.Konvert / FMath::Max(V.KonvertMaks, 0.02f);
+				Maqsad = FMath::Clamp((N - 0.12f) / 0.7f, 0.f, 1.f);
+			}
+			else
+			{
+				// konvert yo'q (masalan, procedural tovushda hisoblanmasa) - bo'g'in ritmi
+				V.Faza += Dt * (9.f + 4.f * FMath::PerlinNoise1D(Now * 0.7f + Npc->GetUniqueID()));
+				Maqsad = 0.2f + 0.6f * FMath::Abs(FMath::Sin(V.Faza));
+			}
+		}
+		if (OgizMajburiy >= 0.f && Npc == SinovSotuvchi.Get()) Maqsad = OgizMajburiy;
+		// ochilish tez, yopilish sekinroq - lab qimirlashi tabiiy ko'rinadi
+		V.Ogiz = OgizMajburiy >= 0.f && Npc == SinovSotuvchi.Get() ? Maqsad : FMath::FInterpTo(V.Ogiz, Maqsad, Dt, Maqsad > V.Ogiz ? 28.f : 14.f);
+		if (V.Ogiz < 0.002f && Maqsad == 0.f) V.Ogiz = 0.f;
+		for (const TWeakObjectPtr<USkeletalMeshComponent>& B : V.Boshlar)
+			if (B.IsValid()) B->SetMorphTarget(UBozorOgizMorph::MorphNomi, V.Ogiz * OgizMaks);
+		static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("OgizLog"));
+		static double KeyingiLog = 0.0;
+		if (bLog && V.Ogiz > 0.05f && Now > KeyingiLog)
+		{
+			KeyingiLog = Now + 0.5;
+			UE_LOG(LogBozorOvoz, Display, TEXT("[Ogiz] %s og'iz=%.2f %s, %d bosh"), *Npc->GetActorNameOrLabel(), V.Ogiz,
+				V.Src->IsPlaying() ? TEXT("ovoz") : TEXT("jim"), V.Boshlar.Num());
+		}
+	}
+}
+
+void ABozorSotuvchiOvozi::SinovKameraJoyla(float Masofa)
+{
+	ABozorNpc* V = SinovSotuvchi.Get();
+	ACameraActor* Cam = SinovKamera.Get();
+	if (!V || !Cam) return;
+	USkeletalMeshComponent* Bosh = nullptr;
+	TArray<USkeletalMeshComponent*> Q;
+	V->GetComponents(Q);
+	for (USkeletalMeshComponent* C : Q)
+		if (C->GetSkeletalMeshAsset() && C->GetSkeletalMeshAsset()->FindMorphTarget(UBozorOgizMorph::MorphNomi)) Bosh = C;
+	if (!Bosh) return;
+	// og'iz nuqtasi (mesh fazosi: old ~10 sm, og'iz ~ erkak 164 / ayol 157) "head" suyagi bilan hozirgi pozaga ko'chiriladi:
+	// dunyo = nuqta * suyak(ref)^-1 * suyak(hozir)
+	const FReferenceSkeleton& Ref = Bosh->GetSkeletalMeshAsset()->GetRefSkeleton();
+	const int32 Bone = Ref.FindBoneIndex(TEXT("head"));
+	FTransform RefCS = FTransform::Identity;
+	for (int32 B = Bone; B != INDEX_NONE; B = Ref.GetParentIndex(B)) RefCS = RefCS * Ref.GetRefBonePose()[B];
+	const FTransform Kochir = RefCS.Inverse() * Bosh->GetBoneTransform(Bone);
+	const FVector Yuz = Kochir.TransformPosition(FVector(0.f, 10.f, V->bFemale ? 157.f : 164.f));
+	const FVector Old = Kochir.TransformVector(FVector(0.f, 1.f, 0.f)).GetSafeNormal();
+	const FVector Ong = Kochir.TransformVector(FVector(1.f, 0.f, 0.f)).GetSafeNormal();
+	// o'yinchi ko'zi balandligidan (bola - sotuvchidan pastroq) va sal yondan
+	const FVector Joy = Yuz + Old * Masofa + Ong * Masofa * 0.25f - FVector(0.f, 0.f, Masofa * 0.12f);
+	Cam->SetActorLocationAndRotation(Joy, (Yuz - Joy).Rotation());
+}
+
+void ABozorSotuvchiOvozi::OgizSinov(int32 Qadam)
+{
+	const FString Dir = FPaths::ProjectSavedDir() / TEXT("Screenshots/OgizSinov/");
+	auto Keyin = [this](int32 Q, float S)
+	{
+		FTimerHandle H;
+		GetWorldTimerManager().SetTimer(H, FTimerDelegate::CreateUObject(this, &ABozorSotuvchiOvozi::OgizSinov, Q), S, false);
+	};
+	ABozorNpc* V = SinovSotuvchi.Get();
+	if (Qadam == 0)
+	{
+		// o'yinchiga eng yaqin, og'iz morph'i bor sotuvchi
+		FVector L;
+		ListenerLocation(L);
+		float Eng = TNumericLimits<float>::Max();
+		for (TActorIterator<ABozorNpc> It(GetWorld()); It; ++It)
+		{
+			if (It->NpcRole != EBozorRole::Sotuvchi) continue;
+			TArray<USkeletalMeshComponent*> Q;
+			It->GetComponents(Q);
+			const bool bBor = Q.ContainsByPredicate([](USkeletalMeshComponent* C) { return C->GetSkeletalMeshAsset() && C->GetSkeletalMeshAsset()->FindMorphTarget(UBozorOgizMorph::MorphNomi); });
+			const float D = FVector::DistSquared(It->GetActorLocation(), L);
+			if (bBor && D < Eng) { Eng = D; V = *It; }
+		}
+		if (!V)
+		{
+			UE_LOG(LogBozorOvoz, Display, TEXT("[OgizSinov] og'iz morph'i bor sotuvchi topilmadi"));
+			UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
+			return;
+		}
+		SinovSotuvchi = V;
+		Get(V);
+		if (APlayerController* Pc = UGameplayStatics::GetPlayerController(this, 0))
+			if (ACameraActor* Cam = GetWorld()->SpawnActor<ACameraActor>())
+			{
+				Cam->GetCameraComponent()->SetFieldOfView(40.f);
+				Pc->SetViewTarget(Cam);
+				SinovKamera = Cam;
+			}
+		SinovKameraJoyla(120.f);
+		OgizMajburiy = 0.f;
+		Keyin(1, 2.5f);
+		return;
+	}
+	if (!V) return;
+	// har surat oldidan kamera boshga qayta to'g'rilanadi (sotuvchi animatsiyada qimirlaydi); keyingi qadam 0.25 s keyin suratga oladi
+	if (Qadam == 1) { SinovKameraJoyla(120.f); Keyin(2, 0.25f); return; }
+	if (Qadam == 2) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("1_yopiq_120sm.png"), false, false); OgizMajburiy = 1.f; Keyin(30, 0.5f); return; }
+	if (Qadam == 30) { SinovKameraJoyla(120.f); Keyin(31, 0.25f); return; }
+	if (Qadam == 31) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("2_ochiq_120sm.png"), false, false); Keyin(32, 0.3f); return; }
+	if (Qadam == 32) { SinovKameraJoyla(55.f); Keyin(33, 0.25f); return; }
+	if (Qadam == 33) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("3_ochiq_55sm.png"), false, false); OgizMajburiy = 0.f; Keyin(34, 0.3f); return; }
+	if (Qadam == 34) { SinovKameraJoyla(55.f); Keyin(35, 0.25f); return; }
+	if (Qadam == 35) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("3_yopiq_55sm.png"), false, false); Keyin(3, 0.3f); return; }
+	if (Qadam == 3)
+	{
+		SinovKameraJoyla(120.f);
+		OgizMajburiy = -1.f;
+		// haqiqiy gap: chaqiriq klipi - og'iz konvert bilan qimirlashi kerak
+		FVoice& Ov = Get(V);
+		for (const TPair<FString, TArray<USoundBase*>>& K : ByKey)
+			if (K.Key.StartsWith(TEXT("chaqiriq")) && K.Value.Num())
+			{
+				Ov.Src->Stop();
+				Ov.Src->SetSound(K.Value[0]);
+				Ov.Src->Play();
+				break;
+			}
+		Keyin(4, 0.1f);
+		return;
+	}
+	if (Qadam >= 4 && Qadam < 4 + 24)
+	{
+		const FVoice& Ov = Get(V);
+		if (Qadam == 11) SinovKameraJoyla(120.f);
+		UE_LOG(LogBozorOvoz, Display, TEXT("[OgizSinov] t=%.1f chalinyapti=%d konvert=%.3f (yangi=%d) og'iz=%.2f"), (Qadam - 4) * 0.1f,
+			Ov.Src->IsPlaying() ? 1 : 0, Ov.Konvert, GetWorld()->GetTimeSeconds() - Ov.KonvertVaqt < 0.25 ? 1 : 0, Ov.Ogiz);
+		if (Qadam == 12) FScreenshotRequest::RequestScreenshot(Dir + TEXT("4_gapirmoqda.png"), false, false);
+		Keyin(Qadam + 1, 0.1f);
+		return;
+	}
+	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
 }
 
 // sot_<tur>_<bolim>_<persona>_<nn> -> <tur>_<bolim>_<a|e>_<nn>: bitta haqiqiy yozuv ayol (a1..a3) yoki erkak (e1..e2)

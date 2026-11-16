@@ -373,6 +373,8 @@ void BozorSotuv::XulqniOqi(const FJsonObject& O, FBozorXulq& X)
 		(*Ovoz)->TryGetNumberField(TEXT("ohang"), X.Ohang);
 		(*Ovoz)->TryGetNumberField(TEXT("tezlik"), X.OvozTezlik);
 		(*Ovoz)->TryGetStringField(TEXT("namuna"), X.OvozNamuna);
+		(*Ovoz)->TryGetStringField(TEXT("server"), X.ServerOvoz);
+		(*Ovoz)->TryGetNumberField(TEXT("temp"), X.Temp);
 		X.Ohang = FMath::Clamp(X.Ohang, -6.f, 6.f);
 		X.OvozTezlik = FMath::Clamp(X.OvozTezlik, 0.8f, 1.2f);
 	}
@@ -1303,7 +1305,7 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 
 	// sotuvchilar va ularning maydoni: sotuvchi + navbat boshlari, chetidan 60 sm
 	// har mol uchun: nechta topildi, joylari yig'indisi (o'rtachasi uchun) va eng baland nuqtasi
-	struct FMaydon { ABozorNpc* Sotuvchi; int32 Stall; FBox Box; FVector Navbat; TArray<int32> Soni; TArray<FVector> Yigindi; TArray<float> Tepa; };
+	struct FMaydon { ABozorNpc* Sotuvchi; int32 Stall; FBox Box; FVector Navbat; TArray<int32> Soni; TArray<FVector> Yigindi; TArray<float> Tepa; TArray<const UStaticMesh*> Mesh; };
 	TArray<FMaydon> Maydon;
 	for (const FBozorQueueSpot& Q : Mgr->Queues)
 	{
@@ -1320,6 +1322,7 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 			M->Soni.SetNumZeroed(Katalog.Num());
 			M->Yigindi.SetNumZeroed(Katalog.Num());
 			M->Tepa.SetNumZeroed(Katalog.Num());
+			M->Mesh.SetNumZeroed(Katalog.Num());
 		}
 		M->Box += Q.Points[0];
 	}
@@ -1338,7 +1341,7 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 		MeshMol.Add(Mesh, Topildi);
 		return Topildi;
 	};
-	auto Sana = [&](int32 Mol, const FBox& B)
+	auto Sana = [&](int32 Mol, const FBox& B, const UStaticMesh* Mesh)
 	{
 		const FVector P = B.GetCenter();
 		for (FMaydon& M : Maydon)
@@ -1347,6 +1350,9 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 				++M.Soni[Mol];
 				M.Yigindi[Mol] += P;
 				M.Tepa[Mol] += static_cast<float>(B.Max.Z);   // o'rtacha tepa (bitta baland narsa taxtachani ko'tarib yubormasin)
+				// uzatish uchun eng kichigi (uyum emas, bitta dona)
+				const UStaticMesh*& Eng = M.Mesh[Mol];
+				if (!Eng || Mesh->GetBounds().SphereRadius < Eng->GetBounds().SphereRadius) Eng = Mesh;
 			}
 	};
 	for (TActorIterator<AActor> It(&World); It; ++It)
@@ -1363,9 +1369,9 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 				FTransform Tr;
 				const FBox Mahalliy = Mesh->GetBoundingBox();
 				for (int32 i = 0; i < Ism->GetInstanceCount(); ++i)
-					if (Ism->GetInstanceTransform(i, Tr, true)) Sana(Mol, Mahalliy.TransformBy(Tr));
+					if (Ism->GetInstanceTransform(i, Tr, true)) Sana(Mol, Mahalliy.TransformBy(Tr), Mesh);
 			}
-			else Sana(Mol, C->Bounds.GetBox());
+			else Sana(Mol, C->Bounds.GetBox(), Mesh);
 		}
 	}
 
@@ -1436,6 +1442,7 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 			FVector J = M.Yigindi[i] / M.Soni[i];
 			J.Z = M.Tepa[i] / M.Soni[i];
 			R.MolJoylari.Add(J);
+			R.MolMeshlari.Add(const_cast<UStaticMesh*>(M.Mesh[i]));
 		}
 		if (R.Mollar.Num()) Rastalar.Add(MoveTemp(R));
 	}

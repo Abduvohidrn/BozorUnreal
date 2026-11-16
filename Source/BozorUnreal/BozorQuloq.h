@@ -76,6 +76,8 @@ private:
 	void Yakunla();
 	// STT jarayoni (alohida ip): Audio -> Asos.txt -> NatijaKeldi (o'yin oqimida)
 	void Tanit(const FString& Audio, const FString& Asos, float Sekund);
+	// lokal STT: rubaiSTT (DLL) yoki CrispASR + FastConformer (Tanit masofaviy server javob bermasa shunga o'tadi)
+	void MahalliyTanit(const FString& Audio, const FString& Asos, float Sekund);
 
 	TSharedPtr<Audio::FAudioCaptureSynth> Synth;
 	TArray<float> Xom;      // qurilma chastotasida, kanallar aralash (interleaved)

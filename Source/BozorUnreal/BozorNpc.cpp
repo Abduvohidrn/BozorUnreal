@@ -857,6 +857,11 @@ FBozorCo ABozorNpc::DealWith(ABozorNpc* V, int32 ForceBuy)
 	V->EndDeal();
 }
 
+UStaticMesh* ABozorNpc::XaltaMesh() const
+{
+	return Mgr && Mgr->BagMeshes.Num() ? Mgr->BagMeshes[FMath::RandRange(0, Mgr->BagMeshes.Num() - 1)].Get() : nullptr;
+}
+
 void ABozorNpc::TakeBag()
 {
 	if (Bag || !Mgr || Mgr->BagMeshes.Num() == 0) return;

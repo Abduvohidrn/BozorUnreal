@@ -58,3 +58,6 @@ AI/tts/natija/
 AI/tts/namuna/
 # yozilgan gap bo'laklari Unreal'ga import qilinadi (Content/Bozor/Audio/Gaplar, LFS) - wav'lar qayta yoziladi
 AI/tts/gaplar/
+# masofaviy Navoiy sozlamasi - API kaliti bor, git'ga kirmasin
+AI/navoiy/masofaviy.json
+AI/stt/masofaviy.json

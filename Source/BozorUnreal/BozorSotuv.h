@@ -56,6 +56,11 @@ struct FBozorXulq
 	float OvozTezlik = 1.f;
 	// namuna ovoz (AI/navoiy/ovozlar/<namuna>.wav, masalan "odamlar/erkak_cv_137014"); bo'sh - fe'l x jins asl ovozi
 	FString OvozNamuna;
+	// ofis Navoiy serveridagi ovozi ("ovoz.server": malika_kore, jj_4, erkak ...) va gapirish tempi ("ovoz.temp", 0 - fe'ldan).
+	// Bo'sh - fe'l x jinsdan (UBozorNavoiy::MasofaviyOvoz). Temp - natijaviy tezlik: serverga temp/tezlik so'raladi, chunki
+	// o'yin ovozni "tezlik" (pitch) bilan chaladi - erkaklar bitta server ovozida bo'lsa ham tembri farq qiladi
+	FString ServerOvoz;
+	float Temp = 0.f;
 	bool Bormi() const { return !Tavsif.IsEmpty(); }
 };
 
@@ -73,6 +78,8 @@ struct FBozorRasta
 	UPROPERTY(BlueprintReadOnly) float XatoQaytim = 0.f; // qaytimni kam berish ehtimoli
 	UPROPERTY(BlueprintReadOnly) TArray<FBozorMahsulot> Mollar;
 	UPROPERTY(BlueprintReadOnly) TArray<FVector> MolJoylari;   // har mol uyumining tepasi (narx taxtachasi uchun), Mollar tartibida
+	// har molning rastadagi eng kichik mesh'i (bitta dona: non, qovun...) - o'yinchiga uzatish sahnasi uchun, Mollar tartibida
+	UPROPERTY(BlueprintReadOnly) TArray<TObjectPtr<class UStaticMesh>> MolMeshlari;
 	UPROPERTY(BlueprintReadOnly) FVector Markaz = FVector::ZeroVector;   // sotuvchi va navbat orasi
 	UPROPERTY(BlueprintReadOnly) FVector Xaridorga = FVector::ForwardVector;   // sotuvchidan xaridor tomonga (gorizontal)
 

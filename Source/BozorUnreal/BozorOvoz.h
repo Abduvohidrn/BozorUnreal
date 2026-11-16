@@ -6,6 +6,7 @@
 
 class ABozorNpc;
 class UAudioComponent;
+class USkeletalMeshComponent;
 class USoundBase;
 class USoundWave;
 
@@ -196,6 +197,9 @@ public:
 	static void JonliDavom(USoundWave* Ovoz, float Qolgan);
 	// sotuvchi hozir gapiryaptimi (sinovlar uchun)
 	static bool Gapiryapti(ABozorNpc* Vendor);
+	// Ovozsiz gap (ovoz topilmadi yoki hali kelmadi): og'iz matn uzunligicha bo'g'in ritmida qimirlaydi. Haqiqiy ovoz chalinsa -
+	// og'izni uning konverti boshqaradi
+	static void JimGapir(ABozorNpc* Vendor, const FString& Matn);
 	// o'yinchi sotuvchining gapini bo'ldi (ovozli chatdagi kabi): gap darhol to'xtaydi, navbatdagi bo'laklar tashlanadi
 	static void Jimla(ABozorNpc* Vendor);
 	// Suhbatdagi javob: oldindan yozilgan bo'laklarni (UBozorSuhbat::GetBolaklar, AI/tts/gaplar_yoz.py ->
@@ -255,6 +259,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	int32 MaxCalls = 2;
 
+	// Gapirganda og'iz: bosh mesh'idagi "Ogiz_Ochiq" morph'i (UBozorOgizMorph yozadi) ovoz balandligi konvertiga qarab
+	// 0..OgizMaks oralig'ida ochiladi; konvert kelmasa bo'g'in ritmida (~5 Hz) qimirlaydi
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor|Og'iz", meta = (ClampMin = "0", ClampMax = "1.5"))
+	float OgizMaks = 0.6f;   // morph 10° jag'; lablar payvandlangan - kattaroq ochilishda cho'zilish ko'rinadi
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -273,7 +282,21 @@ private:
 		TArray<USoundBase*> Navbat;   // SayLine: suhbat gapining keyingi bo'laklari (BolakTugadi yuritadi)
 		TArray<USoundBase*> GapNavbat;   // SayGap: yozilgan bo'laklar navbati (GapKesh ushlab turadi), Tick yuritadi
 		int32 GapI = 0;
+		// og'iz: ovoz konverti (OnAudioSingleEnvelopeValueNative), uning so'nuvchi eng kattasi va hozirgi ochiqlik
+		float Konvert = 0.f, KonvertMaks = 0.05f, Ogiz = 0.f;
+		double KonvertVaqt = -100.0;
+		double JimGacha = -100.0;   // ovozsiz gap shu paytgacha
+		float Faza = 0.f;
+		TArray<TWeakObjectPtr<USkeletalMeshComponent>> Boshlar;   // shu sotuvchining og'iz morph'i bor qismlari
+		bool bBoshlarTopildi = false;
 	};
+	void OgizYangila(float Dt);
+	// -OgizSinov: yuzga kamera, og'iz yopiq/ochiq suratlari, haqiqiy gapda konvert logi, keyin chiqish
+	void OgizSinov(int32 Qadam);
+	TWeakObjectPtr<ABozorNpc> SinovSotuvchi;
+	TWeakObjectPtr<class ACameraActor> SinovKamera;
+	void SinovKameraJoyla(float Masofa);
+	float OgizMajburiy = -1.f;
 	void BolakTugadi(UAudioComponent* Src);
 
 	bool TrySay(ABozorNpc* Vendor, FName Kind);

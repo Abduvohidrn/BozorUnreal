@@ -1,0 +1,18 @@
+{
+  "_izoh": "Nusxalab masofaviy.json deb saqlang va kalitni yozing (masofaviy.json git'ga kirmaydi). Kalitni NAVOIY_KALIT muhit o'zgaruvchisi bilan ham berish mumkin. Ovozlar: GET /v1/voices",
+  "url": "http://172.17.2.36:8894",
+  "kalit": "",
+  "ovozlar": {
+    "mehribon ayol": "malika_kore",
+    "qattiq ayol": "jj_4c",
+    "shoshqaloq ayol": "malika_kore_shoshilinch",
+    "ayyor ayol": "malika_kore_xursand",
+    "erkak": "erkak"
+  },
+  "tezlik": {
+    "mehribon": 1.05,
+    "qattiq": 1.0,
+    "shoshqaloq": 1.2,
+    "ayyor": 1.1
+  }
+}

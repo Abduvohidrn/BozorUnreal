@@ -21,6 +21,7 @@ struct FBozorNavoiyOqim
 	int64 Bayt = 0;
 	int32 Chastota = 24000;
 	bool bJavob = false, bSarlavha = false, bYaroqsiz = false, bTugadi = false;
+	bool bHttpXato = false;   // masofaviy: javob ovoz emas (Content-Type json/text) - HTTP ipi yozadi (Qulf ostida)
 };
 
 // Sotuvchining jonli ovozi: lokal Navoiy TTS (aisha-org/navoiy-tts + CosyVoice2-0.5B, Apache-2.0) har gapni
@@ -47,7 +48,9 @@ public:
 
 	// Matnni ovozlashtiradi (oqim bilan); Tayyor o'yin oqimida birinchi bo'lak kelganda chaqiriladi - tovush keyingi
 	// bo'laklar bilan to'lib boradi (Duration ham o'sadi). Ovoz=nullptr - server javob bermadi/birinchi bo'lak kechikdi
-	void Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFunction<void(USoundWave* Ovoz)> Tayyor, float Ohang = 0.f, const FString& Namuna = FString());
+	// ServerOvoz/ServerTezlik - masofaviy rejimda sotuvchining o'z ovozi va serverdan so'raladigan tezlik (0 - fe'ldan)
+	void Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFunction<void(USoundWave* Ovoz)> Tayyor, float Ohang = 0.f, const FString& Namuna = FString(),
+		const FString& ServerOvoz = FString(), float ServerTezlik = 0.f);
 
 	// WAV (PCM16) baytlaridan chalinadigan tovush (sinovlar uchun ochiq)
 	static USoundWave* WavdanOvoz(const TArray<uint8>& Wav, UObject* Egasi);
@@ -63,6 +66,18 @@ private:
 	// va o'yinni yopadi; natija logda "[NavoiySinov]" qatorlarida
 	void Sinov(int32 I, int32 Ovozli, int32 Chalindi);
 	void OqimIshla(const TSharedRef<FBozorNavoiyOqim, ESPMode::ThreadSafe>& O, bool bOxiri);
+
+	// Masofaviy Navoiy (ofis DGX Spark, TensorRT: birinchi ovoz ~0.3 s, RTF ~0.28): AI/navoiy/masofaviy.json
+	// {"url": "http://172.17.2.36:8894", "kalit": "...", "ovozlar": {"mehribon ayol": "malika_kore", ...}, "tezlik": {"shoshqaloq": 1.2}}
+	// Kalit faqat shu faylda yoki NAVOIY_KALIT muhit o'zgaruvchisida (fayl git'ga kirmaydi). Server tayyor bo'lsa lokal server
+	// ishga tushirilmaydi (videokarta o'yin va LLM'ga qoladi); javob bermasa - lokal Navoiy. -NavoiyLokal - masofaviyni chetlab o'tish
+	bool MasofaviySozlama();
+	void MasofaviyniTekshir();
+	FString MasofaviyOvoz(const FString& Fel, bool bAyol) const;
+	bool bMasofaviy = false;
+	FString MUrl, MKalit;
+	TMap<FString, FString> MOvozlar;
+	TMap<FString, float> MTezlik;
 	int32 Faol = 0;
 	float EskiFps = 0.f;
 	bool bFpsOzgardi = false;

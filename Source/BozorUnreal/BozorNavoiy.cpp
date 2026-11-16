@@ -71,6 +71,12 @@ void UBozorNavoiy::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 	const TCHAR* Cmd = FCommandLine::Get();
 	if (FParse::Param(Cmd, TEXT("NavoiyYoq")) || FParse::Param(Cmd, TEXT("AiYoq")) || IsRunningCommandlet() || IsRunningDedicatedServer()) return;
+	// ofis serveri bor bo'lsa - avval u (javob bermasa MasofaviyniTekshir lokalni ishga tushiradi)
+	if (!FParse::Param(Cmd, TEXT("NavoiyLokal")) && MasofaviySozlama())
+	{
+		MasofaviyniTekshir();
+		return;
+	}
 	if (!FayllarBormi())
 	{
 		UE_LOG(LogBozorNavoiy, Log, TEXT("Navoiy o'rnatilmagan (%s) - yozilgan ovozlar ishlatiladi"), *NavoiyPapka());
@@ -149,6 +155,77 @@ void UBozorNavoiy::Ishga()
 	Sogmi(0);
 }
 
+bool UBozorNavoiy::MasofaviySozlama()
+{
+	FString Matn;
+	TSharedPtr<FJsonObject> J;
+	if (FFileHelper::LoadFileToString(Matn, *(NavoiyPapka() / TEXT("masofaviy.json"))))
+		FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Matn), J);
+	if (J.IsValid())
+	{
+		J->TryGetStringField(TEXT("url"), MUrl);
+		J->TryGetStringField(TEXT("kalit"), MKalit);
+		const TSharedPtr<FJsonObject>* Ov = nullptr;
+		if (J->TryGetObjectField(TEXT("ovozlar"), Ov))
+			for (const auto& P : (*Ov)->Values) MOvozlar.Add(FString(P.Key), P.Value->AsString());
+		const TSharedPtr<FJsonObject>* Tz = nullptr;
+		if (J->TryGetObjectField(TEXT("tezlik"), Tz))
+			for (const auto& P : (*Tz)->Values) MTezlik.Add(FString(P.Key), float(P.Value->AsNumber()));
+	}
+	const FString EnvUrl = FPlatformMisc::GetEnvironmentVariable(TEXT("NAVOIY_URL"));
+	const FString EnvKalit = FPlatformMisc::GetEnvironmentVariable(TEXT("NAVOIY_KALIT"));
+	if (!EnvUrl.IsEmpty()) MUrl = EnvUrl;
+	if (!EnvKalit.IsEmpty()) MKalit = EnvKalit;
+	MUrl.RemoveFromEnd(TEXT("/"));
+	if (MUrl.IsEmpty()) return false;
+	if (MKalit.IsEmpty()) UE_LOG(LogBozorNavoiy, Warning, TEXT("Masofaviy Navoiy (%s): kalit yo'q - AI/navoiy/masofaviy.json \"kalit\" yoki NAVOIY_KALIT"), *MUrl);
+	return !MKalit.IsEmpty();
+}
+
+// ofis serveri /health: ready bo'lsa masofaviy rejim, bo'lmasa lokal Navoiy
+void UBozorNavoiy::MasofaviyniTekshir()
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> R = FHttpModule::Get().CreateRequest();
+	R->SetURL(MUrl + TEXT("/health"));
+	R->SetVerb(TEXT("GET"));
+	R->SetTimeout(3.f);
+	BoshVaqt = FPlatformTime::Seconds();
+	TWeakObjectPtr<UBozorNavoiy> Men(this);
+	R->OnProcessRequestComplete().BindLambda([Men](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
+	{
+		if (!Men.IsValid()) return;
+		TSharedPtr<FJsonObject> J;
+		bool bReady = false;
+		if (bOk && Javob.IsValid() && Javob->GetResponseCode() == 200
+			&& FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Javob->GetContentAsString()), J) && J.IsValid())
+			J->TryGetBoolField(TEXT("ready"), bReady);
+		if (bReady)
+		{
+			Men->bMasofaviy = true;
+			Men->bTayyor = true;
+			UE_LOG(LogBozorNavoiy, Log, TEXT("Navoiy tayyor: masofaviy %s (%.1f s) - lokal server ishga tushirilmadi"), *Men->MUrl, FPlatformTime::Seconds() - Men->BoshVaqt);
+			if (FParse::Param(FCommandLine::Get(), TEXT("NavoiySinov"))) Men->Sinov(0, 0, 0);
+			return;
+		}
+		UE_LOG(LogBozorNavoiy, Warning, TEXT("Masofaviy Navoiy (%s) javob bermadi - lokal Navoiy"), *Men->MUrl);
+		if (Men->FayllarBormi()) Men->Ishga();
+	});
+	R->ProcessRequest();
+}
+
+// fe'l x jins -> server ovozi (masofaviy.json "ovozlar" ustun; serverda faqat bitta erkak ovozi bor)
+FString UBozorNavoiy::MasofaviyOvoz(const FString& Fel, bool bAyol) const
+{
+	if (const FString* S = MOvozlar.Find(Fel + (bAyol ? TEXT(" ayol") : TEXT(" erkak")))) return *S;
+	if (const FString* S = MOvozlar.Find(bAyol ? TEXT("ayol") : TEXT("erkak"))) return *S;
+	if (!bAyol) return TEXT("erkak");
+	static const TMap<FString, FString> Ayol = {
+		{TEXT("mehribon"), TEXT("malika_kore")}, {TEXT("qattiq"), TEXT("jj_4c")},
+		{TEXT("shoshqaloq"), TEXT("malika_kore_shoshilinch")}, {TEXT("ayyor"), TEXT("malika_kore_xursand")} };
+	const FString* S = Ayol.Find(Fel);
+	return S ? *S : FString(TEXT("malika_kore"));
+}
+
 // /health 200 bo'lguncha har 1 s (modellar GPU'ga ~20-40 s yuklanadi)
 void UBozorNavoiy::Sogmi(int32 Urinish)
 {
@@ -183,7 +260,8 @@ void UBozorNavoiy::Sogmi(int32 Urinish)
 	R->ProcessRequest();
 }
 
-void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFunction<void(USoundWave* Ovoz)> Tayyor, float Ohang, const FString& Namuna)
+void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFunction<void(USoundWave* Ovoz)> Tayyor, float Ohang, const FString& Namuna,
+	const FString& ServerOvoz, float ServerTezlik)
 {
 	if (!Tayyormi() || Matn.TrimStartAndEnd().IsEmpty())
 	{
@@ -209,7 +287,38 @@ void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFun
 	O->Nomi = FString::Printf(TEXT("[%s %s] %s"), *Fel, bAyol ? TEXT("ayol") : TEXT("erkak"), *Matn);
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> R = FHttpModule::Get().CreateRequest();
-	R->SetURL(FString::Printf(TEXT("http://127.0.0.1:%d/ayt_oqim"), Port));
+	if (bMasofaviy)
+	{
+		// ofis serveri (OpenAI'ga o'xshash): javob - sarlavhasiz PCM s16le 24 kHz mono oqimi
+		TSharedRef<FJsonObject> M = MakeShared<FJsonObject>();
+		M->SetStringField(TEXT("input"), Matn);
+		const FString Ovoz = ServerOvoz.IsEmpty() ? MasofaviyOvoz(Fel, bAyol) : ServerOvoz;
+		M->SetStringField(TEXT("voice"), Ovoz);
+		M->SetStringField(TEXT("response_format"), TEXT("pcm"));
+		const float* Tz = MTezlik.Find(Fel);
+		const float Tezlik = ServerTezlik > 0.f ? ServerTezlik : (Tz ? *Tz : (Fel == TEXT("shoshqaloq") ? 1.2f : 1.05f));
+		M->SetNumberField(TEXT("speed"), FMath::Clamp(Tezlik, 0.75f, 1.3f));
+		Body.Reset();
+		FJsonSerializer::Serialize(M, TJsonWriterFactory<>::Create(&Body));
+		R->SetURL(MUrl + TEXT("/v1/audio/speech"));
+		R->SetHeader(TEXT("Authorization"), TEXT("Bearer ") + MKalit);
+		O->bSarlavha = true;
+		O->Chastota = 24000;
+		O->Nomi = Ovoz + TEXT(" ") + O->Nomi;
+		// xato javobi (401/404/422 - JSON matn) ovoz deb chalinmasin
+		R->OnHeaderReceived().BindLambda([O](FHttpRequestPtr, const FString& Nom, const FString& Qiymat)
+		{
+			if (Nom.Equals(TEXT("Content-Type"), ESearchCase::IgnoreCase) && !Qiymat.Contains(TEXT("audio")))
+			{
+				FScopeLock L(&O->Qulf);
+				O->bHttpXato = true;
+			}
+		});
+	}
+	else
+	{
+		R->SetURL(FString::Printf(TEXT("http://127.0.0.1:%d/ayt_oqim"), Port));
+	}
 	R->SetVerb(TEXT("POST"));
 	R->SetHeader(TEXT("Content-Type"), TEXT("application/json; charset=utf-8"));
 	R->SetContentAsString(Body);
@@ -224,13 +333,15 @@ void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFun
 		}
 		AsyncTask(ENamedThreads::GameThread, [O, Men]() { if (Men.IsValid()) Men->OqimIshla(O, false); });
 	}));
-	KadrChekla(true);
-	R->OnProcessRequestComplete().BindLambda([Men, O](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
+	// kadrni cheklash faqat lokal Navoiy uchun (u o'yin bilan bitta videokartada)
+	const bool bChekla = !bMasofaviy;
+	if (bChekla) KadrChekla(true);
+	R->OnProcessRequestComplete().BindLambda([Men, O, bChekla](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
 	{
 		if (!Men.IsValid()) return;
-		Men->KadrChekla(false);
+		if (bChekla) Men->KadrChekla(false);
 		if (Javob.IsValid() && Javob->GetResponseCode() != 200)
-			UE_LOG(LogBozorNavoiy, Warning, TEXT("Navoiy javobi %d"), Javob->GetResponseCode());
+			UE_LOG(LogBozorNavoiy, Warning, TEXT("Navoiy javobi %d: %s"), Javob->GetResponseCode(), *Javob->GetContentAsString().Left(200));
 		Men->OqimIshla(O, true);
 	});
 	// birinchi bo'lak NavoiyKutish ichida kelmasa - so'rov bekor (OnProcessRequestComplete Tayyor(nullptr) beradi)
@@ -254,6 +365,7 @@ void UBozorNavoiy::OqimIshla(const TSharedRef<FOqim, ESPMode::ThreadSafe>& O, bo
 		FScopeLock L(&O->Qulf);
 		B.Append(O->Yangi);
 		O->Yangi.Reset();
+		if (O->bHttpXato) O->bYaroqsiz = true;
 	}
 	if (!O->bSarlavha && !O->bYaroqsiz)
 	{

@@ -394,6 +394,8 @@ public:
 	int32 CartFrames = 0, CartBackFrames = 0, CartTurns = 0, CartGiveUps = 0;
 
 	float Do(FName Category, float Min = 2.f, float Max = 6.f);
+	// xaridorlarga beriladigan xaltalardan biri (o'yinchiga mol uzatish uchun ham)
+	UStaticMesh* XaltaMesh() const;
 	void DoLater(FName Category, float Duration, float Delay);
 
 private:

@@ -937,6 +937,11 @@ void ABozorRastaOvozlari::PlayKind(FName Kind, const FVector& Location, AActor* 
 
 // ============================================================ o'yinchi qadamlari
 
+// Qadam ovozlari hozircha o'chiq (2026-11-17, foydalanuvchi so'rovi). Qayta yoqish: konsolda "bozor.Qadam 1"
+// (o'yin davomida ham ishlaydi) yoki DefaultEngine.ini [ConsoleVariables] bozor.Qadam=1. -BozorQadamTest doim yoqadi
+static TAutoConsoleVariable<int32> CVarBozorQadam(TEXT("bozor.Qadam"), 0,
+	TEXT("O'yinchi qadamlarining ovozi: 1 - yoqiq, 0 - o'chiq (hozircha o'chiq)"));
+
 ABozorQadamOvozlari::ABozorQadamOvozlari()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -975,6 +980,7 @@ void ABozorQadamOvozlari::BeginPlay()
 void ABozorQadamOvozlari::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (!bTest && CVarBozorQadam.GetValueOnGameThread() == 0) return;
 	ACharacter* C = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	UCharacterMovementComponent* Move = C ? C->GetCharacterMovement() : nullptr;
 	if (!Move) return;

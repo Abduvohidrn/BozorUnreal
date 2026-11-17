@@ -1,15 +1,15 @@
 # Savdo animatsiyasi sinovi: bot 1-darajani o'ynaydi (bitta non), keyin logdan sotuvchi harakatlari va mol uzatish ([MolBer]).
 # Mol uzatilmasa yoki sotuvchi harakati klipsiz qolsa - QIZIL (chiqish kodi 1). Faqat ASCII (PowerShell 5.1).
 # Ishga tushirish: powershell -File Scripts\savdo_sinov.ps1 [-Daraja 1]
-# UE - loyiha EngineAssociation'idagi dvigatel (reestr: D:/install/UE_5.8); boshqasi bilan build PCH to'qnashuvi beradi
-param([int]$Daraja = 1, [string]$UE = "D:\install\UE_5.8")
+# UE - loyiha EngineAssociation'idagi dvigatel; boshqasi bilan build PCH to'qnashuvi beradi
+param([int]$Daraja = 1, [string]$UE = "C:\Program Files\Epic Games\UE_5.8")
 $loyiha = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $log = Join-Path $loyiha "Saved\Logs\SavdoSinov.log"
 Remove-Item $log -ErrorAction SilentlyContinue
 $p = Start-Process "$UE\Engine\Binaries\Win64\UnrealEditor.exe" -PassThru -ArgumentList ("`"$loyiha\BozorUnreal.uproject`" /Game/Bozor/Maps/Bozor -game -windowed " +
 	"-ResX=1280 -ResY=720 -DarajaTest -Daraja=$Daraja -AvtobusYoq -Unattended -log=SavdoSinov.log")
 if (-not $p.WaitForExit(300000)) { $p.Kill(); "TIMEOUT"; exit 2 }
-$q = Select-String -Path $log -Pattern "SavdoAnim|\[MolBer\]|Natija:" | ForEach-Object { $_.Line -replace "^\[[^\]]*\]\[[^\]]*\]", "" }
+$q = Select-String -Path $log -Pattern "SavdoAnim|\[MolBer\]|\[MolUshla\]|Natija:" | ForEach-Object { $_.Line -replace "^\[[^\]]*\]\[[^\]]*\]", "" }
 $q
 $mol = ($q | Where-Object { $_ -match "\[MolBer\]" }).Count
 $klipsiz = ($q | Where-Object { $_ -match "klip yo'q|o'ynadi 0" }).Count
@@ -20,12 +20,18 @@ $tortdim = ($q | Where-Object { $_ -match "javob=(Tortdim|TaroziUzr)" }).Count
 # ta'zim: kelganda va salomga alik (2 ta), xayrlashuvda (1 ta); ketma-ket kelgani bir-birini kesadi
 $tazim = ($q | Where-Object { $_ -match " V_Greet -> " }).Count
 $rahmat = ($q | Where-Object { $_ -match " V_Thanks -> " }).Count
-# uzatish (V_Handout) boshlangach mol sotuvchi qo'lidan chiqquncha (0.55 x davom + 0.3 s) boshqa harakat qo'lni tortib olmasin
+# uzatish (V_Handout) boshlangach mol sotuvchi qo'lidan chiqquncha (min(0.55 x davom, 1.3) + 0.3 s) boshqa harakat qo'lni tortib olmasin
 $xato = @()
+# mol uchmaydi: bola qo'li yetib ushlaydi ([MolUshla]) - tutqich kaftdan uzoq bo'lsa, mol qo'lga "sakraydi"
+# (farq 0.25 s da silliq yo'qoladi; 10 sm dan katta bo'lsa ko'zga tashlanadi). Bola ketib qolgan bo'lsa mol pastdan chiqadi - tekshirilmaydi
+foreach ($s in ($q | Where-Object { $_ -match "\[MolUshla\] .*qo'ldan.*kaftdan farq ([\d.]+)" })) {
+	if ([double]$Matches[1] -gt 10) { $xato += "mol kaftdan $($Matches[1]) sm uzoqda ushlandi" }
+}
+if (($q | Where-Object { $_ -match "\[MolUshla\]" }).Count -ne $mol) { $xato += "mol ushlanmadi" }
 $qatorlar = Select-String -Path $log -Pattern "SavdoAnim\] \S+ V_\w+ -> " | ForEach-Object { $_.Line }
 for ($i = 0; $i -lt $qatorlar.Count; $i++) {
 	if ($qatorlar[$i] -notmatch " V_Handout -> .*davom ([\d.]+)") { continue }
-	$uch = 0.55 * [double]$Matches[1] + 0.3
+	$uch = [Math]::Min(0.55 * [double]$Matches[1], 1.3) + 0.3
 	$t0 = [datetime]::ParseExact(($qatorlar[$i] -replace "^\[([^\]]+)\].*", '$1'), "yyyy.MM.dd-HH.mm.ss:fff", $null)
 	if ($i + 1 -lt $qatorlar.Count) {
 		$t1 = [datetime]::ParseExact(($qatorlar[$i + 1] -replace "^\[([^\]]+)\].*", '$1'), "yyyy.MM.dd-HH.mm.ss:fff", $null)

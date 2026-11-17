@@ -38,6 +38,15 @@ static TAutoConsoleVariable<int32> CVarQolsiz(TEXT("bozor.Qolsiz"), 1,
 
 namespace
 {
+	// Mol uzatish (MolBer/MolYangila). Bola molni ushlaydigan payt (V_Handout boshidan, s). Cashier_Handout: sotuvchi qo'li
+	// 0.4 s da cho'zilib 3.6 s gacha turadi - bola qo'li shu oraliqning boshida yetib boradi (avval 0.55 x davom = 2.2 s edi:
+	// sotuvchi qo'lini uzoq cho'zib kutardi, keyin mol 0.3 s da kamon bo'ylab "otilib" kelardi)
+	float MolUzatPayti(float MolH) { return FMath::Min(0.55f * MolH, 1.3f); }
+	// ushlagandan keyin bola molni o'ziga tortib oladigan vaqt (s)
+	constexpr float MolTortish = 0.5f;
+	// FP qo'l nishoni kameradan shu masofada (sm): bola modeli 0.66 masshtabda, qo'li ~40 sm - uzoqroq nishonga IK yetmaydi
+	constexpr float MolFpMasofa = 30.f;
+
 	// Bosh qahramon: Fab "Cartoon Young Boy Rigged" (Epic skeleti), animatsiyalar eski boladan IK retarget qilingan
 	const TCHAR* const BolaMeshYoli = TEXT("/Game/BoshQahramon/YangiBola/SKM_YangiBola.SKM_YangiBola");
 	const TCHAR* const BolaAnimYoli = TEXT("/Game/BoshQahramon/YangiBola/Anim/ABP_Unarmed_YangiBola");
@@ -874,7 +883,7 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	{
 		// mol hali sotuvchi qo'lida bo'lsa (MolYangila: 0.55 x MolH da uchadi) - keyingi harakat uzatish tugagach,
 		// aks holda yangi klip qo'lni mol bilan birga tortib oladi ("Rahmat!" tez bosilganda)
-		const float Kut = MolSotuvchi.Get() == V && MolBosh >= 0.0 ? 0.55f * MolH + 0.3f - float(GetWorld()->GetTimeSeconds() - MolBosh) : 0.f;
+		const float Kut = MolSotuvchi.Get() == V && MolBosh >= 0.0 ? MolUzatPayti(MolH) + 0.3f - float(GetWorld()->GetTimeSeconds() - MolBosh) : 0.f;
 		if (Kut > 0.f) V->DoLater(Harakat, Kut + 2.f, Kut);
 		else V->Do(Harakat, 1.5f, 3.f);
 	}
@@ -954,6 +963,13 @@ void ABozorOyinchi::MolBer(ABozorNpc* V)
 	UE_LOG(LogBozorOyinchi, Display, TEXT("[MolBer] %s: %s (%s), uzatish %.1f s"), *V->GetActorNameOrLabel(), *MolMesh->GetName(), *H.Mahsulot.Nomi, MolH);
 }
 
+// bola qo'li sotuvchi qo'lidagi molga yeta oladimi: yaqinda (2.5 m) va ekranda, kamera oldida (FP qo'l faqat oldinga cho'ziladi)
+bool ABozorOyinchi::MolYetadimi(const FVector& Dunyo) const
+{
+	const FVector L = Kamera->GetComponentRotation().UnrotateVector(Dunyo - Kamera->GetComponentLocation());
+	return L.Size() < 250.f && L.X > 20.f && FMath::Abs(L.Y) < L.X * 1.2f && FMath::Abs(L.Z) < L.X;
+}
+
 // qo'lga olingan mol ushlab turiladigan joy (FP): o'ngda, ko'z balandligidan sal pastda - ekranda suhbat panelidan o'ngda.
 // Xalta dastasidan kaftga osiladi: qo'l pastroq bo'lsa tanasi ekrandan chiqib, yeng ortida qolardi
 FVector ABozorOyinchi::MolQolJoyi() const
@@ -975,8 +991,8 @@ void ABozorOyinchi::MolYangila(float Dt)
 	if (MolBosh < 0.0 || !BerilganMol) return;
 	ABozorNpc* V = MolSotuvchi.Get();
 	const float T = float(GetWorld()->GetTimeSeconds() - MolBosh);
-	const float Uzat = 0.55f * MolH;            // sotuvchi qo'li eng cho'zilgan payt
-	const float Uch = Uzat + 0.3f;              // mol bolaning qo'liga yetadi
+	const float Uzat = MolUzatPayti(MolH);      // bola qo'li molga yetib, uni ushlaydi
+	const float Uch = Uzat + MolTortish;        // mol bolaning o'ngdagi ushlab turish joyiga yetadi
 	const FVector KaftFp = Qollar->GetSocketLocation(TEXT("hand_r"));
 	const FVector Kam = Kamera->GetComponentLocation(), Old = Kamera->GetForwardVector(), Past = -Kamera->GetUpVector();
 	auto Silliq = [](float A, float B, float X) { const float S = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return S * S * (3.f - 2.f * S); };
@@ -986,11 +1002,18 @@ void ABozorOyinchi::MolYangila(float Dt)
 		// sotuvchining o'ng qo'lida (bolaga sal yaqin); xalta dastasidan osiladi, dona markazidan ushlanadi
 		const FVector Q = V->GetMesh()->GetSocketLocation(TEXT("hand_r"));
 		const FRotator Bur(0.f, V->GetActorRotation().Yaw, 0.f);
-		BerilganMol->SetWorldLocationAndRotation(Q + (Kam - Q).GetSafeNormal2D() * 5.f - Bur.RotateVector(MolTutqich * MolOlcham), Bur);
-		// bola qo'lini molga cho'zadi (ekranda mol turgan joyga). Ko'zdan 30 sm: bola modeli 0.66 masshtabda, qo'li ~40 sm -
-		// uzoqroq nishonga IK yetmay qo'l pastda qolardi
-		Qollar->QolNishon = FpGa(BerilganMol->GetComponentLocation(), 30.f);
-		Qollar->QolAlfa = Silliq(0.45f * Uzat, Uzat, T);
+		const FVector Tutqich = Q + (Kam - Q).GetSafeNormal2D() * 5.f;
+		BerilganMol->SetWorldLocationAndRotation(Tutqich - Bur.RotateVector(MolTutqich * MolOlcham), Bur);
+		// bola uzatish tugamay ketib qoldi yoki o'girildi - qo'li yetmaydi: kutmasdan ushlash bosqichiga (mol pastdan qo'lga chiqadi)
+		if (!MolYetadimi(Tutqich))
+		{
+			MolBosh = GetWorld()->GetTimeSeconds() - Uzat;
+			MolYangila(0.f);
+			return;
+		}
+		// bola qo'lini molning tutqichiga cho'zadi (ekranda tutqich turgan joyga) - sotuvchi qo'li cho'zilgach (0.4 s) boshlaydi
+		Qollar->QolNishon = FpGa(Tutqich, MolFpMasofa);
+		Qollar->QolAlfa = Silliq(FMath::Min(0.4f, 0.5f * Uzat), Uzat, T);
 		if (bTest)
 		{
 			static int32 Surat = 0;
@@ -1000,54 +1023,57 @@ void ABozorOyinchi::MolYangila(float Dt)
 		}
 		return;
 	}
-	if (T < Uch)
-	{
-		// mol sotuvchi qo'lidan bolaning qo'li ko'ringan joyga (dunyo fazosida) uchadi; qo'l shu payt o'ngdagi ushlab turish
-		// joyiga siljiydi - mol o'sha yerda ilinadi (ekran markazida - suhbat paneli ostida - qolmaydi)
-		if (MolUchishBosh.IsZero() || T - Dt < Uzat)
-		{
-			MolUchishBosh = BerilganMol->GetComponentLocation();
-			MolQolBosh = Qollar->QolNishon;
-		}
-		Qollar->QolNishon = FMath::Lerp(MolQolBosh, MolQolJoyi(), Silliq(Uzat, Uch, T));
-		const FVector Tutqich = BerilganMol->GetComponentRotation().RotateVector(MolTutqich * BerilganMol->GetComponentScale().X);
-		// kamon bo'ylab: sotuvchi qo'li yashiklar ortida qolsa, to'g'ri chiziq yashiklar ichidan o'tib mol peshtaxtada birdan paydo bo'lardi
-		const float A = Silliq(Uzat, Uch, T);
-		BerilganMol->SetWorldLocation(FMath::Lerp(MolUchishBosh, DunyoGa(KaftFp) - Tutqich, A) + FVector(0.f, 0.f, 35.f * FMath::Sin(PI * A)));
-		Qollar->QolAlfa = 1.f;
-		static bool bUchSurat = false;
-		if (bTest && !bUchSurat && T > Uzat + 0.15f)
-		{
-			bUchSurat = true;
-			FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/SotuvTest/6_uzatish_2_uchish.png"), false, false);
-		}
-		return;
-	}
+	const float F = FovNisbati(Kamera);
 	if (!bMolFp)
 	{
-		// endi qo'lda: FP fazosida qo'l bilan birga chiziladi (devor/peshtaxtaga kirib ketmaydi). Ko'rinadigan o'lcham sakramasin:
-		// FP'da FOV torroq - shuncha kichik qo'yiladi, keyin tabiiy kattalikkacha o'sadi
+		// Ushlash: bola qo'li tutqichga yetdi - mol shu kadrdan bolaning qo'lida. U uchmaydi: FP fazosiga (qo'llar bilan birga,
+		// devor/peshtaxtaga kirmaydi) ekranda AYNAN turgan joyi va ko'rinadigan o'lchami bilan o'tadi, keyin qo'l bilan birga tortiladi.
+		// Dunyoda D masofadagi s o'lchamli narsa = FP'da M masofadagi s * F * M / D o'lchamli narsa (FP FOV torroq - F nisbati)
 		bMolFp = true;
-		MolUchishBosh = FVector::ZeroVector;
+		const FVector G0 = BerilganMol->GetComponentLocation() + BerilganMol->GetComponentRotation().RotateVector(MolTutqich * MolOlcham);
+		const float D0 = FMath::Max(FVector::Dist(G0, Kam), 10.f);
+		if (MolYetadimi(G0))
+		{
+			MolSBosh = MolOlcham * F * MolFpMasofa / D0;
+			// tutqich FP'da kaftdan qancha farq qiladi (IK nishonga to'liq yetmasa) - tortish boshida asta yo'qoladi
+			MolUchishBosh = FpGa(G0, MolFpMasofa) - (KaftFp + Old * 2.f);
+		}
+		else
+		{
+			// sotuvchi uzoqda yoki ko'rinmaydi: uzoqdan uchirmaymiz - mol ekran pastidan kaftga ko'tariladi
+			MolSBosh = MolOlcham * 0.35f;
+			MolUchishBosh = Past * 25.f;
+		}
+		MolQolBosh = Qollar->QolNishon;
 		MolBurBosh = BerilganMol->GetComponentQuat();
 		BerilganMol->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
 		BerilganMol->MarkRenderStateDirty();
+		UE_LOG(LogBozorOyinchi, Log, TEXT("[MolUshla] %.2f s, %s, masofa %.0f sm, kaftdan farq %.1f sm"), T,
+			MolYetadimi(G0) ? TEXT("qo'ldan") : TEXT("uzoqda - pastdan"), D0, MolUchishBosh.Size());
 	}
-	const float F = FovNisbati(Kamera);
-	const float Osish = Silliq(Uch, Uch + 0.4f, T);
+	// Tortish: qo'l molni ushlagan joyidan o'ngdagi ushlab turish joyiga olib keladi (mol kaftda); yaqinlashgani sari kattalashadi
+	const float Tort = Silliq(Uzat, Uch, T);
+	const float Osish = Silliq(Uzat, Uch + 0.2f, T);
 	const float Tushish = Silliq(Uch + 1.9f, Uch + 2.4f, T);   // sumkaga
-	// FP'da kameraga yaqin turadi - kichikroq: F^2 (uchishdagi ko'rinish bilan bir xil) dan 0.55 gacha
-	const float S = MolOlcham * FMath::Lerp(F * F, 0.55f, Osish) * (1.f - 0.6f * Tushish);
+	// ushlash paytidagi ko'rinishdan qo'ldagi tabiiy kattaligiga (FP'da kameraga yaqin - 0.55)
+	const float S = FMath::Lerp(MolSBosh, MolOlcham * 0.55f, Osish) * (1.f - 0.6f * Tushish);
 	BerilganMol->SetWorldScale3D(FVector(S));
 	// qo'lda kameraga nisbatan tik turadi (bola ko'tarib ko'rsatadi): dunyoga nisbatan osilsa, pastga qaraganda
 	// xaltaning tanasi ekranning pastki chetidan chiqib ketardi
 	const FQuat Tik = FRotator(Kamera->GetComponentRotation().Pitch, Kamera->GetComponentRotation().Yaw, 0.f).Quaternion();
-	BerilganMol->SetWorldRotation(FQuat::Slerp(MolBurBosh, Tik, Silliq(Uch, Uch + 0.3f, T)));
+	BerilganMol->SetWorldRotation(FQuat::Slerp(MolBurBosh, Tik, Silliq(Uzat, Uch, T)));
 	const FRotator Bur = BerilganMol->GetComponentRotation();
-	BerilganMol->SetWorldLocation(KaftFp + Old * 2.f - Bur.RotateVector(MolTutqich * S) + Past * 30.f * Tushish);
-	// qo'l mol bilan o'ngdagi joyida turadi (uchish paytida o'sha yerga borgan), keyin animatsiyadagi joyiga
-	Qollar->QolNishon = MolQolJoyi();
+	const FVector Farq = MolUchishBosh * (1.f - Silliq(Uzat, Uzat + 0.25f, T));
+	BerilganMol->SetWorldLocation(KaftFp + Old * 2.f + Farq - Bur.RotateVector(MolTutqich * S) + Past * 30.f * Tushish);
+	// qo'l ushlagan joyidan o'ngdagi joyiga (ekran markazida - suhbat paneli ostida - qolmaydi), keyin animatsiyadagi joyiga
+	Qollar->QolNishon = FMath::Lerp(MolQolBosh, MolQolJoyi(), Tort);
 	Qollar->QolAlfa = 1.f - Silliq(Uch + 1.6f, Uch + 2.4f, T);
+	static bool bTortSurat = false;
+	if (bTest && !bTortSurat && T > Uzat + 0.2f)
+	{
+		bTortSurat = true;
+		FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/SotuvTest/6_uzatish_2_tortish.png"), false, false);
+	}
 	// qo'ldagi mol ekranning qayerida: suhbat paneli (ABozorHud::SotuvChiz - markazda, kengligi min(1200 S, ekran - 80 S)) ostida
 	// qolmasligi kerak. Scripts/savdo_sinov.ps1 shu qatorni tekshiradi
 	for (const float Payt : { Uch + 0.15f, Uch + 0.5f, Uch + 1.f })

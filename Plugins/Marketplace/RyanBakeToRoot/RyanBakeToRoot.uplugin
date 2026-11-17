@@ -1,0 +1,32 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.1.0",
+	"FriendlyName": "Ryan Bake To Root",
+	"Description": "This plugin contains features for baking motion of a character to the root, from any number of selected anim sequences in the content browser.  If a root does not exist, then there's a function to add a new root bone.",
+	"Category": "Editor",
+	"CreatedBy": "Ryan Roberts",
+	"CreatedByURL": "https://www.youtube.com/@ryanrobertsstudio",
+	"DocsURL": "https://sites.google.com/ryanroberts.studio/ryan-bake-to-root?usp=sharing",
+	"MarketplaceURL": "",
+	"SupportURL": "https://discord.gg/r7RCE8xx",
+	"EngineVersion": "5.8.0",
+	"CanContainContent": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "RyanBakeToRoot",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "MeshModelingToolset",
+			"Enabled": true
+		}
+	]
+}

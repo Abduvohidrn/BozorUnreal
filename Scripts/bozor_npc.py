@@ -323,7 +323,8 @@ def build(scene, log):
     mgr.set_editor_property("seats", seats)
     mgr.set_editor_property("wander_points", [V(p) for p in npc["wanderPoints"]])
     mgr.set_editor_property("gate_points", [V(p) for p in npc["gatePoints"]])
-    bags = [load("%s/Meshes/SM_SM_Paket_%s_LOD0" % (ROOT, c)) for c in ("Qora", "Oq")]
+    # yangi paketlar (paket_import.py): qo'lda ushlangan shakl, pivot - kaftdagi tutqich
+    bags = [load("%s/Paket/SM_Paket_%s" % (ROOT, c)) for c in ("Qora", "Oq", "Sariq")]
     mgr.set_editor_property("bag_meshes", [b for b in bags if b])
     mgr.set_editor_property("cart_mesh", load(ROOT + "/Meshes/SM_SM_Aravakash_Arava_LOD0"))
     log("npc: ABozorNpc", dict(stats), "navbat", len(queues), "o'rindiq", len(seats), "harakat", len(acts),

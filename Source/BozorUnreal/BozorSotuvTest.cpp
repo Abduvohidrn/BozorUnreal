@@ -251,6 +251,13 @@ bool FBozorMiyaTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("o'z ismi - yaroqsiz"), UBozorAiMiya::Tozala(TEXT("Gulnora opa sizga aytadi: 5 000."), K), FString());
 	TestEqual(TEXT("ikkinchi qator tashlanadi"), UBozorAiMiya::Tozala(TEXT("Mana, 2 kilo.\nIzoh: bu gap..."), K), FString(TEXT("Mana, 2 kilo.")));
 	TestEqual(TEXT("kasr son buzilmaydi"), UBozorAiMiya::Tozala(TEXT("1,5 kilo - 18000 so'm."), K), FString(TEXT("1,5 kilo - 18 000 so'm.")));
+	// bolaga haqorat/haydash - yaroqsiz (bulut sinovida qattiq sotuvchi shunday degan, 2026-11-18)
+	TestEqual(TEXT("haydash - yaroqsiz"), UBozorAiMiya::Tozala(TEXT("Ana ol, 2 000 so'ming. Bor yo'kol."), K), FString());
+	TestEqual(TEXT("yo ket - yaroqsiz"), UBozorAiMiya::Tozala(TEXT("Narxi shu, tushmaydi. Olasanmi yo ket!"), K), FString());
+	TestEqual(TEXT("yo'qol (ʻ) - yaroqsiz"), UBozorAiMiya::Tozala(TEXT("Bor, yoʻqol endi."), K), FString());
+	TestEqual(TEXT("haqorat - yaroqsiz"), UBozorAiMiya::Tozala(TEXT("Ahmoqmisan, narxi shu."), K), FString());
+	TestEqual(TEXT("oddiy qattiq gap qoladi"), UBozorAiMiya::Tozala(TEXT("Narxi shu, tushmaydi. Olasizmi?"), K), FString(TEXT("Narxi shu, tushmaydi. Olasizmi?")));
+	TestEqual(TEXT("'pomidor endi' - haydash emas"), UBozorAiMiya::Tozala(TEXT("Pomidor endi tugadi, bodring bor."), K), FString(TEXT("Pomidor endi tugadi, bodring bor.")));
 
 	// --- jonli
 	if (!UBozorAiMiya::FayllarBormi())
@@ -518,3 +525,101 @@ bool FBozorXulqTest::RunTest(const FString& Parameters)
 }
 
 #endif
+
+// Savdolashuv: bola gapi va suhbat tarixi bilan (bulut AI) - har fe'ldagi sotuvchi bolaning gapiga o'z xarakterida munosabat
+// bildiradi, ma'nodagi sonlar o'zgarmaydi. Bozor.Xulq dan alohida: u 300 s lik test limitiga yaqin
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBozorSavdolashTest, "Bozor.Savdolash", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FBozorSavdolashTest::RunTest(const FString& Parameters)
+{
+	FString Matn;
+	TSharedPtr<FJsonObject> Ildiz;
+	if (!FFileHelper::LoadFileToString(Matn, *(FPaths::ProjectContentDir() / TEXT("Bozor/Data/xulq.json"))) || !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Matn), Ildiz) || !Ildiz)
+	{
+		AddError(TEXT("xulq.json o'qilmadi"));
+		return false;
+	}
+	TArray<FBozorShaxs> Shaxslar;
+	for (const auto& P : Ildiz->GetObjectField(TEXT("sotuvchilar"))->Values)
+	{
+		const TSharedPtr<FJsonObject> O = P.Value->AsObject();
+		FBozorShaxs K;
+		BozorSotuv::XulqniOqi(*O, K.Xulq);
+		K.Ism = K.Xulq.Ism;
+		K.Yosh = K.Xulq.Yosh;
+		K.bAyol = K.Ism.EndsWith(TEXT(" opa")) || K.Ism.EndsWith(TEXT(" xola"));
+		FString Fel;
+		O->TryGetStringField(TEXT("fel"), Fel);
+		const int64 V = StaticEnum<EBozorFel>()->GetValueByNameString(Fel.Left(1).ToUpper() + Fel.Mid(1));
+		if (V != INDEX_NONE) K.Fel = static_cast<EBozorFel>(V);
+		TestTrue(FString::Printf(TEXT("%s: savdo uslubi, kayfiyat va hayot bor"), *P.Key), !K.Xulq.SavdoUslubi.IsEmpty() && !K.Xulq.Kayfiyat.IsEmpty() && K.Xulq.Hayot.Num() > 0);
+		Shaxslar.Add(MoveTemp(K));
+	}
+	if (!UBozorAiMiya::FayllarBormi())
+	{
+		AddWarning(TEXT("AI miya yo'q - LLM qismi o'tkazib yuborildi"));
+		return true;
+	}
+	UGameInstance* Gi = NewObject<UGameInstance>(GetTransientPackage());
+	Gi->AddToRoot();
+	UBozorAiMiya* M = NewObject<UBozorAiMiya>(Gi);
+	auto Kut = [](TFunctionRef<bool()> Shart, double Sekund)
+	{
+		const double T0 = FPlatformTime::Seconds();
+		double Oldin = T0;
+		while (!Shart() && FPlatformTime::Seconds() - T0 < Sekund)
+		{
+			const double H = FPlatformTime::Seconds();
+			FHttpModule::Get().GetHttpManager().Tick(float(H - Oldin));
+			FTSTicker::GetCoreTicker().Tick(float(H - Oldin));
+			FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GameThread);
+			Oldin = H;
+			FPlatformProcess::Sleep(0.02f);
+		}
+		return Shart();
+	};
+	M->Boshla();
+	if (!Kut([M] { return M->Tayyormi(); }, 120.0))
+	{
+		M->Toxtat();
+		Gi->RemoveFromRoot();
+		AddError(TEXT("AI miya 120 s da tayyor bo'lmadi"));
+		return false;
+	}
+	// savdolashuv: bola gapi va suhbat tarixi bilan - sotuvchi bolaning gapiga o'z xarakterida munosabat bildiradi, sonlar o'zgarmaydi
+	struct FNavbat { const TCHAR* Bola; const TCHAR* Mano; int32 Savdolashuv; };
+	const FNavbat Navbatlar[] = {
+		{TEXT("Assalomu alaykum! Pomidor necha pul?"), TEXT("Vaalaykum assalom. Bir kilo pomidor 12 000 so'm."), 0},
+		{TEXT("Voy, juda qimmat-ku, arzonroq qiling"), TEXT("Mayli, 11 000 so'm qilaman."), 1},
+		{TEXT("Yana ozgina tushiring, iltimos"), TEXT("Bundan arzoni yo'q. 11 000 so'm."), 2},
+		{TEXT("Pomidoringiz juda chiroyli ekan!"), TEXT("Rahmat! Necha kilo beray?"), 2},
+		{TEXT("Ikki kilo bering"), TEXT("Mana, 2 kilo pomidor. Jami 22 000 so'm bo'ldi."), 2},
+	};
+	int32 SavdoAi = 0, SavdoJami = 0;
+	for (const TCHAR* Ism : {TEXT("Sherzod aka"), TEXT("Erkin aka"), TEXT("Gulchehra opa"), TEXT("Ilhom aka")})
+	{
+		const FBozorShaxs* K = Shaxslar.FindByPredicate([Ism](const FBozorShaxs& X) { return X.Ism == Ism; });
+		if (!K) continue;
+		AddInfo(FString::Printf(TEXT("[savdo] %s - bugun: %s"), Ism, *K->Xulq.Kayfiyat));
+		TArray<TPair<FString, FString>> Tarix;
+		for (const FNavbat& N : Navbatlar)
+		{
+			TSharedRef<TOptional<TPair<FString, bool>>> J = MakeShared<TOptional<TPair<FString, bool>>>();
+			// o'yindagi kabi: mol nomi faqat ma'noda bo'lsa javobda ham qolishi shart (ABozorOyinchi::SotuvchiAytdi)
+			TArray<FString> Saqla;
+			if (FString(N.Mano).Contains(TEXT("pomidor"))) Saqla.Add(TEXT("pomidor"));
+			M->QaytaYoz(*K, 50, N.Bola, N.Mano, Saqla,[J](const FString& Javob, bool bAi) { *J = TPair<FString, bool>(Javob, bAi); }, 0, &Tarix, N.Savdolashuv);
+			if (!Kut([J] { return J->IsSet(); }, 30.0)) continue;
+			const TPair<FString, bool>& R = J->GetValue();
+			++SavdoJami;
+			SavdoAi += R.Value ? 1 : 0;
+			TestTrue(TEXT("savdo: sonlar mos"), UBozorAiMiya::SonlarMosmi(N.Mano, R.Key));
+			AddInfo(FString::Printf(TEXT("[savdo] %s | bola: %s -> %s%s"), Ism, N.Bola, *R.Key, R.Value ? TEXT("") : TEXT(" (tayyor)")));
+			Tarix.Emplace(N.Bola, R.Key);
+		}
+	}
+	AddInfo(FString::Printf(TEXT("Savdolashuv AI javoblari: %d/%d"), SavdoAi, SavdoJami));
+	M->Toxtat();
+	Gi->RemoveFromRoot();
+	return true;
+}

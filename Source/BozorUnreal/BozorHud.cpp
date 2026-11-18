@@ -3,6 +3,7 @@
 #include "BozorAvtobus.h"
 #include "BozorOyinchi.h"
 #include "BozorSozlamalar.h"
+#include "BozorTelefon.h"
 #include "CanvasItem.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
@@ -62,10 +63,24 @@ void ABozorHud::Tick(float Dt)
 		bTest =FParse::Param(FCommandLine::Get(), TEXT("AvtobusTest"));
 		if (Intro && Intro->Oynaldi())
 		{
-			Qogoz(true);
-			bBirinchi = true;
 			bIntroBor = true;
 			BozorJoyi = Intro->QarashNuqtasi;
+		}
+		// darajada qo'ng'iroq bo'lsa - avval ona telefon qiladi (avto-sinovlarda yo'q; -QongiroqYoq - o'chirish)
+		const TCHAR* Cmd = FCommandLine::Get();
+		const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this);
+		const FBozorDaraja* D = Tz ? Tz->GetDaraja() : nullptr;
+		const bool bSinov = FParse::Param(Cmd, TEXT("DarajaTest")) || FParse::Param(Cmd, TEXT("SotuvTest")) || FParse::Param(Cmd, TEXT("BozorAutoTest"))
+			|| FParse::Param(Cmd, TEXT("BozorQadamTest")) || (bTest && !FParse::Param(Cmd, TEXT("QongiroqTest")));
+		if (D && D->QongiroqGaplar.Num() > 0 && PlayerOwner && !bSinov && !FParse::Param(Cmd, TEXT("QongiroqYoq")))
+		{
+			Telefon = NewObject<UBozorTelefon>(this);
+			Telefon->Boshla(PlayerOwner, *D);
+		}
+		else if (bIntroBor)
+		{
+			Qogoz(true);
+			bBirinchi = true;
 		}
 		return;
 	}
@@ -73,6 +88,22 @@ void ABozorHud::Tick(float Dt)
 	const double Hozir = GetWorld()->GetTimeSeconds();
 	APlayerController* P = PlayerOwner.Get();
 	const APawn* Pw = P ? P->GetPawn() : nullptr;
+
+	// telefon suhbati: tugaguncha qog'oz, maslahat va belgi kutadi; tugagach ro'yxat cho'ntakdan chiqadi
+	if (Telefon)
+	{
+		Telefon->Tick(Dt);
+		if (!Telefon->Tugadimi())
+		{
+			Ochiqlik = FMath::FInterpConstantTo(Ochiqlik, 0.f, Dt, 2.8f);
+			return;
+		}
+		Telefon = nullptr;
+		if (FParse::Param(FCommandLine::Get(), TEXT("QongiroqTest"))) QongiroqTestVaqt = Hozir;
+		Qogoz(true);
+		bBirinchi = true;
+		OchilganVaqt = Hozir;
+	}
 	if (P)
 	{
 		// Tab bosib turilganda ochiq, qo'yib yuborilsa yopiladi. Introdan keyingi birinchi ochilishda Tab bosilsa - shu rejimga o'tadi
@@ -123,6 +154,17 @@ void ABozorHud::Tick(float Dt)
 		bMaslahatSurat = true;
 		FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/AvtobusTest/4d_maslahat.png"), false, false);
 	}
+	// -QongiroqTest: suhbatdan keyin ochilgan uzun ro'yxat surati, keyin chiqish
+	if (QongiroqTestVaqt > 0.0 && P)
+	{
+		if (Ochiqlik >= 1.f && !bQongiroqSurat)
+		{
+			FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/QongiroqTest/3_royxat.png"), true, false);
+			bQongiroqSurat = true;
+			QongiroqTestVaqt = Hozir;
+		}
+		if (bQongiroqSurat && Hozir - QongiroqTestVaqt > 1.5) P->ConsoleCommand(TEXT("quit"));
+	}
 }
 
 void ABozorHud::DrawHUD()
@@ -164,9 +206,10 @@ void ABozorHud::DrawHUD()
 	if (MaslahatAlfa > 0.f) MaslahatChiz();
 	if (Ochiqlik > 0.f) QogozChiz(Ochiqlik);
 	SotuvChiz();
+	if (Telefon) Telefon->Chiz(Canvas);
 
 	// yopiq paytda burchakda eslatma (maslahat ko'rinib turganda - unda Tab bor)
-	if (Ochiqlik < 1.f && MaslahatAlfa < 1.f)
+	if (Ochiqlik < 1.f && MaslahatAlfa < 1.f && !Telefon)
 	{
 		const float S = Canvas->ClipY / 1080.f;
 		FCanvasTextItem T(FVector2D(40.f * S, Canvas->ClipY - 70.f * S), FText::FromString(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Royxat"))).ToString() + TEXT(" (bosib turing) — ro'yxat")), GEngine->GetMediumFont(),
@@ -185,10 +228,13 @@ void ABozorHud::QogozChiz(float A)
 	const float S = Canvas->ClipY / 1080.f;
 	const float Yuz = 1.f - FMath::Pow(1.f - A, 3.f);   // ease-out: cho'ntakdan tez chiqib, sekin to'xtaydi
 
-	const float Qator = 66.f * S;
+	const int32 N = H->Royxat.Num();
+	// uzun ro'yxat (mehmon) ekranga sig'sin: qator balandligi va matn kichrayadi
+	// ekran 1080 birlik: 40 - chetlar, 375 - sarlavha, pul va eslatma joyi; qolgani qatorlarga
+	const float QatorNisbat = FMath::Clamp((1080.f - 40.f - 375.f) / FMath::Max(N, 1) / 66.f, 0.45f, 1.f);
+	const float Qator = 66.f * S * QatorNisbat;
 	const float W = 580.f * S;
 	const float Bosh = 130.f * S;   // sarlavha joyi
-	const int32 N = H->Royxat.Num();
 	const float Hgt = Bosh + Qator * FMath::Max(N, 1) + 245.f * S;
 	const float X = Canvas->ClipX - W - 90.f * S;
 	const float Y = FMath::Lerp(Canvas->ClipY + 30.f * S, (Canvas->ClipY - Hgt) * 0.5f, Yuz);
@@ -222,28 +268,29 @@ void ABozorHud::QogozChiz(float A)
 	Chiz(X + 62.f * S, Y, X + 62.f * S, Y + Hgt, Hoshiya, 2.f * S);
 
 	const float Kt = 2.1f * S;   // matn kattaligi (GetLargeFont kichik - 10-13 yoshli bola uzoqdan o'qisin)
+	const float Kq = Kt * QatorNisbat;   // ro'yxat qatorlari: matn qator bilan birga kichrayadi (ustma-ust tushmasin)
 	Yoz(TEXT("Xarid ro'yxati"), X + 80.f * S, Y + 38.f * S, 2.6f * S, Siyoh);
 
 	for (int32 I = 0; I < N; ++I)
 	{
 		const FBozorRoyxatQator& R = H->Royxat[I];
 		const float Ly = Y + Bosh + Qator * I;          // qator ostidagi chiziq ustidan yoziladi
-		const float Ty = Ly + Qator * 0.5f - 22.f * S;
+		const float Ty = Ly + Qator * 0.5f - 22.f * S * (Kq / Kt);
 		// katakcha
-		const float Kx = X + 20.f * S, Ky = Ty + 8.f * S, Kk = 28.f * S;
+		const float Kx = X + 20.f * S, Ky = Ty + 8.f * S * (Kq / Kt), Kk = 28.f * S * (Kq / Kt);
 		Chiz(Kx, Ky, Kx + Kk, Ky, Siyoh, 2.f * S);
 		Chiz(Kx + Kk, Ky, Kx + Kk, Ky + Kk, Siyoh, 2.f * S);
 		Chiz(Kx + Kk, Ky + Kk, Kx, Ky + Kk, Siyoh, 2.f * S);
 		Chiz(Kx, Ky + Kk, Kx, Ky, Siyoh, 2.f * S);
 		const FString Matn = FString::Printf(TEXT("%s — %s %s"), *R.Nomi, *BozorSotuv::Miqdor(R.Miqdor), *R.Birlik);
-		Yoz(Matn, X + 80.f * S, Ty, Kt, R.bOlindi ? Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.5f) : Siyoh);
+		Yoz(Matn, X + 80.f * S, Ty, Kq, R.bOlindi ? Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.5f) : Siyoh);
 		if (R.bOlindi)
 		{
 			// belgi va ustidan chizish
 			Chiz(Kx + 4.f * S, Ky + Kk * 0.5f, Kx + Kk * 0.4f, Ky + Kk - 3.f * S, FLinearColor(0.1f, 0.5f, 0.15f), 3.f * S);
 			Chiz(Kx + Kk * 0.4f, Ky + Kk - 3.f * S, Kx + Kk + 6.f * S, Ky - 6.f * S, FLinearColor(0.1f, 0.5f, 0.15f), 3.f * S);
 			float Tw = 0.f, Th = 0.f;
-			Canvas->TextSize(Shrift, Matn, Tw, Th, Kt, Kt);
+			Canvas->TextSize(Shrift, Matn, Tw, Th, Kq, Kq);
 			Chiz(X + 78.f * S, Ty + Th * 0.55f, X + 82.f * S + Tw, Ty + Th * 0.5f, Siyoh, 2.f * S);
 		}
 	}
@@ -251,7 +298,14 @@ void ABozorHud::QogozChiz(float A)
 	// pul va eslatma
 	const float Py = Y + Bosh + Qator * FMath::Max(N, 1) + 20.f * S;
 	Yoz(FString::Printf(TEXT("Pul: %s so'm"), *BozorSotuv::Som(H->Pul)), X + 80.f * S, Py, Kt, Siyoh);
-	Yoz(FString::Printf(TEXT("(%s)"), *H->Tarkibi()), X + 80.f * S, Py + 52.f * S, 1.5f * S, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.75f));
+	{
+		// kupyuralar ko'p bo'lsa qator qog'ozga sig'guncha kichrayadi
+		const FString Tarkib = FString::Printf(TEXT("(%s)"), *H->Tarkibi());
+		float Tw = 0.f, Th = 0.f;
+		Canvas->TextSize(Shrift, Tarkib, Tw, Th, 1.5f * S, 1.5f * S);
+		const float Sigish = Tw > 0.f ? FMath::Min(1.f, (W - 100.f * S) / Tw) : 1.f;
+		Yoz(Tarkib, X + 80.f * S, Py + 52.f * S, 1.5f * S * Sigish, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.75f));
+	}
 	Yoz(H->Eslatma, X + 80.f * S, Py + 110.f * S, 1.8f * S, FLinearColor(0.55f, 0.1f, 0.1f));
 
 	// birinchi ochilishda: qanday yopilishi va keyin qanday ochilishi (Tab bilan ochilganda yozuv kerak emas)
@@ -566,9 +620,13 @@ void ABozorHud::NatijaChiz()
 
 	// jadval: ro'yxatdagi har mol (kerak / olindi / to'landi / narx / baho), keyin ro'yxatdan tashqari olinganlar
 	const TArray<FBozorNatijaQator> Jadval = H->NatijaQatorlari();
-	const float QatorH = 40.f * S;
+	const bool bZich = Jadval.Num() > 7;   // uzun ro'yxat (mehmon): statistika zichroq, jadval qatorlari ekranga sig'adi
+	const float StatQadam = (bZich ? 36.f : 44.f) * S;
+	const float Asos = bZich ? 732.f : 780.f;
+	const float QatorH = FMath::Min(40.f, (1080.f - 20.f - Asos) / (Jadval.Num() + 1)) * S;
+	const float JadvalK = 1.35f * S * FMath::Clamp(QatorH / (40.f * S), 0.4f, 1.f);   // matn qator balandligidan oshmasin
 	Tort(0.f, 0.f, Canvas->ClipX, Canvas->ClipY, FLinearColor(0.f, 0.f, 0.f, 0.55f));
-	const float W = 1240.f * S, Hh = FMath::Min(Canvas->ClipY - 20.f * S, 780.f * S + QatorH * (Jadval.Num() + 1));
+	const float W = 1240.f * S, Hh = FMath::Min(Canvas->ClipY - 20.f * S, Asos * S + QatorH * (Jadval.Num() + 1));
 	const float X = (Canvas->ClipX - W) * 0.5f, Y = (Canvas->ClipY - Hh) * 0.5f;
 	Tort(X, Y, W, Hh, FLinearColor(0.96f, 0.93f, 0.83f, 0.97f));
 	const bool bTugadi = H->RoyxatTugadimi();
@@ -596,7 +654,7 @@ void ABozorHud::NatijaChiz()
 	for (const FString& Q : Qatorlar)
 	{
 		Yoz(Q, X + 70.f * S, Ty, 1.55f * S, Siyoh);
-		Ty += 44.f * S;
+		Ty += StatQadam;
 	}
 
 	// xaridlar jadvali
@@ -604,7 +662,7 @@ void ABozorHud::NatijaChiz()
 	const float Ustun[] = {70.f, 300.f, 470.f, 690.f, 880.f, 1080.f};
 	const TCHAR* Sarlavha[] = {TEXT("Mahsulot"), TEXT("Kerak edi"), TEXT("Olindi"), TEXT("To'landi"), TEXT("Narx (1 birlik)"), TEXT("Baho")};
 	Tort(X + 50.f * S, Ty - 4.f * S, W - 100.f * S, QatorH, FLinearColor(0.3f, 0.25f, 0.15f, 0.18f));
-	for (int32 I = 0; I < UE_ARRAY_COUNT(Ustun); ++I) Yoz(Sarlavha[I], X + Ustun[I] * S, Ty, 1.35f * S, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.75f));
+	for (int32 I = 0; I < UE_ARRAY_COUNT(Ustun); ++I) Yoz(Sarlavha[I], X + Ustun[I] * S, Ty, JadvalK, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.75f));
 	Ty += QatorH;
 	for (const FBozorNatijaQator& Q : Jadval)
 	{
@@ -626,7 +684,7 @@ void ABozorHud::NatijaChiz()
 			Narx,
 			Baho,
 		};
-		for (int32 I = 0; I < UE_ARRAY_COUNT(Ustun); ++I) Yoz(Ustunlar[I], X + Ustun[I] * S, Ty, 1.35f * S, I == 0 ? Siyoh : Rang);
+		for (int32 I = 0; I < UE_ARRAY_COUNT(Ustun); ++I) Yoz(Ustunlar[I], X + Ustun[I] * S, Ty, JadvalK, I == 0 ? Siyoh : Rang);
 		Ty += QatorH;
 	}
 

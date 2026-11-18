@@ -139,7 +139,18 @@
       "pul": { "5000": 1, "2000": 1, "1000": 2 },
       "royxat": [ ["non", 1, "dona"] ],
       "xatoQaytim": false,
-      "tarozi": ["ortiq"]
+      "tarozi": ["ortiq"],
+      "qongiroq": {
+        "kim": "Oyijon",
+        "gaplar": [
+          ["ona", "Allo, bolam! Bozorga yetib keldingmi?"],
+          ["bola", "Ha, oyijon, hozir avtobusdan tushdim."],
+          ["ona", "Barakalla! Ro'yxatga qara - bitta non olib kel, xo'pmi?"],
+          ["ona", "Sotuvchiga avval salom ber, qaytimni ham sanab ol."],
+          ["bola", "Xo'p, oyijon! Hozir olib boraman."],
+          ["ona", "Yaxshi, bolam. Ehtiyot bo'l!"]
+        ]
+      }
     },
     {
       "nomi": "Ro'yxat",
@@ -156,6 +167,41 @@
       "royxat": [ ["non", 2, "dona"], ["kartoshka", 2, "kilo"], ["olma", 2, "kilo"] ],
       "xatoQaytim": true,
       "tarozi": ["kam", "ortiq", "togri"]
+    },
+    {
+      "nomi": "Mehmonlar keldi",
+      "izoh": "Mehmon kutish: osh (sabzi, piyoz, sarimsoq, zira; go'shtni dadasi oladi), achchiq-chuchuk va salat (pomidor, bodring, piyoz, qora murch, ko'kat), dasturxonga patir va meva, choyga limon",
+      "eslatma": "Mehmonlar kutyapti, tezroq kel!\n— Oying",
+      "pul": { "50000": 3, "20000": 3, "10000": 3, "5000": 2, "2000": 2, "1000": 4, "500": 2 },
+      "royxat": [
+        ["patir", 4, "dona"],
+        ["sabzi", 3, "kilo"],
+        ["piyoz", 2, "kilo"],
+        ["sarimsoq", 0.5, "kilo"],
+        ["zira", 1, "qadoq"],
+        ["qora murch", 1, "qadoq"],
+        ["pomidor", 2, "kilo"],
+        ["bodring", 1, "kilo"],
+        ["ko'kat", 3, "bog'"],
+        ["uzum", 1, "kilo"],
+        ["anor", 1, "kilo"],
+        ["limon", 0.5, "kilo"]
+      ],
+      "xatoQaytim": true,
+      "tarozi": ["togri", "ortiq", "togri", "kam", "togri", "ortiq"],
+      "qongiroq": {
+        "kim": "Oyijon",
+        "gaplar": [
+          ["ona", "Allo, bolam! Bozorga yetib keldingmi?"],
+          ["bola", "Ha, oyijon, hozir avtobusdan tushdim."],
+          ["ona", "Voy bolam, mehmonlar kelib qolishdi! Xolang oilasi bilan kelibdi."],
+          ["ona", "Mehmonlarga osh damlayman, achchiq-chuchuk qilaman, dasturxonga meva ham kerak."],
+          ["ona", "Cho'ntagingdagi ro'yxatga qara - hammasini yozib qo'yganman. Go'shtni dadang olib keladi."],
+          ["ona", "Ro'yxatdagi narsalarni tezroq olib kel. Qaytimni sanab ol, xo'pmi?"],
+          ["bola", "Xo'p, oyijon! Hammasini olib, tez boraman."],
+          ["ona", "Barakalla, bolam. Ehtiyot bo'l, kutyapmiz!"]
+        ]
+      }
     }
   ],
 

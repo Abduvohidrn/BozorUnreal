@@ -366,6 +366,12 @@ void BozorSotuv::XulqniOqi(const FJsonObject& O, FBozorXulq& X)
 	O.TryGetStringField(TEXT("odatlar"), X.Odatlar);
 	O.TryGetStringField(TEXT("yoqtiradi"), X.Yoqtiradi);
 	O.TryGetStringField(TEXT("yoqtirmaydi"), X.Yoqtirmaydi);
+	O.TryGetStringField(TEXT("savdoUslubi"), X.SavdoUslubi);
+	O.TryGetStringArrayField(TEXT("hayot"), X.Hayot);
+	// bugungi kayfiyat: har o'yinda boshqacha - sotuvchi har kuni bir xil bo'lmasin
+	TArray<FString> Kayfiyatlar;
+	if (O.TryGetStringArrayField(TEXT("kayfiyatlar"), Kayfiyatlar) && Kayfiyatlar.Num())
+		X.Kayfiyat = Kayfiyatlar[FMath::RandRange(0, Kayfiyatlar.Num() - 1)];
 	O.TryGetNumberField(TEXT("boshMunosabat"), X.BoshMunosabat);
 	const TSharedPtr<FJsonObject>* Ovoz = nullptr;
 	if (O.TryGetObjectField(TEXT("ovoz"), Ovoz))
@@ -1254,6 +1260,18 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 			O->TryGetStringField(TEXT("eslatma"), D.Eslatma);
 			O->TryGetBoolField(TEXT("xatoQaytim"), D.bXatoQaytim);
 			O->TryGetStringArrayField(TEXT("tarozi"), D.Tarozi);
+			const TSharedPtr<FJsonObject>* Qj = nullptr;
+			if (O->TryGetObjectField(TEXT("qongiroq"), Qj))
+			{
+				(*Qj)->TryGetStringField(TEXT("kim"), D.Qongiroqchi);
+				const TArray<TSharedPtr<FJsonValue>>* Gj = nullptr;
+				if ((*Qj)->TryGetArrayField(TEXT("gaplar"), Gj))
+					for (const TSharedPtr<FJsonValue>& G : *Gj)
+					{
+						const TArray<TSharedPtr<FJsonValue>>& A = G->AsArray();
+						if (A.Num() >= 2) D.QongiroqGaplar.Emplace(A[0]->AsString() != TEXT("bola"), A[1]->AsString());
+					}
+			}
 			const TSharedPtr<FJsonObject>* Pul = nullptr;
 			if (O->TryGetObjectField(TEXT("pul"), Pul))
 				for (const auto& K : (*Pul)->Values) D.Kupyura.Add(FCString::Atoi(*FString(*K.Key)), static_cast<int32>(K.Value->AsNumber()));

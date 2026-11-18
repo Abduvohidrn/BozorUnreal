@@ -195,6 +195,10 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> BerilganMol;
 	TWeakObjectPtr<ABozorNpc> MolSotuvchi;
 	double MolBosh = -1.0;
+	// sotuvchi V_Handout klipini boshlagan payt va kim (MolBosh uzoqdagi "pastdan" holatda oldinga suriladi, bu - yo'q):
+	// mol qo'ldan chiqquncha sotuvchining keyingi harakati kutadi
+	TWeakObjectPtr<ABozorNpc> UzatishSotuvchi;
+	double UzatishBosh = -1.0;
 	float MolH = 2.5f, MolOlcham = 1.f;
 	FVector MolUchishBosh = FVector::ZeroVector;   // ushlash paytida mol tutqichining kaftdan farqi (FP fazosida; asta yo'qoladi)
 	FVector MolQolBosh = FVector::ZeroVector;   // ushlash paytida bola qo'lining nishoni (u yerdan o'ngga - ushlab turish joyiga)

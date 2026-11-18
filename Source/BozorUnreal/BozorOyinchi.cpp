@@ -1,6 +1,7 @@
 #include "BozorOyinchi.h"
 #include "BozorAiMiya.h"
 #include "BozorNavoiy.h"
+#include "BozorPaket.h"
 #include "AudioMixerBlueprintLibrary.h"
 #include "Sound/SoundWave.h"
 #include "BozorHud.h"
@@ -594,6 +595,9 @@ void ABozorOyinchi::YaqinSotuvchiniTop()
 
 void ABozorOyinchi::EBosildi()
 {
+	// ona telefon qilayotganda E - qo'ng'iroqqa javob / keyingi gap (BozorTelefon), sotuvchi bilan suhbat boshlanmaydi
+	if (const APlayerController* P = Cast<APlayerController>(GetController()))
+		if (const ABozorHud* Hud = Cast<ABozorHud>(P->GetHUD()); Hud && Hud->TelefonFaol()) return;
 	if (bSuhbatda) SuhbatniTugat();
 	else SuhbatniBoshla();
 }
@@ -798,7 +802,7 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 			for (const FBozorMahsulot& M : H.Mollar) Nomlar.Add(M.Nomi);
 			Miya->Suhbatlash(UBozorAiMiya::Shaxs(V, H.Fel), H.Munosabat, Tarix, OxirgiGapim, FString::Join(Nomlar, TEXT(", ")), Mano, Tugadi);
 		}
-		else Miya->QaytaYoz(UBozorAiMiya::Shaxs(V, H.Fel), H.Munosabat, OxirgiGapim, Mano, Saqla, Tugadi, Suhbat->GetOxirgiOdob());
+		else Miya->QaytaYoz(UBozorAiMiya::Shaxs(V, H.Fel), H.Munosabat, OxirgiGapim, Mano, Saqla, Tugadi, Suhbat->GetOxirgiOdob(), &Tarix, H.Savdolashuv);
 	}
 	else
 	{
@@ -883,7 +887,7 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	{
 		// mol hali sotuvchi qo'lida bo'lsa (MolYangila: 0.55 x MolH da uchadi) - keyingi harakat uzatish tugagach,
 		// aks holda yangi klip qo'lni mol bilan birga tortib oladi ("Rahmat!" tez bosilganda)
-		const float Kut = MolSotuvchi.Get() == V && MolBosh >= 0.0 ? MolUzatPayti(MolH) + 0.3f - float(GetWorld()->GetTimeSeconds() - MolBosh) : 0.f;
+		const float Kut = UzatishSotuvchi.Get() == V && UzatishBosh >= 0.0 ? MolUzatPayti(MolH) + 0.3f - float(GetWorld()->GetTimeSeconds() - UzatishBosh) : 0.f;
 		if (Kut > 0.f) V->DoLater(Harakat, Kut + 2.f, Kut);
 		else V->Do(Harakat, 1.5f, 3.f);
 	}
@@ -949,16 +953,21 @@ void ABozorOyinchi::MolBer(ABozorNpc* V)
 	BerilganMol->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BerilganMol->SetMobility(EComponentMobility::Movable);
 	BerilganMol->RegisterComponent();
-	// xalta ~30 sm, dona (non, qovun) eng katta o'lchami ~22 sm
+	// xalta ~24 sm (yangi paket 46 sm - FP'da ekrandan chiqmasin), dona (non, qovun) eng katta o'lchami ~22 sm
 	const float Kattasi = MolMesh->GetBoundingBox().GetSize().GetMax();
-	MolOlcham = Kattasi > 1.f ? FMath::Clamp((bXalta ? 30.f : 22.f) / Kattasi, 0.02f, 4.f) : 1.f;
+	MolOlcham = Kattasi > 1.f ? FMath::Clamp((bXalta ? 24.f : 22.f) / Kattasi, 0.02f, 4.f) : 1.f;
 	BerilganMol->SetWorldScale3D(FVector(MolOlcham));
 	const FBox Ch = MolMesh->GetBoundingBox();
 	MolTutqich = bXalta ? FVector(Ch.GetCenter().X, Ch.GetCenter().Y, Ch.Max.Z) : Ch.GetCenter();
+	// paket ichida - olingan mol (kilo: tarozidagi miqdorga qarab 2..8 dona; sabzi, pomidor ...)
+	if (bXalta)
+		BozorPaket::IchigaSol(BerilganMol, BozorPaket::MolMeshi(H.Mahsulot.Nomi), FMath::Clamp(FMath::RoundToInt(H.Miqdor * 4.f), 2, 8), FMath::Rand());
 	MolSotuvchi = V;
 	// to'liq uzunlikda (Cashier_Handout 4 s: qo'l ~0.4 s da cho'ziladi va oxirigacha ushlab turadi - 3 s da kesilsa qo'l keskin qaytardi)
 	MolH = V->Do(TEXT("V_Handout"), 2.f, 4.5f);
 	MolBosh = GetWorld()->GetTimeSeconds();
+	UzatishSotuvchi = V;
+	UzatishBosh = MolBosh;
 	bMolFp = false;
 	UE_LOG(LogBozorOyinchi, Display, TEXT("[MolBer] %s: %s (%s), uzatish %.1f s"), *V->GetActorNameOrLabel(), *MolMesh->GetName(), *H.Mahsulot.Nomi, MolH);
 }
@@ -979,6 +988,8 @@ FVector ABozorOyinchi::MolQolJoyi() const
 
 void ABozorOyinchi::MolTozala()
 {
+	if (BerilganMol)
+		for (UStaticMeshComponent* M : BozorPaket::Ichidagilar(BerilganMol)) M->DestroyComponent();
 	if (BerilganMol) BerilganMol->DestroyComponent();
 	BerilganMol = nullptr;
 	MolSotuvchi = nullptr;
@@ -1048,6 +1059,11 @@ void ABozorOyinchi::MolYangila(float Dt)
 		MolBurBosh = BerilganMol->GetComponentQuat();
 		BerilganMol->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
 		BerilganMol->MarkRenderStateDirty();
+		for (UStaticMeshComponent* M : BozorPaket::Ichidagilar(BerilganMol))
+		{
+			M->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
+			M->MarkRenderStateDirty();
+		}
 		UE_LOG(LogBozorOyinchi, Log, TEXT("[MolUshla] %.2f s, %s, masofa %.0f sm, kaftdan farq %.1f sm"), T,
 			MolYetadimi(G0) ? TEXT("qo'ldan") : TEXT("uzoqda - pastdan"), D0, MolUchishBosh.Size());
 	}
@@ -1055,6 +1071,9 @@ void ABozorOyinchi::MolYangila(float Dt)
 	const float Tort = Silliq(Uzat, Uch, T);
 	const float Osish = Silliq(Uzat, Uch + 0.2f, T);
 	const float Tushish = Silliq(Uch + 1.9f, Uch + 2.4f, T);   // sumkaga
+	// -DarajaTest: mol bola qo'liga yetgach (paket bo'lsa - ichidagi mol bilan) surat
+	if (bBot && T >= Uch + 0.6f && T - Dt < Uch + 0.6f && BerilganMol && BerilganMol->GetStaticMesh())
+		FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / FString::Printf(TEXT("Screenshots/DarajaTest/qolda_%s.png"), *BerilganMol->GetStaticMesh()->GetName()), true, false);
 	// ushlash paytidagi ko'rinishdan qo'ldagi tabiiy kattaligiga (FP'da kameraga yaqin - 0.55)
 	const float S = FMath::Lerp(MolSBosh, MolOlcham * 0.55f, Osish) * (1.f - 0.6f * Tushish);
 	BerilganMol->SetWorldScale3D(FVector(S));

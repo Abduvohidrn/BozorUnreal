@@ -24,6 +24,9 @@ public:
 
 	void Qogoz(bool bOch);
 
+	// ona bilan telefon suhbati davom etyapti (E/Enter shu paytda telefonga tegishli)
+	bool TelefonFaol() const { return Telefon != nullptr; }
+
 	// ekran nuqtasida qaysi javob varianti tugmasi turibdi (oxirgi chizilgan kadr bo'yicha), yo'q bo'lsa INDEX_NONE
 	int32 TanlovQayerda(const FVector2D& Nuqta) const;
 
@@ -46,6 +49,11 @@ private:
 	bool bBoshJoy = false;
 
 	UPROPERTY() TObjectPtr<USoundBase> Shitir;
+
+	// darajada qo'ng'iroq bo'lsa: intro tugagach ona telefon qiladi, qog'oz suhbatdan keyin chiqadi
+	UPROPERTY() TObjectPtr<class UBozorTelefon> Telefon;
+	double QongiroqTestVaqt = -1.0;   // -QongiroqTest: ro'yxat surati olinib, o'yin yopiladi
+	bool bQongiroqSurat = false;
 
 	TArray<FBox2D> TanlovJoylari;
 

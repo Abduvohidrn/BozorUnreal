@@ -49,6 +49,7 @@ AI/miya/natija/
 AI/miya/*.gguf
 AI/miya/*.log
 AI/miya/model.txt
+AI/miya/kalit.txt
 AI/stt/rubai/
 # ===== Navoiy TTS (jonli ovoz): muhit - D:\Trk\Ovoz_tashqi\navoiy ga junction (venv + modellar) =====
 AI/navoiy/muhit

@@ -48,6 +48,9 @@ struct FBozorXulq
 	FString Tavsif;           // kimligi, hayoti (1-2 gap)
 	FString Odatlar;          // qanday gapiradi: so'z odatlari, murojaati
 	FString Yoqtiradi, Yoqtirmaydi;
+	FString SavdoUslubi;      // qanday savdolashadi (narx tushirishni so'rashsa qanday javob qaytaradi)
+	FString Kayfiyat;         // bugungi holati: "kayfiyatlar" dan har o'yinda bittasi tasodifan
+	TArray<FString> Hayot;    // erkin suhbatda aytishi mumkin bo'lgan hayotiy tafsilotlar
 	TArray<TPair<FString, FString>> Namunalar;   // ma'no -> shu sotuvchi qanday aytadi
 	int32 BoshMunosabat = 50; // bolaga birinchi munosabati (0..100)
 	// o'z ovozi ("ovoz": {"ohang", "tezlik"}): Ohang - Navoiy namuna ovozini necha yarim tonga siljitish (har sotuvchiga boshqa
@@ -335,6 +338,10 @@ struct FBozorDaraja
 	UPROPERTY(BlueprintReadOnly) bool bXatoQaytim = false;
 	// tortishlar tartibida tarozi rejasi: "togri", "ortiq" (ko'p tortadi), "kam" (kam tortib, to'liq narx so'raydi)
 	UPROPERTY(BlueprintReadOnly) TArray<FString> Tarozi;
+	// avtobusdan tushgach keladigan telefon qo'ng'irog'i (sotuv.json "qongiroq"): kim qo'ng'iroq qilyapti va suhbat
+	// (Key: true - qo'ng'iroq qilgan odam gapi, false - bola javobi). Bo'sh bo'lsa qo'ng'iroq yo'q
+	UPROPERTY(BlueprintReadOnly) FString Qongiroqchi;
+	TArray<TPair<bool, FString>> QongiroqGaplar;
 };
 
 // O'yinchining puli (kupyuralar), xarid ro'yxati (cho'ntakdagi qog'oz) va xarid qilganlari

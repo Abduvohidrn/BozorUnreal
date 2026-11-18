@@ -1,7 +1,9 @@
-#include "BozorNpc.h"
+﻿#include "BozorNpc.h"
 
 #include "AIController.h"
 #include "BozorOvoz.h"
+#include "BozorPaket.h"
+#include "BozorSotuv.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
 #include "Camera/CameraActor.h"
@@ -18,12 +20,14 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/App.h"
 #include "Misc/CommandLine.h"
+#include "Misc/Paths.h"
 #include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "TimerManager.h"
 #include "TwoBoneIK.h"
 #include "UnrealClient.h"
+#include "UObject/ConstructorHelpers.h"
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -121,6 +125,12 @@ ABozorNpcManager::ABozorNpcManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	// yangi paketlar (Scripts/paket_import.py): xaritada saqlangan eski BagMeshes o'rniga BeginPlay'da qo'yiladi
+	for (const TCHAR* Rang : { TEXT("Qora"), TEXT("Oq"), TEXT("Sariq") })
+	{
+		ConstructorHelpers::FObjectFinder<UStaticMesh> P(*FString::Printf(TEXT("/Game/Bozor/Paket/SM_Paket_%s.SM_Paket_%s"), Rang, Rang));
+		if (P.Succeeded()) PaketMeshlari.Add(P.Object);
+	}
 }
 
 ABozorNpcManager* ABozorNpcManager::Get(const UObject* WorldContext)
@@ -134,6 +144,7 @@ ABozorNpcManager* ABozorNpcManager::Get(const UObject* WorldContext)
 void ABozorNpcManager::BeginPlay()
 {
 	Super::BeginPlay();
+	if (PaketMeshlari.Num() > 0) BagMeshes = PaketMeshlari;
 	StartTime = GetWorld()->GetTimeSeconds();
 	for (int32 i = 0; i < Actions.Num(); ++i)
 	{
@@ -145,6 +156,7 @@ void ABozorNpcManager::BeginPlay()
 	for (float& P : Popularity) P = FMath::FRand() < 0.15f ? FMath::FRandRange(2.f, 3.f) : FMath::FRandRange(0.4f, 1.2f);
 	SeatOccupant.SetNum(Seats.Num());
 	bAutoTest = FParse::Param(FCommandLine::Get(), TEXT("BozorAutoTest"));
+	bPaketTest = FParse::Param(FCommandLine::Get(), TEXT("PaketTest"));
 	NextShot = StartTime + 12.0;
 	EnsureNavMesh();
 	UE_LOG(LogBozorNpc, Display, TEXT("[BozorNpc] harakat=%d navbat=%d o'rindiq=%d nuqta=%d+%d"), Actions.Num(), Queues.Num(), Seats.Num(), WanderPoints.Num(), GatePoints.Num());
@@ -154,6 +166,7 @@ void ABozorNpcManager::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (bAutoTest) AutoTest(GetWorld()->GetTimeSeconds());
+	if (bPaketTest) PaketTest(GetWorld()->GetTimeSeconds());
 }
 
 // Xaritada NavMesh bo'sh saqlangan bo'lsa (Dynamic rejimda o'yin uni o'zi qurmaydi), hech kim yurolmaydi: shu yerda quriladi
@@ -412,6 +425,7 @@ void ABozorNpc::Tick(float DeltaSeconds)
 	{
 		Main.Step(DeltaSeconds);
 	}
+	if (Bag) PaketniOsil(DeltaSeconds);
 	if (Cart)
 	{
 		UpdateCart(DeltaSeconds);
@@ -849,7 +863,7 @@ FBozorCo ABozorNpc::DealWith(ABozorNpc* V, int32 ForceBuy)
 		Do(TEXT("C_Pay"), H, H);                               // pul beradi
 		ABozorRastaOvozlari::Play(this, FMath::FRand() < 0.5f ? FName(TEXT("pul")) : FName(TEXT("tanga")), CHand, this);
 		co_await FBozorWait{ H };
-		TakeBag();
+		TakeBag(V);
 		Mgr->TradesBought++;
 		const float Th = V->Do(TEXT("V_Thanks"), 1.5f, 2.5f); // "Bozoringizni bersin!" - "Yana keling!"
 		ABozorSotuvchiOvozi::Say(V, TEXT("rahmat"));
@@ -869,20 +883,93 @@ UStaticMesh* ABozorNpc::XaltaMesh() const
 	return Mgr && Mgr->BagMeshes.Num() ? Mgr->BagMeshes[FMath::RandRange(0, Mgr->BagMeshes.Num() - 1)].Get() : nullptr;
 }
 
-void ABozorNpc::TakeBag()
+// Xaridor paketni CHAP qo'lda ko'taradi (o'ng qo'l pul berish, imo-ishora uchun bo'sh). Paket kaftdagi tutqich nuqtasiga
+// biriktiriladi, aylanishi esa dunyoda: doim tik osiladi, yurganda mayatnikdek tebranadi (PaketniOsil). Ichida - sotuvchi
+// rastasidagi mollardan biri
+void ABozorNpc::TakeBag(ABozorNpc* Sotuvchi)
 {
 	if (Bag || !Mgr || Mgr->BagMeshes.Num() == 0) return;
 	UStaticMesh* M = Mgr->BagMeshes[FMath::RandRange(0, Mgr->BagMeshes.Num() - 1)];
 	if (!M) return;
+	USkeletalMeshComponent* Tana = GetMesh();
+	static const FName Kaft(TEXT("hand_l")), OrtaBarmoq(TEXT("middle_01_l"));
+	if (Tana->GetBoneIndex(Kaft) == INDEX_NONE) return;
 	Bag = NewObject<UStaticMeshComponent>(this);
 	Bag->SetStaticMesh(M);
 	Bag->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Bag->SetMobility(EComponentMobility::Movable);
 	Bag->RegisterComponent();
-	const float H = M->GetBoundingBox().GetSize().Z;
-	if (H > 1.f) Bag->SetWorldScale3D(FVector(32.f / H));
-	Bag->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
+	Bag->AttachToComponent(Tana, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Kaft);
+	// tutqich kaft o'rtasida: bilak suyagidan o'rta barmoq ildizigacha yo'lning ~60%
+	const FTransform KaftT = Tana->GetSocketTransform(Kaft);
+	FVector Ushlash = FVector::ZeroVector;
+	if (Tana->GetBoneIndex(OrtaBarmoq) != INDEX_NONE)
+		Ushlash = KaftT.InverseTransformPositionNoScale(Tana->GetSocketLocation(OrtaBarmoq)) * 0.6f;
+	Bag->SetRelativeLocation(Ushlash);
+	Bag->SetUsingAbsoluteRotation(true);
+	Bag->SetUsingAbsoluteScale(true);
+	Bag->SetWorldScale3D(FVector::OneVector);   // haqiqiy o'lcham (~25 x 16 x 46 sm)
 	Bag->SetWorldRotation(GetActorRotation());
-	Bag->SetWorldLocation(GetMesh()->GetSocketLocation(TEXT("hand_r")) - FVector(0.f, 0.f, 18.f));
+	BagBurchak = BagBurchakTezlik = FVector2D::ZeroVector;
+	bBagJoyBor = false;
+	if (UBozorNpcMesh* Body = Cast<UBozorNpcMesh>(Tana)) Body->bPaketQol = true;
+	static bool bSuyaklarLog = false;
+	if (!bSuyaklarLog && FParse::Param(FCommandLine::Get(), TEXT("PaketTest")))
+	{
+		bSuyaklarLog = true;
+		TArray<FName> Nomlar;
+		Tana->GetBoneNames(Nomlar);
+		FString S;
+		for (const FName& N : Nomlar)
+			if (N.ToString().EndsWith(TEXT("_l")) || N.ToString().Contains(TEXT("Left"))) S += N.ToString() + TEXT(" ");
+		UE_LOG(LogBozorNpc, Display, TEXT("[PaketTest] chap suyaklar: %s"), *S);
+	}
+
+	// ichiga sotuvchining mollaridan biri
+	if (const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this))
+		if (const FBozorRasta* R = Sotuvchi ? Tz->Top(Sotuvchi) : nullptr; R && R->Mollar.Num() > 0)
+			if (UStaticMesh* Mol = BozorPaket::MolMeshi(R->Mollar[FMath::RandRange(0, R->Mollar.Num() - 1)].Nomi))
+				BozorPaket::IchigaSol(Bag, Mol, FMath::RandRange(3, 6), FMath::Rand());
+}
+
+// Paket mayatnigi: tutqich kaftda, paket og'irlik markazi ~L sm pastda. Kaft tezlanganda paket orqada qoladi va
+// tebranib so'nadi (yengil plyonka + ichidagi mol - so'nish kuchli). Kenglik (X) aktor oldiga qarab - paket songa yonma-yon
+void ABozorNpc::PaketniOsil(float Dt)
+{
+	if (!Bag || Dt <= 0.f) return;
+	const FVector Joy = Bag->GetComponentLocation();
+	const FVector Oldinga = GetActorForwardVector(), Yon = GetActorRightVector();
+	if (UBozorNpcMesh* Body = Cast<UBozorNpcMesh>(GetMesh()))
+	{
+		Body->PaketOldinga = Oldinga;
+		Body->PaketTashqi = -Yon;   // chap qo'l
+	}
+	FVector Tezlanish = FVector::ZeroVector;
+	if (bBagJoyBor)
+	{
+		const FVector Tezlik = (Joy - BagOldingiJoy) / Dt;
+		Tezlanish = ((Tezlik - BagOldingiTezlik) / Dt).GetClampedToMaxSize(2500.f);   // teleport/birinchi kadr sakrashi
+		BagOldingiTezlik = Tezlik;
+	}
+	BagOldingiJoy = Joy;
+	bBagJoyBor = true;
+	constexpr float L = 28.f, G = 980.f, Sonish = 5.f, Chegara = 0.6f;
+	const FVector2D A(FVector::DotProduct(Tezlanish, Oldinga), FVector::DotProduct(Tezlanish, Yon));
+	// kichik qadamlarda integrallash (past FPS'da ham barqaror)
+	const int32 Qadam = FMath::Clamp(FMath::CeilToInt(Dt / 0.008f), 1, 8);
+	const float H = Dt / Qadam;
+	for (int32 i = 0; i < Qadam; ++i)
+	{
+		const FVector2D BurchakTez = -(G / L) * BagBurchak - Sonish * BagBurchakTezlik - A / L;
+		BagBurchakTezlik += BurchakTez * H;
+		BagBurchak += BagBurchakTezlik * H;
+	}
+	BagBurchak.X = FMath::Clamp(BagBurchak.X, -Chegara, Chegara);
+	BagBurchak.Y = FMath::Clamp(BagBurchak.Y, -Chegara, Chegara);
+	// paket tubi yo'nalishi: pastga, og'ish burchagicha oldinga/yonga; tanaga (o'ngga) kirmasin
+	const float YonBurchak = FMath::Max(BagBurchak.Y, -0.12f);
+	const FVector Past = (FVector::DownVector + Oldinga * FMath::Tan(BagBurchak.X) + Yon * FMath::Tan(YonBurchak)).GetSafeNormal();
+	Bag->SetWorldRotation(FRotationMatrix::MakeFromZX(-Past, Oldinga).ToQuat());
 }
 
 // ================= hamroh
@@ -1448,6 +1535,7 @@ void ABozorNpc::PlaceCart(const FVector& AxleGround)
 void UBozorNpcMesh::FinalizeBoneTransform()
 {
 	if (bHandIK) ApplyHandIK();
+	else if (bPaketQol) PaketQoli();
 	Super::FinalizeBoneTransform();
 }
 
@@ -1482,6 +1570,88 @@ void UBozorNpcMesh::ApplyHandIK()
 			Cs[i] = Old[i].GetRelativeTransform(Old[P]) * Cs[P];
 			Changed[i] = true;
 		}
+	}
+}
+
+// Paket ko'targan chap qo'l. Haqiqiy odamda: og'irlik qo'lni to'g'ri pastga tortadi - yelka bo'sh, qo'l tanaga yaqin osiladi,
+// tirsak sal bukilgan (to'liq tik emas), kaft songa qaragan, paket songa tegmasligi uchun qo'l ~12 sm tashqarida;
+// yurganda qo'l kam tebranadi (paket og'ir), savdoda ham pastda qoladi. Barmoqlar tutqichni musht qilib qisadi.
+// Animatsiyadagi kaft joyining (1 - PaketAralash) ulushi qoladi - yurish tebranishi butunlay yo'qolmasin
+void UBozorNpcMesh::PaketQoli()
+{
+	TArray<FTransform>& Cs = GetEditableComponentSpaceTransforms();
+	const USkeletalMesh* M = GetSkeletalMeshAsset();
+	if (!M || Cs.Num() == 0) return;
+	const FReferenceSkeleton& Ref = M->GetRefSkeleton();
+	const int32 U = GetBoneIndex(TEXT("upperarm_l")), L = GetBoneIndex(TEXT("lowerarm_l")), H = GetBoneIndex(TEXT("hand_l"));
+	if (U == INDEX_NONE || L == INDEX_NONE || H == INDEX_NONE || H >= Cs.Num()) return;
+
+	const FTransform& ToWorld = GetComponentTransform();
+	const float Sc = FMath::Max(ToWorld.GetScale3D().Z, 0.01f);   // dunyo sm -> komponent birligi
+	const FVector Past = ToWorld.InverseTransformVectorNoScale(FVector::DownVector);
+	const FVector Tashqi = ToWorld.InverseTransformVectorNoScale(PaketTashqi);
+	const FVector Oldi = ToWorld.InverseTransformVectorNoScale(PaketOldinga);
+
+	// 1) qo'l IK: kaft yelka ostida, qo'l uzunligining 95% pastda (tirsak sal bukilgan), tashqariga va sal oldinga
+	const TArray<FTransform> Old = Cs;
+	const float Uzun = FVector::Dist(Cs[U].GetLocation(), Cs[L].GetLocation()) + FVector::Dist(Cs[L].GetLocation(), Cs[H].GetLocation());
+	const FVector Osilgan = Cs[U].GetLocation() + Past * (Uzun * 0.95f) + Tashqi * (12.f / Sc) + Oldi * (3.f / Sc);
+	const FVector Nishon = FMath::Lerp(Cs[H].GetLocation(), Osilgan, PaketAralash);
+	FTransform Ut = Cs[U], Lt = Cs[L], Ht = Cs[H];
+	// tirsak orqaga va sal tashqariga bukiladi (oldinga emas)
+	const FVector Tirsak = Lt.GetLocation() - Oldi * (15.f / Sc) + Tashqi * (4.f / Sc);
+	AnimationCore::SolveTwoBoneIK(Ut, Lt, Ht, Tirsak, Nishon, false, 1.0, 1.0);
+	// kaft bilak davomida (ref pozadagi lowerarm->hand burilishi): barmoqlar pastga, kaft songa
+	if (Ref.GetParentIndex(H) == L) Ht.SetRotation((Ref.GetRefBonePose()[H] * Lt).GetRotation());
+	Cs[U] = Ut;
+	Cs[L] = Lt;
+	Cs[H] = Ht;
+	TBitArray<> Changed(false, Cs.Num());
+	Changed[U] = true;
+	Changed[L] = true;
+	Changed[H] = true;
+	for (int32 i = U + 1; i < Cs.Num(); ++i)
+	{
+		const int32 P = Ref.GetParentIndex(i);
+		if (i == L || i == H || P == INDEX_NONE || !Changed[P]) continue;
+		Cs[i] = Old[i].GetRelativeTransform(Old[P]) * Cs[P];
+		Changed[i] = true;
+	}
+
+	// 2) barmoqlar tutqichni qisadi: har bo'g'in kaft tomonga (songa qaragan tomon) bukiladi. Bukish o'qi skeletning
+	// o'qlariga bog'liq emas - barmoq yo'nalishi va kaft tomonidan hisoblanadi
+	const FVector KaftTomon = -Tashqi;
+	auto Burish = [&](int32 B, const FQuat& Q)
+	{
+		const FVector Ildiz = Cs[B].GetLocation();
+		for (int32 i = B; i < Cs.Num(); ++i)
+		{
+			bool bOstida = i == B;
+			for (int32 P = Ref.GetParentIndex(i); !bOstida && P != INDEX_NONE && P >= B; P = Ref.GetParentIndex(P)) bOstida = P == B;
+			if (!bOstida) continue;
+			Cs[i].SetLocation(Ildiz + Q.RotateVector(Cs[i].GetLocation() - Ildiz));
+			Cs[i].SetRotation(Q * Cs[i].GetRotation());
+		}
+	};
+	struct FBarmoq { const TCHAR* Nom; float Burchak[3]; };
+	static const FBarmoq Barmoqlar[] = {
+		{ TEXT("index"),  { 50.f, 60.f, 40.f } },
+		{ TEXT("middle"), { 55.f, 60.f, 40.f } },
+		{ TEXT("ring"),   { 58.f, 60.f, 40.f } },
+		{ TEXT("pinky"),  { 60.f, 60.f, 40.f } },
+		{ TEXT("thumb"),  { 15.f, 25.f, 20.f } },
+	};
+	for (const FBarmoq& Bm : Barmoqlar)
+	{
+		int32 Bo[3];
+		for (int32 k = 0; k < 3; ++k) Bo[k] = GetBoneIndex(FName(*FString::Printf(TEXT("%s_0%d_l"), Bm.Nom, k + 1)));
+		if (Bo[0] == INDEX_NONE || Bo[1] == INDEX_NONE) continue;
+		// o'q bir marta: barmoq kaftdan o'tib bukilganda o'q teskari bo'lib, barmoqni ochib yubormasin
+		const FVector Yonalish = (Cs[Bo[1]].GetLocation() - Cs[Bo[0]].GetLocation()).GetSafeNormal();
+		const FVector Oq = FVector::CrossProduct(Yonalish, KaftTomon).GetSafeNormal();
+		if (Oq.IsNearlyZero()) continue;
+		for (int32 k = 0; k < 3; ++k)
+			if (Bo[k] != INDEX_NONE) Burish(Bo[k], FQuat(Oq, FMath::DegreesToRadians(Bm.Burchak[k])));
 	}
 }
 
@@ -1782,6 +1952,58 @@ FBozorCo ABozorNpc::TurnTo(FVector Forward)
 }
 
 // ============================================================ avtomatik sinov
+
+void ABozorNpcManager::PaketTest(double Now)
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (!PC || Now - StartTime < 15.0) return;   // shader va NavMesh tayyor bo'lsin, NPC'lar yura boshlasin
+	ABozorNpc* N = PaketTestNpc.Get();
+	if (!N)
+	{
+		// yurib turgan xaridor (aravasiz) va mollari bor sotuvchi
+		ABozorNpc* Sotuvchi = nullptr;
+		const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this);
+		for (TActorIterator<ABozorNpc> It(GetWorld()); It; ++It)
+		{
+			if (It->NpcRole == EBozorRole::Sotuvchi && Tz && Tz->Top(*It) && !Sotuvchi) Sotuvchi = *It;
+			if (!N && It->NpcRole == EBozorRole::Xaridor && !It->bCart && It->GetVelocity().Size2D() > 40.f) N = *It;
+		}
+		if (!N) return;
+		N->PaketBer(Sotuvchi);
+		PaketTestNpc = N;
+		NextShot = Now + 1.5;
+		UE_LOG(LogBozorNpc, Display, TEXT("[PaketTest] %s paket oldi (sotuvchi %s), bor: %d"), *N->GetName(), Sotuvchi ? *Sotuvchi->GetName() : TEXT("-"), N->PaketBormi() ? 1 : 0);
+	}
+	if (!AutoCamera)
+	{
+		AutoCamera = GetWorld()->SpawnActor<ACameraActor>(N->GetActorLocation(), FRotator::ZeroRotator);
+		AutoCamera->GetCameraComponent()->SetFieldOfView(55.f);
+		AutoCamera->GetCameraComponent()->bConstrainAspectRatio = false;
+		PC->SetViewTarget(AutoCamera);
+	}
+	// 0 - chap yondan qo'l va paket, 1 - old-chapdan butun tana, 2 - yelka ustidan paket ichiga
+	const int32 Tur = PaketTestSurat % 3;
+	const FVector P = N->GetActorLocation(), F = N->GetActorForwardVector(), Chap = -N->GetActorRightVector();
+	const FVector Qol = N->GetMesh()->GetSocketLocation(TEXT("hand_l"));
+	FVector Joy, Qara;
+	if (Tur == 0) { Joy = Qol + Chap * 150.f + F * 30.f + FVector(0.f, 0.f, 10.f); Qara = Qol - FVector(0.f, 0.f, 15.f); }
+	else if (Tur == 1) { Joy = P + Chap * 230.f + F * 200.f + FVector(0.f, 0.f, 30.f); Qara = P - FVector(0.f, 0.f, 10.f); }
+	else { Joy = Qol + Chap * 45.f + F * 25.f + FVector(0.f, 0.f, 75.f); Qara = Qol - FVector(0.f, 0.f, 25.f); }
+	AutoCamera->SetActorLocationAndRotation(Joy, (Qara - Joy).Rotation());
+	if (Now < NextShot) return;
+	if (PaketTestSurat >= 9)
+	{
+		UKismetSystemLibrary::QuitGame(this, PC, EQuitPreference::Quit, false);
+		NextShot = DBL_MAX;
+		return;
+	}
+	const FString Nomi = FString::Printf(TEXT("%d_%s_%s.png"), PaketTestSurat, Tur == 0 ? TEXT("yon") : Tur == 1 ? TEXT("tana") : TEXT("ichi"),
+		N->GetVelocity().Size2D() > 30.f ? TEXT("yuryapti") : TEXT("turibdi"));
+	FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/PaketTest") / Nomi, false, false);
+	UE_LOG(LogBozorNpc, Display, TEXT("[PaketTest] surat %s, tezlik %.0f"), *Nomi, N->GetVelocity().Size2D());
+	++PaketTestSurat;
+	NextShot = Now + 1.3;
+}
 
 void ABozorNpcManager::LogStats(const TCHAR* Tag)
 {

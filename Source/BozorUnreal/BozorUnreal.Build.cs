@@ -25,6 +25,8 @@ public class BozorUnreal : ModuleRules
 		PrivateDependencyModuleNames.Add("HTTP");
 		RuntimeDependencies.Add("$(ProjectDir)/AI/miya/llama/...", StagedFileType.NonUFS);
 		RuntimeDependencies.Add("$(ProjectDir)/AI/miya/model.gguf", StagedFileType.NonUFS);
+		// bulut AI (rag-api.edcom.uz) kaliti - git'ga kirmaydi, paketga qo'shiladi
+		RuntimeDependencies.Add("$(ProjectDir)/AI/miya/kalit.txt", StagedFileType.NonUFS);
 		if (Target.bBuildEditor)
 		{
 			PrivateDependencyModuleNames.Add("UnrealEd");

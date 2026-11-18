@@ -228,6 +228,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	TObjectPtr<UStaticMesh> CartMesh = nullptr;
 
+	// Assets/Paket'dan yangi paketlar (qora, oq, sariq; qo'lda ushlangan shakl, pivot - kaftdagi tutqich).
+	// Bo'lsa - BeginPlay'da BagMeshes o'rniga ishlatiladi (xaritadagi eski SM_SM_Paket_* qiymati ustidan)
+	UPROPERTY(VisibleAnywhere, Category = "Bozor")
+	TArray<TObjectPtr<UStaticMesh>> PaketMeshlari;
+
 	static ABozorNpcManager* Get(const UObject* WorldContext);
 
 	virtual void BeginPlay() override;
@@ -263,6 +268,11 @@ public:
 private:
 	void EnsureNavMesh();
 	void AutoTest(double Now);
+	// -PaketTest: bitta xaridorga paket beriladi, kamera chap yonidan kuzatib suratga oladi (Saved/Screenshots/PaketTest), keyin chiqish
+	void PaketTest(double Now);
+	bool bPaketTest = false;
+	TWeakObjectPtr<ABozorNpc> PaketTestNpc;
+	int32 PaketTestSurat = 0;
 	void LogStats(const TCHAR* Tag);
 
 	TMap<FName, TArray<int32>> ByCat;
@@ -290,10 +300,18 @@ public:
 	bool bHandIK = false;
 	FVector HandTarget[2];     // dunyo koordinatasida: 0 - chap, 1 - o'ng qo'l
 
+	// Chap qo'lda paket: qo'l yelkadan pastga osiladi (tirsak sal bukilgan, kaft songa qaragan), barmoqlar tutqichni qisadi.
+	// Animatsiyadagi qo'l harakatining bir qismi qoladi (PaketAralash - osilgan holat ulushi). Yo'nalishlar - dunyoda
+	bool bPaketQol = false;
+	float PaketAralash = 0.8f;
+	FVector PaketOldinga = FVector::ForwardVector;   // aktor oldi
+	FVector PaketTashqi = FVector::LeftVector;       // chap qo'l tomoni (tanadan tashqariga)
+
 	virtual void FinalizeBoneTransform() override;
 
 private:
 	void ApplyHandIK();
+	void PaketQoli();
 };
 
 UCLASS()
@@ -303,6 +321,10 @@ class BOZORUNREAL_API ABozorNpc : public ACharacter
 
 public:
 	ABozorNpc(const FObjectInitializer& ObjectInitializer);
+
+	// -PaketTest: shu NPC'ga paket beriladi (sotuvchi rastasidagi mol bilan)
+	void PaketBer(ABozorNpc* Sotuvchi) { TakeBag(Sotuvchi); }
+	bool PaketBormi() const { return Bag != nullptr; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	EBozorRole NpcRole = EBozorRole::Yolovchi;
@@ -416,6 +438,11 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Bag;
+	// paket mayatnigi: tutqich (kaft) atrofida oldinga/orqaga (X) va yonga (Y) og'ish, rad; kaftning oldingi joyi va tezligi
+	FVector2D BagBurchak = FVector2D::ZeroVector, BagBurchakTezlik = FVector2D::ZeroVector;
+	FVector BagOldingiJoy = FVector::ZeroVector, BagOldingiTezlik = FVector::ZeroVector;
+	bool bBagJoyBor = false;
+	void PaketniOsil(float Dt);
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Cart;
 	// hammol aravasi: kapsula (AI agenti) - aravaning g'ildirak o'qi, u yo'l bo'ylab oldinda yuradi; hammol dastadan
@@ -447,7 +474,7 @@ private:
 	void TurnTowards(const FVector& Forward);
 	void FaceTowards(const FVector& P) { TurnTowards(P - GetActorLocation()); }
 	bool SomeoneInFront(float Radius) const;
-	void TakeBag();
+	void TakeBag(ABozorNpc* Sotuvchi = nullptr);
 	void AttachCart();
 	FVector NextWalkTarget() const;
 	FVector WaitSpot(float Side, float Row) const;

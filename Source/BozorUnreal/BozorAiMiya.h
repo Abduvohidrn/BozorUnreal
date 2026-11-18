@@ -7,7 +7,9 @@
 
 class ABozorNpc;
 
-// Sotuvchining "tili": lokal LLM (llama.cpp + Qwen3-4B) har javobni shu sotuvchining fe'li va kayfiyatida qayta yozadi.
+// Sotuvchining "tili": LLM har javobni shu sotuvchining fe'li va kayfiyatida qayta yozadi.
+// Manba (bozor.MiyaManba): 1 - bulut rag-api.edcom.uz (kalit: AI/miya/kalit.txt yoki BOZOR_AI_KALIT), kalit bo'lmasa yoki
+// -AiLokal / bozor.MiyaManba 0 - lokal llama.cpp + Qwen3-4B.
 // Nima deyishni (narx, summa, qaytim, rad etish) har doim UBozorSuhbat hal qiladi - LLM faqat ma'noni o'z uslubida aytadi.
 // Tekshiruv: tayyor gapdagi har bir son LLM javobida aynan bo'lishi kerak, aks holda tayyor gap ishlatiladi.
 // Fayllar: <loyiha>/AI/miya/llama/llama-server.exe (+ dll), AI/miya/model.gguf - AI/miya/yukla.sh tayyorlaydi.
@@ -46,8 +48,10 @@ public:
 	// bAi=false - LLM javob bermadi, kechikdi yoki son xato (Matn = Mano).
 	// Saqla - javobda albatta qolishi kerak bo'lgan so'zlar (mol nomlari). Oxiridagi "[Tarozida: ...]" LLM'ga berilmaydi, qayta qo'shiladi
 	// BolaOdob - bolaning shu gapi: -1 qo'pol, 1 odobli (UBozorSuhbat::GetOxirgiOdob) - sotuvchi o'z fe'lida munosabat bildiradi
+	// Tarix - oldingi navbatlar (bola, sotuvchi), Savdolashuv - bola necha marta narx tushirishni so'radi: bulut rejimida
+	// sotuvchi bolaning gapiga va suhbat oqimiga o'z xarakterida munosabat bildiradi
 	void QaytaYoz(const FBozorShaxs& Kim, int32 Munosabat, const FString& BolaGapi, const FString& Mano, const TArray<FString>& Saqla,
-		TFunction<void(const FString& Matn, bool bAi)> Tayyor, int32 BolaOdob = 0);
+		TFunction<void(const FString& Matn, bool bAi)> Tayyor, int32 BolaOdob = 0, const TArray<TPair<FString, FString>>* Tarix = nullptr, int32 Savdolashuv = 0);
 
 	// Erkin suhbat (ovozli chat kabi): bola savdodan tashqari gap aytdi yoki savol berdi ("qayerdansiz?", "charchadingizmi?") -
 	// sotuvchi o'z shaxsida, suhbat tarixini bilib javob beradi. Pul hisobi yo'q: javobda son/narx bo'lsa rad etiladi
@@ -74,7 +78,12 @@ private:
 	void Ishga();
 	void Sogmi(int32 Urinish);
 	FString Tizim(const FBozorShaxs& Kim) const;
+	// bitta so'rov: bulutda (rag-api) yoki lokal llama-server'da. Natija(Xom javob, HTTP 200 keldimi) - o'yin oqimida
+	void Yubor(const FString& TizimMatn, const TArray<TPair<FString, FString>>& Tarix, const FString& Savol, double Harorat, int32 MaxToken,
+		TFunction<void(const FString& Xom, bool bOk)> Natija);
 
+	bool bBulut = false;   // true - rag-api.edcom.uz, false - lokal llama-server
+	FString Kalit;
 	FProcHandle Jarayon;
 	int32 Port = 0;
 	bool bTayyor = false;

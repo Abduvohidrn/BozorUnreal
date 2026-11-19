@@ -136,7 +136,8 @@ UBozorTelefon::UBozorTelefon()
 	static ConstructorHelpers::FObjectFinder<UTexture2D> TClose(TEXT("/Game/PhoneSystem/Texture/Icon/T_CloseCall.T_CloseCall"));
 	static ConstructorHelpers::FObjectFinder<USoundBase> SJiring(TEXT("/Game/PhoneSystem/Demo/Sound/SW_Notify.SW_Notify"));
 	static ConstructorHelpers::FObjectFinder<USoundBase> SUlandi(TEXT("/Game/PhoneSystem/Sound/SW_Beep.SW_Beep"));
-	static ConstructorHelpers::FObjectFinder<USoundBase> SUzildi(TEXT("/Game/PhoneSystem/Sound/SW_Rejected.SW_Rejected"));
+	// SW_Rejected - inglizcha avtojavob gapi, shuning uchun go'shak qo'yilganda ham qisqa signal (SW_Beep)
+	static ConstructorHelpers::FObjectFinder<USoundBase> SUzildi(TEXT("/Game/PhoneSystem/Sound/SW_Beep.SW_Beep"));
 	if (TFon.Succeeded()) Fon = TFon.Object;
 	if (TCall.Succeeded()) QongiroqBelgi = TCall.Object;
 	if (TClose.Succeeded()) TugatishBelgi = TClose.Object;
@@ -287,14 +288,15 @@ void UBozorTelefon::Chiz(UCanvas* C)
 	Yumaloq(C, X, Y, W, H, 34.f * S, FLinearColor(0.02f, 0.02f, 0.025f, 1.f));
 	const float E = 12.f * S;
 	const float Ex = X + E, Ey = Y + E, Ew = W - 2.f * E, Eh = H - 2.f * E;
-	Yumaloq(C, Ex, Ey, Ew, Eh, 0.f, FLinearColor(0.08f, 0.32f, 0.45f, 1.f));
+	// T_PhoneBG'ning o'zida qora ramka va yumaloq burchaklar bor (burchaklari shaffof): tagiga to'rtburchak chizilmaydi,
+	// aks holda korpus bilan rasm ramkasi orasida havorang burchaklar ko'rinadi. Matn o'qilishi uchun rasm sal xiralanadi
 	if (Fon && Fon->GetResource())
 	{
-		FCanvasTileItem F(FVector2D(Ex, Ey), Fon->GetResource(), FVector2D(Ew, Eh), FLinearColor::White);
+		FCanvasTileItem F(FVector2D(Ex, Ey), Fon->GetResource(), FVector2D(Ew, Eh), FLinearColor(0.7f, 0.7f, 0.7f, 1.f));
 		F.BlendMode = SE_BLEND_Translucent;
 		C->DrawItem(F);
 	}
-	Yumaloq(C, Ex, Ey, Ew, Eh, 0.f, FLinearColor(0.f, 0.02f, 0.05f, 0.3f));   // matn o'qilsin
+	else Yumaloq(C, Ex, Ey, Ew, Eh, 24.f * S, FLinearColor(0.06f, 0.24f, 0.34f, 1.f));
 	Doira(C, FVector2D(X + W * 0.5f, Ey + 16.f * S), 6.f * S, FLinearColor(0.f, 0.f, 0.f, 1.f));
 
 	const float Mx = X + W * 0.5f;

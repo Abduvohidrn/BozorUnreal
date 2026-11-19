@@ -31,6 +31,14 @@ namespace
 		{
 			FMasofaviyRubai R;
 			if (FParse::Param(FCommandLine::Get(), TEXT("SttLokal"))) return R;
+			// lokal rubaiSTT bor bo'lsa - u asosiy: unga bozor so'zlari maslahati (prompt) beriladi, server esa promptni
+			// qabul qilmaydi va bozor gaplarini yomonroq taniydi ("qimmat" -> "qibbati", 2026-11-19). Server faqat
+			// lokal model yo'q bo'lsa yoki -SttServer bilan
+			if (BozorRubai::Tanlangan() && !FParse::Param(FCommandLine::Get(), TEXT("SttServer")))
+			{
+				UE_LOG(LogBozorQuloq, Log, TEXT("STT: lokal rubaiSTT (bozor so'zlari maslahati bilan); ofis serveri - faqat -SttServer"));
+				return R;
+			}
 			FString Matn;
 			TSharedPtr<FJsonObject> J;
 			if (FFileHelper::LoadFileToString(Matn, *(SttPapka() / TEXT("masofaviy.json")))
@@ -220,10 +228,11 @@ void UBozorQuloq::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 
 void UBozorQuloq::Tugat()
 {
-	// tugma qo'yilganda oxirgi bo'g'in hali qurilma buferida - yana biroz yoziladi
+	// tugma qo'yilganda qurilma buferida qolgan oxirgi ~0.1 s olinadi, keyin mikrofon darhol yopiladi
+	// (0.35 s edi - tugma qo'yilgandan keyingi ovoz ham yozilib qolardi)
 	if (!bTinglayapti || bOxiri) return;
 	bOxiri = true;
-	OxiriVaqti = FPlatformTime::Seconds() + 0.35;
+	OxiriVaqti = FPlatformTime::Seconds() + 0.1;
 }
 
 void UBozorQuloq::Yakunla()
@@ -258,9 +267,9 @@ void UBozorQuloq::Yakunla()
 	if (Boshi > 0) Mono.RemoveAt(0, Boshi);
 
 	const float Sekund = float(Mono.Num()) / Chastota;
-	if (Sekund < 0.4f || Eng < 0.002f)
+	if (Sekund < 0.4f || Eng < (bOxirgiAvto ? MinChoqqi : 0.002f))
 	{
-		UE_LOG(LogBozorQuloq, Log, TEXT("Gap juda qisqa yoki jim (%.2f s, cho'qqi %.4f)"), Sekund, Eng);
+		UE_LOG(LogBozorQuloq, Log, TEXT("Gap juda qisqa yoki jim (%.2f s, cho'qqi %.4f%s)"), Sekund, Eng, bOxirgiAvto ? TEXT(", o'zi boshlangan - fon ovozi") : TEXT(""));
 		if (NatijaKeldi) NatijaKeldi(FString());
 		return;
 	}

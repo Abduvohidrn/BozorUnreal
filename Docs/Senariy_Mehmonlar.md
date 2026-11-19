@@ -104,8 +104,10 @@ Yulduzlar odatdagidek: 1 — ro'yxat to'liq, +1 — odob, +1 — qaytim va taroz
 ## Ishga tushirish va sinovlar
 
 ```bash
-Bozor_Oyin.bat 4
+Bozor_Oyin.bat
 ```
+
+O'yin shu darajadan boshlanadi: `sotuv.json` → `"boshlangichDaraja": 4`. Boshqa daraja — `Bozor_Oyin.bat 1` (yoki `-Daraja=N`).
 
 | Buyruq qatori | Nima qiladi |
 |---------------|-------------|

@@ -62,8 +62,16 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Bozor|Qolsiz")
 	float NisbatEsik = 3.5f;
 
+	// 0.004 edi: karnaydan qaytgan bozor fon ovozi (boshqa sotuvchilar baqirig'i, rms ~0.004-0.007) gap deb olinardi
+	// (2026-11-19). Haqiqiy gap boshlanishi rms ~0.010+; oraliq to'liq ajralmaydi - asosiy elak MinChoqqi
 	UPROPERTY(EditAnywhere, Category = "Bozor|Qolsiz")
-	float MinEsik = 0.004f;
+	float MinEsik = 0.008f;
+
+	// qo'lsiz rejimda o'zi boshlangan yozuvning eng past cho'qqisi (kuchaytirishdan oldin): undan past - karnaydan
+	// qaytgan fon ovozi, STT'ga berilmaydi (aks holda x30 kuchaytirilib "musiqa" bo'lib chiqardi).
+	// Jurnal bo'yicha: fon cho'qqisi 0.02-0.05, o'yinchi gapi 0.084+
+	UPROPERTY(EditAnywhere, Category = "Bozor|Qolsiz")
+	float MinChoqqi = 0.065f;
 
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

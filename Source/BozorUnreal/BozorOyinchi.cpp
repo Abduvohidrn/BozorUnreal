@@ -34,7 +34,8 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogBozorOyinchi, Log, All);
 
-static TAutoConsoleVariable<int32> CVarQolsiz(TEXT("bozor.Qolsiz"), 1,
+// 1 edi: karnaydan qaytgan bozor ovozi gap deb olinardi (2026-11-19) - endi faqat V bosib turib gapiriladi
+static TAutoConsoleVariable<int32> CVarQolsiz(TEXT("bozor.Qolsiz"), 0,
 	TEXT("Ovozli chat kabi qo'lsiz suhbat: 1 - suhbatda mikrofon o'zi tinglaydi (tugmasiz, gapni bo'lish mumkin), 0 - faqat V bosib turib"));
 
 namespace
@@ -401,7 +402,10 @@ void ABozorOyinchi::VBosildi()
 	{
 		Xabar = Quloq->GetXato();
 		XabarVaqti = GetWorld()->GetTimeSeconds();
+		return;
 	}
+	// V bosildi - sotuvchi gapini to'xtatadi: uning ovozi karnaydan o'yinchi yozuviga aralashmasin
+	GapBoshlandi();
 }
 
 void ABozorOyinchi::QuloqSinov(const FString& Fayl)
@@ -634,8 +638,7 @@ bool ABozorOyinchi::SuhbatniBoshla()
 	bSuhbatda = true;
 	TugatishVaqti = -1.0;
 	OxirgiGapim.Empty();
-	Quloq->Isit(true);   // birinchi gapning boshi yo'qolmasin
-	// ovozli chat: tugmasiz - gapirsangiz o'zi eshitadi (sinov/botda o'chiq: xona shovqini sinovni buzmasin)
+	// mikrofon faqat V bosib turilganda ochiq (fonda tinglash yo'q). Qo'lsiz rejim (bozor.Qolsiz 1) o'zi Isit(true) qiladi
 	Quloq->SetQolsiz(CVarQolsiz.GetValueOnGameThread() != 0 && !bTest && !bBot);
 	if (APlayerController* Pc = Cast<APlayerController>(GetController()))
 	{

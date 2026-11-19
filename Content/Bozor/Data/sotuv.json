@@ -131,7 +131,8 @@
 
   "felTartibi": ["mehribon", "qattiq", "shoshqaloq", "ayyor"],
 
-  "darajalarIzoh": "Daraja o'yinga ?Daraja=N (yoki -Daraja=N) bilan beriladi, natija oynasida Enter - keyingisi. pul: kupyura -> soni; royxat: [nomi (mahsulot nomi bilan bir xil), miqdor, birlik]; xatoQaytim: false - hech kim qaytimni xato bermaydi, true - fe'llardagi ehtimollar. tarozi: tortishlar tartibida reja - 'togri', 'ortiq' (bir qadam ko'p tortadi va ko'piga pul so'raydi), 'kam' (kilo - 80%, dona - 1 ta kam soladi, lekin to'liq narx so'raydi); rejadan keyingi tortishlar to'g'ri. Bola tarozini ko'rib, indamay oladi yoki aytadi.",
+  "boshlangichDaraja": 4,
+  "darajalarIzoh": "O'yin 'boshlangichDaraja' dan boshlanadi (hozir 4 - 'Mehmonlar keldi'). Daraja o'yinga ?Daraja=N (yoki -Daraja=N) bilan ham beriladi, natija oynasida Enter - keyingisi. pul: kupyura -> soni; royxat: [nomi (mahsulot nomi bilan bir xil), miqdor, birlik]; xatoQaytim: false - hech kim qaytimni xato bermaydi, true - fe'llardagi ehtimollar. tarozi: tortishlar tartibida reja - 'togri', 'ortiq' (bir qadam ko'p tortadi va ko'piga pul so'raydi), 'kam' (kilo - 80%, dona - 1 ta kam soladi, lekin to'liq narx so'raydi); rejadan keyingi tortishlar to'g'ri. Bola tarozini ko'rib, indamay oladi yoki aytadi.",
   "darajalar": [
     {
       "nomi": "Birinchi xarid",

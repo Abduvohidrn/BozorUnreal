@@ -1299,7 +1299,9 @@ void UBozorSotuvTizimi::Qur(UWorld& World)
 					R.Birlik = A[2]->AsString();
 				}
 		}
+	// o'yin qaysi darajadan boshlanadi (sotuv.json "boshlangichDaraja"); buyruq qatori va ?Daraja=N undan ustun
 	int32 DarajaRaqami = 1;
+	Ildiz->TryGetNumberField(TEXT("boshlangichDaraja"), DarajaRaqami);
 	FParse::Value(FCommandLine::Get(), TEXT("Daraja="), DarajaRaqami);
 	if (const AGameModeBase* GM = World.GetAuthGameMode()) DarajaRaqami = UGameplayStatics::GetIntOption(GM->OptionsString, TEXT("Daraja"), DarajaRaqami);
 	DarajaIndeksi = FMath::Clamp(DarajaRaqami - 1, 0, FMath::Max(0, Darajalar.Num() - 1));

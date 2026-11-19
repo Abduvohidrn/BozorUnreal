@@ -33,7 +33,7 @@ Qadamlar:
    powershell -File Scripts\savdo_sinov.ps1 -UE "<UE>"
    Natija oxirida "YASHIL" bo'lishi kerak. "QIZIL" bo'lsa, qaysi tekshiruv yiqilganini ayt.
 7. Hammasi ishlasa, o'zim o'ynashim uchun shu buyruqni ber:
-   "<UE>\Engine\Binaries\Win64\UnrealEditor.exe" "<loyiha>\BozorUnreal.uproject" /Game/Bozor/Maps/Bozor -game -windowed -ResX=1600 -ResY=900 -Daraja=1
+   "<UE>\Engine\Binaries\Win64\UnrealEditor.exe" "<loyiha>\BozorUnreal.uproject" /Game/Bozor/Maps/Bozor -game -windowed -ResX=1600 -ResY=900
 
 Loyiha haqida qisqacha:
 - Bozor o'yini: 10-13 yoshli bola xaridor, sotuvchilar bilan tanlov tugmalari va ovoz orqali gaplashadi.

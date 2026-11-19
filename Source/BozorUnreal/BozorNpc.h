@@ -9,6 +9,7 @@
 #include "BozorNpc.generated.h"
 
 class UAnimSequence;
+class USkeleton;
 class UStaticMesh;
 class UStaticMeshComponent;
 class ABozorNpc;
@@ -233,6 +234,20 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Bozor")
 	TArray<TObjectPtr<UStaticMesh>> PaketMeshlari;
 
+	// NPC telefonga qaraganda qo'lidagi telefon - har NPC'ga tasodifiy biri (Scripts/telefon_import.py:
+	// /Game/Bozor/Telefon/<Redmi|Oddiy|Multfilm>; markaz pivot, tepasi +X, ekrani +Z, haqiqiy o'lcham) va uning
+	// qo'ldagi joyi: "Phone" soketi, paket telefoni o'qlarida (ABozorNpc::TelefonKorsat), Siljish/Burilish - qo'shimcha tuzatish
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor|Telefon")
+	TArray<TObjectPtr<UStaticMesh>> TelefonMeshlari;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor|Telefon")
+	FVector TelefonSiljish = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor|Telefon")
+	FRotator TelefonBurilish = FRotator::ZeroRotator;
+	// cho'ntakdan olish / qarash / qaytarish kliplari (Citizen Male va Female: /Game/Bozor/CitizenAnim/<jins>/Telefon)
+	UPROPERTY(VisibleAnywhere, Category = "Bozor|Telefon")
+	TArray<TObjectPtr<UAnimSequence>> TelefonKliplar;
+	UAnimSequence* TelefonKlip(const TCHAR* Nomi, const USkeleton* Skelet) const;
+
 	static ABozorNpcManager* Get(const UObject* WorldContext);
 
 	virtual void BeginPlay() override;
@@ -270,6 +285,13 @@ private:
 	void AutoTest(double Now);
 	// -PaketTest: bitta xaridorga paket beriladi, kamera chap yonidan kuzatib suratga oladi (Saved/Screenshots/PaketTest), keyin chiqish
 	void PaketTest(double Now);
+	// -TelefonTest: bitta yo'lovchi to'xtab telefonini oladi, qaraydi, qaytaradi; kamera old-o'ngdan suratga oladi
+	// (Saved/Screenshots/TelefonTest), keyin chiqish
+	void TelefonTest(double Now);
+	bool bTelefonTest = false;
+	TWeakObjectPtr<ABozorNpc> TelefonTestNpc;
+	int32 TelefonTestSurat = 0;
+	double TelefonTestTugash = 0.0;
 	bool bPaketTest = false;
 	TWeakObjectPtr<ABozorNpc> PaketTestNpc;
 	int32 PaketTestSurat = 0;
@@ -324,6 +346,11 @@ public:
 
 	// -PaketTest: shu NPC'ga paket beriladi (sotuvchi rastasidagi mol bilan)
 	void PaketBer(ABozorNpc* Sotuvchi) { TakeBag(Sotuvchi); }
+	// -TelefonTest: rol siklini to'xtatib telefonga qaraydi; qaytaradi: umumiy davomiylik (<0 - kliplar yo'q)
+	float TelefonSinov();
+	bool TelefonKorinyaptimi() const;
+	const TCHAR* TelefonBosqichNomi() const;
+	FString TelefonNomi() const;
 	bool PaketBormi() const { return Bag != nullptr; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
@@ -443,6 +470,27 @@ private:
 	FVector BagOldingiJoy = FVector::ZeroVector, BagOldingiTezlik = FVector::ZeroVector;
 	bool bBagJoyBor = false;
 	void PaketniOsil(float Dt);
+
+	// Telefonga qarash: cho'ntakdan olish (AS_PhoneStart) -> qarab turish (AS_Phone_Loop / AS_Texting) -> cho'ntakka
+	// qaytarish (AS_Phone_End). Telefon olish klipining o'rtasida qo'lda paydo bo'ladi, qaytarish klipining o'rtasida
+	// yo'qoladi. Boshqa harakat yoki yurish boshlansa - darhol yashiriladi (TelefonTozala)
+	enum class ETelefon : uint8 { Yoq, Olish, Qarash, Qoyish, Oddiy };
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMeshComponent> Telefon;
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequence> TelefonQarash;
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequence> TelefonQoyish;
+	ETelefon TelefonBosqich = ETelefon::Yoq;
+	double TelefonKeyingi = 0.0, TelefonKorinadi = 0.0, TelefonYoqoladi = 0.0;
+	float TelefonDavomi = 0.f;
+	static bool TelefonKlipmi(const UAnimSequence* Clip);
+	// telefon kliplari bilan ketma-ketlik (bor bo'lsa); qaytaradi: umumiy davomiylik yoki <0 - bo'lmadi
+	float TelefonBilan(UAnimSequence* Qarash, float Duration);
+	void TelefonTick(double Now);
+	void TelefonKorsat(bool bHa);
+	void TelefonTozala();
+
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Cart;
 	// hammol aravasi: kapsula (AI agenti) - aravaning g'ildirak o'qi, u yo'l bo'ylab oldinda yuradi; hammol dastadan

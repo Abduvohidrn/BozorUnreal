@@ -145,6 +145,23 @@ void ABozorNpcManager::BeginPlay()
 {
 	Super::BeginPlay();
 	if (PaketMeshlari.Num() > 0) BagMeshes = PaketMeshlari;
+	// telefon (Scripts/telefon_import.py): fayllar bo'lmasa telefon ko'rsatilmaydi, kliplar bo'lmasa faqat qarash sikli
+	if (TelefonMeshlari.Num() == 0)
+		for (const TCHAR* Nom : { TEXT("Redmi"), TEXT("Oddiy"), TEXT("Multfilm") })
+		{
+			const FString Yol = FString::Printf(TEXT("/Game/Bozor/Telefon/%s/SM_Telefon_%s.SM_Telefon_%s"), Nom, Nom, Nom);
+			if (UStaticMesh* M = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, *Yol, nullptr, LOAD_NoWarn | LOAD_Quiet)))
+				TelefonMeshlari.Add(M);
+		}
+	TelefonKliplar.Reset();
+	for (const TCHAR* Jins : { TEXT("Male"), TEXT("Female") })
+		for (const TCHAR* Klip : { TEXT("AS_PhoneStart"), TEXT("AS_Phone_Loop"), TEXT("AS_Phone_End") })
+		{
+			const FString Yol = FString::Printf(TEXT("/Game/Bozor/CitizenAnim/%s/Telefon/%s.%s"), Jins, Klip, Klip);
+			if (UAnimSequence* A = Cast<UAnimSequence>(StaticLoadObject(UAnimSequence::StaticClass(), nullptr, *Yol, nullptr, LOAD_NoWarn | LOAD_Quiet)))
+				TelefonKliplar.Add(A);
+		}
+	UE_LOG(LogBozorNpc, Display, TEXT("[Telefon] meshlar %d, kliplar %d"), TelefonMeshlari.Num(), TelefonKliplar.Num());
 	StartTime = GetWorld()->GetTimeSeconds();
 	for (int32 i = 0; i < Actions.Num(); ++i)
 	{
@@ -157,6 +174,7 @@ void ABozorNpcManager::BeginPlay()
 	SeatOccupant.SetNum(Seats.Num());
 	bAutoTest = FParse::Param(FCommandLine::Get(), TEXT("BozorAutoTest"));
 	bPaketTest = FParse::Param(FCommandLine::Get(), TEXT("PaketTest"));
+	bTelefonTest = FParse::Param(FCommandLine::Get(), TEXT("TelefonTest"));
 	NextShot = StartTime + 12.0;
 	EnsureNavMesh();
 	UE_LOG(LogBozorNpc, Display, TEXT("[BozorNpc] harakat=%d navbat=%d o'rindiq=%d nuqta=%d+%d"), Actions.Num(), Queues.Num(), Seats.Num(), WanderPoints.Num(), GatePoints.Num());
@@ -167,6 +185,7 @@ void ABozorNpcManager::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (bAutoTest) AutoTest(GetWorld()->GetTimeSeconds());
 	if (bPaketTest) PaketTest(GetWorld()->GetTimeSeconds());
+	if (bTelefonTest) TelefonTest(GetWorld()->GetTimeSeconds());
 }
 
 // Xaritada NavMesh bo'sh saqlangan bo'lsa (Dynamic rejimda o'yin uni o'zi qurmaydi), hech kim yurolmaydi: shu yerda quriladi
@@ -181,6 +200,13 @@ void ABozorNpcManager::EnsureNavMesh()
 	}
 	UE_LOG(LogBozorNpc, Warning, TEXT("[BozorNpc] NavMesh bo'sh: o'yin boshida quriladi"));
 	Nav->Build();
+}
+
+UAnimSequence* ABozorNpcManager::TelefonKlip(const TCHAR* Nomi, const USkeleton* Skelet) const
+{
+	for (UAnimSequence* A : TelefonKliplar)
+		if (A && A->GetSkeleton() == Skelet && A->GetName() == Nomi) return A;
+	return nullptr;
 }
 
 const FBozorNpcAction* ABozorNpcManager::Pick(FName Category) const
@@ -416,6 +442,7 @@ void ABozorNpc::Tick(float DeltaSeconds)
 	CallCooldown -= DeltaSeconds;
 	const double Now = GetWorld()->GetTimeSeconds();
 	if (SettleAt > 0.0 && Now >= SettleAt) Settle();
+	if (TelefonBosqich != ETelefon::Yoq) TelefonTick(Now);
 	if (!bStarted)
 	{
 		Mgr = ABozorNpcManager::Get(this);
@@ -462,6 +489,7 @@ bool ABozorNpc::ProjectToNav(const FVector& P, FVector& Out, float Extent) const
 void ABozorNpc::PlayMove(bool bCancelDelayedAction)
 {
 	if (bCancelDelayedAction) GetWorldTimerManager().ClearTimer(DelayedActionTimer);
+	TelefonTozala();
 	if (Current == MoveState) return;
 	Current = MoveState;
 	SettleAt = 0.0;
@@ -508,6 +536,7 @@ float ABozorNpc::Do(FName Category, float Min, float Max)
 float ABozorNpc::PlayAction(const FBozorNpcAction& Action, float Min, float Max)
 {
 	GetWorldTimerManager().ClearTimer(DelayedActionTimer);
+	TelefonTozala();
 	UAnimInstance* Inst = GetMesh()->GetAnimInstance();
 	const USkeletalMesh* BodyAsset = GetMesh()->GetSkeletalMeshAsset();
 	const USkeleton* Skeleton = BodyAsset ? BodyAsset->GetSkeleton() : nullptr;
@@ -521,6 +550,13 @@ float ABozorNpc::PlayAction(const FBozorNpcAction& Action, float Min, float Max)
 	const float Length = Clip->GetPlayLength();
 	Min = FMath::Max(0.f, Min);
 	Max = FMath::Max(Min, Max);
+	// telefonga qarash: tik turganda - cho'ntakdan olib, qarab, qaytarib qo'yadi (kliplar bo'lsa)
+	const bool bTelefon = TelefonKlipmi(Clip);
+	if (bTelefon && !bSitting && Action.bLoop)
+	{
+		const float Jami = TelefonBilan(Clip, FMath::FRandRange(Min, Max));
+		if (Jami >= 0.f) return Jami;
+	}
 	const bool bSeatTransition = Action.Category == TEXT("S_Down") || Action.Category == TEXT("S_Up");
 	const float Duration = Action.bLoop ? FMath::FRandRange(Min, Max) : FMath::Clamp(Length, Min, Max);
 	const float Rate = bSeatTransition ? Length / FMath::Max(Duration, UE_SMALL_NUMBER) : 1.f;
@@ -539,6 +575,12 @@ float ABozorNpc::PlayAction(const FBozorNpcAction& Action, float Min, float Max)
 	Current = NAME_None;
 	SettleAt = 0.0;
 	SettleCategory = NAME_None;
+	// o'tirganda yoki olish/qaytarish kliplari yo'q: telefon qarash sikli davomida qo'lda (keyingi harakatda yo'qoladi)
+	if (bTelefon)
+	{
+		TelefonBosqich = ETelefon::Oddiy;
+		TelefonKorinadi = GetWorld()->GetTimeSeconds() + 0.3;
+	}
 	if (bSitting && !bSeatTransition && !Action.bLoop && Action.Category != TEXT("S_Loop"))
 	{
 		SettleAt = GetWorld()->GetTimeSeconds() + FMath::Max(FMath::Min(Duration, Length - 0.25f), 0.1f);
@@ -566,6 +608,173 @@ void ABozorNpc::Settle()
 	SettleAt = 0.0;
 	if (bSitting && !SettleCategory.IsNone()) Do(SettleCategory);
 	else PlayMove(false);
+}
+
+// ================= telefon
+
+float ABozorNpc::TelefonSinov()
+{
+	Main.Reset();
+	StopMoving();
+	PlayMove();
+	const USkeletalMesh* BodyAsset = GetMesh()->GetSkeletalMeshAsset();
+	UAnimSequence* Qarash = Mgr ? Mgr->TelefonKlip(TEXT("AS_Phone_Loop"), BodyAsset ? BodyAsset->GetSkeleton() : nullptr) : nullptr;
+	return Qarash ? TelefonBilan(Qarash, 5.f) : -1.f;
+}
+
+bool ABozorNpc::TelefonKorinyaptimi() const { return Telefon && Telefon->IsVisible(); }
+
+const TCHAR* ABozorNpc::TelefonBosqichNomi() const
+{
+	switch (TelefonBosqich)
+	{
+	case ETelefon::Olish: return TEXT("olish");
+	case ETelefon::Qarash: return TEXT("qarash");
+	case ETelefon::Qoyish: return TEXT("qoyish");
+	case ETelefon::Oddiy: return TEXT("oddiy");
+	default: return TEXT("yoq");
+	}
+}
+
+FString ABozorNpc::TelefonNomi() const { return Telefon && Telefon->GetStaticMesh() ? Telefon->GetStaticMesh()->GetName() : FString(TEXT("-")); }
+
+bool ABozorNpc::TelefonKlipmi(const UAnimSequence* Clip)
+{
+	if (!Clip) return false;
+	const FString N = Clip->GetName();
+	return N.StartsWith(TEXT("AS_Phone_Loop")) || N.StartsWith(TEXT("AS_Texting"));
+}
+
+float ABozorNpc::TelefonBilan(UAnimSequence* Qarash, float Duration)
+{
+	UAnimInstance* Inst = GetMesh()->GetAnimInstance();
+	const USkeletalMesh* BodyAsset = GetMesh()->GetSkeletalMeshAsset();
+	const USkeleton* Skelet = BodyAsset ? BodyAsset->GetSkeleton() : nullptr;
+	UAnimSequence* Olish = Mgr ? Mgr->TelefonKlip(TEXT("AS_PhoneStart"), Skelet) : nullptr;
+	UAnimSequence* Qoyish = Mgr ? Mgr->TelefonKlip(TEXT("AS_Phone_End"), Skelet) : nullptr;
+	if (!Inst || !Olish || !Qoyish || !Qarash) return -1.f;
+	// olish va qaytarish bilan bir xil manbadan retarget qilingan qarash klipi (qo'l holati mos tushadi)
+	if (Qarash->GetName().StartsWith(TEXT("AS_Phone_Loop")))
+		if (UAnimSequence* Mos = Mgr->TelefonKlip(TEXT("AS_Phone_Loop"), Skelet)) Qarash = Mos;
+	if (!Inst->PlaySlotAnimationAsDynamicMontage(Olish, SlotName, 0.3f, 0.15f, 1.f, 1)) return -1.f;
+	const double Now = GetWorld()->GetTimeSeconds();
+	const float LOlish = Olish->GetPlayLength(), LQoyish = Qoyish->GetPlayLength();
+	TelefonQarash = Qarash;
+	TelefonQoyish = Qoyish;
+	TelefonDavomi = FMath::Max(Duration, 2.f);
+	TelefonBosqich = ETelefon::Olish;
+	TelefonKorinadi = Now + LOlish * 0.45f;            // qo'l cho'ntakka yetganda
+	TelefonKeyingi = Now + FMath::Max(LOlish - 0.2f, 0.1f);
+	TelefonYoqoladi = 0.0;
+	Current = NAME_None;
+	SettleAt = 0.0;
+	SettleCategory = NAME_None;
+	return LOlish + TelefonDavomi + LQoyish;
+}
+
+void ABozorNpc::TelefonTick(double Now)
+{
+	if (TelefonKorinadi > 0.0 && Now >= TelefonKorinadi)
+	{
+		TelefonKorinadi = 0.0;
+		TelefonKorsat(true);
+	}
+	UAnimInstance* Inst = GetMesh()->GetAnimInstance();
+	switch (TelefonBosqich)
+	{
+	case ETelefon::Olish:
+		if (Now >= TelefonKeyingi)
+		{
+			TelefonBosqich = ETelefon::Qarash;
+			TelefonKeyingi = Now + TelefonDavomi;
+			// olish klipi telefonni quloqqa olib keladi: yozishma (texting) holatiga sekinroq o'tadi
+			const float Kirish = TelefonQarash->GetName().StartsWith(TEXT("AS_Texting")) ? 0.6f : 0.2f;
+			if (!Inst || !Inst->PlaySlotAnimationAsDynamicMontage(TelefonQarash, SlotName, Kirish, 0.2f, 1.f, 1000, -1.f,
+				FMath::FRandRange(0.f, TelefonQarash->GetPlayLength() * 0.5f))) TelefonTozala();
+		}
+		break;
+	case ETelefon::Qarash:
+		if (Now >= TelefonKeyingi)
+		{
+			TelefonBosqich = ETelefon::Qoyish;
+			const float L = TelefonQoyish->GetPlayLength();
+			TelefonYoqoladi = Now + L * 0.55f;              // qo'l cho'ntakka kirganda
+			TelefonKeyingi = Now + L;
+			if (!Inst || !Inst->PlaySlotAnimationAsDynamicMontage(TelefonQoyish, SlotName, 0.2f, 0.3f, 1.f, 1)) TelefonTozala();
+		}
+		break;
+	case ETelefon::Qoyish:
+		if (TelefonYoqoladi > 0.0 && Now >= TelefonYoqoladi)
+		{
+			TelefonYoqoladi = 0.0;
+			TelefonKorsat(false);
+		}
+		if (Now >= TelefonKeyingi)
+		{
+			// klip tugab AnimBP'ga (tik turish/yurish) o'zi qaytadi
+			TelefonBosqich = ETelefon::Yoq;
+			TelefonQarash = TelefonQoyish = nullptr;
+			Current = MoveState;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void ABozorNpc::TelefonKorsat(bool bHa)
+{
+	if (!bHa)
+	{
+		if (Telefon) Telefon->SetVisibility(false);
+		return;
+	}
+	if (!Mgr || Mgr->TelefonMeshlari.Num() == 0) return;
+	USkeletalMeshComponent* Tana = GetMesh();
+	if (!Telefon)
+	{
+		// har odamning o'z telefoni (bir marta tanlanadi)
+		Telefon = NewObject<UStaticMeshComponent>(this);
+		UStaticMesh* Tel = Mgr->TelefonMeshlari[FMath::RandRange(0, Mgr->TelefonMeshlari.Num() - 1)];
+		FString Nom;   // sinov: -TelefonNom=Redmi|Oddiy|Multfilm
+		if (FParse::Value(FCommandLine::Get(), TEXT("TelefonNom="), Nom))
+			for (UStaticMesh* M : Mgr->TelefonMeshlari)
+				if (M && M->GetName().EndsWith(Nom)) Tel = M;
+		Telefon->SetStaticMesh(Tel);
+		Telefon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Telefon->SetCastShadow(false);   // kichik: soyasi ko'rinmaydi, olomonda arzonroq
+		Telefon->SetMobility(EComponentMobility::Movable);
+		Telefon->RegisterComponent();
+		// Civilian paketining kliplari telefonni kaft bo'ylab KO'NDALANG ushlaydi: bo'yi bosh barmoqdan jimjiloqqa (soketning
+		// Z o'qi), eni bilak-barmoq yo'nalishida (soket X), orqasi kaftda, ekrani tashqariga (soket +Y); barmoqlar yuqori
+		// qirrasini o'raydi. "Phone" soketi (telefon_import.py Citizen skeletlariga ko'chirgan) - paket telefoni markazi.
+		// Paket telefoni 11.8 x 6.4 x 2.3 sm: bizniki (bo'yi +X, eni Y, ekrani +Z) shu o'qlarga buriladi, eni 6.4 sm ga
+		// keltiriladi (kengroq telefon barmoqlar ichiga kirardi), orqasi paket telefoni orqasi turgan joyga - kaftga
+		static const FName Soket(TEXT("Phone")), Kaft(TEXT("hand_r"));
+		const bool bSoket = Tana->DoesSocketExist(Soket);
+		Telefon->AttachToComponent(Tana, FAttachmentTransformRules::SnapToTargetNotIncludingScale, bSoket ? Soket : Kaft);
+		const FBox Q = Telefon->GetStaticMesh()->GetBoundingBox();
+		const float Kattalik = FMath::Clamp(6.4f / FMath::Max(Q.GetSize().Y, 1.f), 0.6f, 1.2f);
+		const float Qalinlik = Q.GetSize().Z * Kattalik;
+		const FVector Joy(0.f, -1.17f + Qalinlik * 0.5f, 0.f);   // paket telefoni orqasi soketdan 1.17 sm (kaft tomonda)
+		const FQuat Bur = FRotationMatrix::MakeFromXZ(FVector::UpVector, FVector::RightVector).ToQuat() * Mgr->TelefonBurilish.Quaternion();
+		// soket yo'q (eski skelet): uning hand_r dagi joyi qo'lda - (-9.79, 2.35, 3.13), pitch 30
+		const FTransform SoketT = bSoket ? FTransform::Identity : FTransform(FRotator(30.f, 0.f, 0.f), FVector(-9.79f, 2.35f, 3.13f));
+		const FTransform Nisbiy = FTransform(Bur, Joy + Mgr->TelefonSiljish) * SoketT;
+		Telefon->SetRelativeLocationAndRotation(Nisbiy.GetLocation(), Nisbiy.GetRotation());
+		Telefon->SetUsingAbsoluteScale(true);
+		Telefon->SetWorldScale3D(FVector(Kattalik));
+	}
+	Telefon->SetVisibility(true);
+}
+
+void ABozorNpc::TelefonTozala()
+{
+	if (TelefonBosqich == ETelefon::Yoq && !(Telefon && Telefon->IsVisible())) return;
+	TelefonBosqich = ETelefon::Yoq;
+	TelefonKorinadi = TelefonYoqoladi = 0.0;
+	TelefonQarash = TelefonQoyish = nullptr;
+	TelefonKorsat(false);
 }
 
 void ABozorNpc::StopMoving()
@@ -937,6 +1146,23 @@ void ABozorNpc::TakeBag(ABozorNpc* Sotuvchi)
 void ABozorNpc::PaketniOsil(float Dt)
 {
 	if (!Bag || Dt <= 0.f) return;
+	// tutqich musht ichida: o'rta va nomsiz barmoqlarning bukilgan bo'g'inlari (01-02-03) markazi. Kaft o'rtasiga qo'yilsa,
+	// barmoqlar songa bukilgani uchun tutqich kaft va barmoqlar ichidan o'tib chiqadi
+	{
+		USkeletalMeshComponent* Tana = GetMesh();
+		static const FName Kaft(TEXT("hand_l"));
+		static const FName Bogin[] = { TEXT("middle_01_l"), TEXT("middle_02_l"), TEXT("middle_03_l"), TEXT("ring_01_l"), TEXT("ring_02_l"), TEXT("ring_03_l") };
+		FVector Yigindi = FVector::ZeroVector;
+		int32 Son = 0;
+		for (const FName& B : Bogin)
+			if (Tana->GetBoneIndex(B) != INDEX_NONE)
+			{
+				Yigindi += Tana->GetSocketLocation(B);
+				++Son;
+			}
+		if (Son > 0 && Tana->GetBoneIndex(Kaft) != INDEX_NONE)
+			Bag->SetRelativeLocation(Tana->GetSocketTransform(Kaft).InverseTransformPositionNoScale(Yigindi / Son));
+	}
 	const FVector Joy = Bag->GetComponentLocation();
 	const FVector Oldinga = GetActorForwardVector(), Yon = GetActorRightVector();
 	if (UBozorNpcMesh* Body = Cast<UBozorNpcMesh>(GetMesh()))
@@ -2003,6 +2229,58 @@ void ABozorNpcManager::PaketTest(double Now)
 	UE_LOG(LogBozorNpc, Display, TEXT("[PaketTest] surat %s, tezlik %.0f"), *Nomi, N->GetVelocity().Size2D());
 	++PaketTestSurat;
 	NextShot = Now + 1.3;
+}
+
+void ABozorNpcManager::TelefonTest(double Now)
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (!PC || Now - StartTime < 15.0) return;
+	ABozorNpc* N = TelefonTestNpc.Get();
+	if (!N)
+	{
+		// tik turgan yoki yurib turgan yo'lovchi (o'tirmagan, aravasiz); bo'lmasa - istalgan xaridor
+		for (TActorIterator<ABozorNpc> It(GetWorld()); It; ++It)
+			if ((It->NpcRole == EBozorRole::Yolovchi || It->NpcRole == EBozorRole::Xaridor) && !It->bSitting && !It->bCart && !It->PaketBormi())
+			{
+				N = *It;
+				if (It->NpcRole == EBozorRole::Yolovchi) break;
+			}
+		if (!N) return;
+		const float Davom = N->TelefonSinov();
+		TelefonTestNpc = N;
+		TelefonTestTugash = Now + FMath::Max(Davom, 4.f) + 1.0;
+		NextShot = Now + 0.5;
+		UE_LOG(LogBozorNpc, Display, TEXT("[TelefonTest] %s (%s) telefonga qaraydi, davom %.1f s, telefon %s"), *N->GetName(),
+			*N->GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->GetName(), Davom, *N->TelefonNomi());
+	}
+	if (!AutoCamera)
+	{
+		AutoCamera = GetWorld()->SpawnActor<ACameraActor>(N->GetActorLocation(), FRotator::ZeroRotator);
+		AutoCamera->GetCameraComponent()->SetFieldOfView(50.f);
+		AutoCamera->GetCameraComponent()->bConstrainAspectRatio = false;
+		PC->SetViewTarget(AutoCamera);
+	}
+	// juft - o'ng qo'l yaqindan (old-o'ngdan), toq - butun tana
+	const bool bYaqin = TelefonTestSurat % 2 == 0;
+	const FVector P = N->GetActorLocation(), F = N->GetActorForwardVector(), O = N->GetActorRightVector();
+	const FVector Qol = N->GetMesh()->GetSocketLocation(TEXT("hand_r"));
+	FVector Joy, Qara;
+	// juft - o'ng yondan, toq - oldidan (ikkalasi ham qo'l balandligida, yaqindan)
+	if (bYaqin) { Joy = Qol + O * 60.f + F * 15.f + FVector(0.f, 0.f, 8.f); Qara = Qol; }
+	else { Joy = Qol + F * 65.f + O * 10.f + FVector(0.f, 0.f, 12.f); Qara = Qol; }
+	AutoCamera->SetActorLocationAndRotation(Joy, (Qara - Joy).Rotation());
+	if (Now < NextShot) return;
+	if (Now > TelefonTestTugash || TelefonTestSurat >= 30)
+	{
+		UKismetSystemLibrary::QuitGame(this, PC, EQuitPreference::Quit, false);
+		NextShot = DBL_MAX;
+		return;
+	}
+	const FString Nomi = FString::Printf(TEXT("%02d_%s_%s_%s.png"), TelefonTestSurat, bYaqin ? TEXT("yon") : TEXT("old"), N->TelefonBosqichNomi(),
+		N->TelefonKorinyaptimi() ? *N->TelefonNomi() : TEXT("telsiz"));
+	FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/TelefonTest") / Nomi, false, false);
+	++TelefonTestSurat;
+	NextShot = Now + 0.6;
 }
 
 void ABozorNpcManager::LogStats(const TCHAR* Tag)

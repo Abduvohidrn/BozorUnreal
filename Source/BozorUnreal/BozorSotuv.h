@@ -53,6 +53,12 @@ struct FBozorXulq
 	TArray<FString> Hayot;    // erkin suhbatda aytishi mumkin bo'lgan hayotiy tafsilotlar
 	TArray<TPair<FString, FString>> Namunalar;   // ma'no -> shu sotuvchi qanday aytadi
 	int32 BoshMunosabat = 50; // bolaga birinchi munosabati (0..100)
+	// odob (o'yin odobnoma emas - har sotuvchi o'zicha): SalomTalab - bola salomsiz gap boshlasa "salom bering" deyish
+	// ehtimoli (0 - e'tibor bermaydi, munosabat ham tushmaydi); Tanbeh - qo'pol gapga tanbeh berish ehtimoli;
+	// QopolgaMunosabat - qo'pol gapga qanday munosabat bildiradi (LLM'ga beriladi)
+	float SalomTalab = 1.f;
+	float Tanbeh = 1.f;
+	FString QopolgaMunosabat;
 	// o'z ovozi ("ovoz": {"ohang", "tezlik"}): Ohang - Navoiy namuna ovozini necha yarim tonga siljitish (har sotuvchiga boshqa
 	// tembr); OvozTezlik - o'yinda jonli gapni chalish tezligi (1 dan past - sekinroq va pastroq: keksalar)
 	float Ohang = 0.f;
@@ -471,6 +477,7 @@ private:
 	FString OxirgiIzoh;
 	TArray<FString> Bolaklar;
 	FString Uslub;
+	float SalomTalab = 1.f, Tanbeh = 1.f;   // shu sotuvchining odob talabi (FBozorXulq)
 	// tanlov oynasi holati
 	bool bMiqdorTanlash = false;
 	bool bMolRoyxati = false;

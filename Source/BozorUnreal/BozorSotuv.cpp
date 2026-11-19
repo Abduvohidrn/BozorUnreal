@@ -373,6 +373,11 @@ void BozorSotuv::XulqniOqi(const FJsonObject& O, FBozorXulq& X)
 	if (O.TryGetStringArrayField(TEXT("kayfiyatlar"), Kayfiyatlar) && Kayfiyatlar.Num())
 		X.Kayfiyat = Kayfiyatlar[FMath::RandRange(0, Kayfiyatlar.Num() - 1)];
 	O.TryGetNumberField(TEXT("boshMunosabat"), X.BoshMunosabat);
+	O.TryGetNumberField(TEXT("salomTalab"), X.SalomTalab);
+	O.TryGetNumberField(TEXT("tanbeh"), X.Tanbeh);
+	O.TryGetStringField(TEXT("qopolgaMunosabat"), X.QopolgaMunosabat);
+	X.SalomTalab = FMath::Clamp(X.SalomTalab, 0.f, 1.f);
+	X.Tanbeh = FMath::Clamp(X.Tanbeh, 0.f, 1.f);
 	const TSharedPtr<FJsonObject>* Ovoz = nullptr;
 	if (O.TryGetObjectField(TEXT("ovoz"), Ovoz))
 	{
@@ -630,6 +635,8 @@ void UBozorSuhbat::Boshla(const FBozorRasta& Rasta, UBozorHamyon* InHamyon, UBoz
 		Tayyor->Asosiy = Rasta.Asosiy;
 	}
 	Uslub = Rasta.Uslub;
+	SalomTalab = Rasta.Xulq.SalomTalab;
+	Tanbeh = Rasta.Xulq.Tanbeh;
 	Bolaklar.Reset();
 	if (Holat.Mollar.Num() == 1) MolniTanla(0);
 }
@@ -691,9 +698,12 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 	if (!Holat.bSalomlashdi)
 	{
 		Holat.bSalomlashdi = true;
-		// odob: salomsiz gap boshlansa, sotuvchi eslatadi (va biroz xafa bo'ladi)
-		Oldi = T.bSalomBor ? (T.Harakat == EBozorHarakat::Salom ? FString() : Javob(EBozorJavob::Salom)) : Javob(EBozorJavob::SalomBering);
-		Munosabat(T.bSalomBor ? Holat.OdobBall / 2 : -10);
+		// odob: salomsiz gap boshlansa, faqat salomni talab qiladigan sotuvchi eslatadi (va biroz xafa bo'ladi) -
+		// qolganlari e'tibor bermay savdoga o'tadi (xulq.json "salomTalab")
+		const bool bEslatadi = !T.bSalomBor && FMath::FRand() < SalomTalab;
+		Oldi = T.bSalomBor ? (T.Harakat == EBozorHarakat::Salom ? FString() : Javob(EBozorJavob::Salom))
+			: bEslatadi ? Javob(EBozorJavob::SalomBering) : FString();
+		Munosabat(T.bSalomBor ? Holat.OdobBall / 2 : bEslatadi ? -10 : 0);
 		++Hamyon->Suhbatlar;
 		if (!T.bSalomBor) ++Hamyon->Salomsiz;
 	}
@@ -936,7 +946,8 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 	// Qo'pollikka har doim (javob o'zi tanbeh bo'lmasa); odobga ba'zan va ketma-ket emas - har gapda "barakalla" zeriktiradi
 	FString Izoh;
 	const bool bTanbeh = OxirgiJavob == EBozorJavob::QopolgaRad || OxirgiJavob == EBozorJavob::Haydadi || OxirgiJavob == EBozorJavob::SalomBering;
-	if (T.Odob < 0 && !bTanbeh) Izoh = Miya->Izoh(TEXT("QopolIzoh"));
+	// qo'pollikka tanbeh ham har sotuvchida har xil (xulq.json "tanbeh"): ba'zisi e'tibor bermaydi yoki hazilga buradi
+	if (T.Odob < 0 && !bTanbeh && FMath::FRand() < Tanbeh) Izoh = Miya->Izoh(TEXT("QopolIzoh"));
 	else if (T.Odob > 0 && !bOdobIzohOldin && OxirgiJavob != EBozorJavob::TushirdiMan && OxirgiJavob != EBozorJavob::Salom && FMath::FRand() < 0.4f)
 		Izoh = Miya->Izoh(TEXT("OdobIzoh"));
 	bOdobIzohOldin = T.Odob > 0 && !Izoh.IsEmpty();

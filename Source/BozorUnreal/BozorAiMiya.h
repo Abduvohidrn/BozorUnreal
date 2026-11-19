@@ -18,6 +18,7 @@ class ABozorNpc;
 // Sotuvchining shaxsi (LLM'ga beriladi)
 struct FBozorShaxs
 {
+	FString Id;   // NPC nomi (BozorNpc_267): bulutda shu sotuvchining alohida suhbat sessiyasi (conversation_id) kaliti
 	FString Ism;
 	int32 Yosh = 45;
 	bool bAyol = false;
@@ -78,12 +79,17 @@ private:
 	void Ishga();
 	void Sogmi(int32 Urinish);
 	FString Tizim(const FBozorShaxs& Kim) const;
-	// bitta so'rov: bulutda (rag-api) yoki lokal llama-server'da. Natija(Xom javob, HTTP 200 keldimi) - o'yin oqimida
+	// bitta so'rov: bulutda (rag-api) yoki lokal llama-server'da. Natija(Xom javob, HTTP 200 keldimi) - o'yin oqimida.
+	// Sessiya - sotuvchi Id si: bulutda har sotuvchining o'z conversation_id si bo'ladi (server suhbat kontekstini o'zi saqlaydi,
+	// sotuvchilar bir-birining gapini bilmaydi); bo'sh - sessiyasiz bir martalik so'rov
 	void Yubor(const FString& TizimMatn, const TArray<TPair<FString, FString>>& Tarix, const FString& Savol, double Harorat, int32 MaxToken,
-		TFunction<void(const FString& Xom, bool bOk)> Natija);
+		TFunction<void(const FString& Xom, bool bOk)> Natija, const FString& Sessiya = FString());
+	// shu sotuvchining bulut sessiyasi ochilganmi (bo'lsa tarix xabarga qo'shilmaydi - server uni biladi)
+	bool SessiyaBor(const FString& Sessiya) const { return bBulut && !Sessiya.IsEmpty() && Sessiyalar.Contains(Sessiya); }
 
 	bool bBulut = false;   // true - rag-api.edcom.uz, false - lokal llama-server
 	FString Kalit;
+	TMap<FString, FString> Sessiyalar;   // sotuvchi Id -> conversation_id (o'yin davomida)
 	FProcHandle Jarayon;
 	int32 Port = 0;
 	bool bTayyor = false;

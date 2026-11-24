@@ -27,14 +27,15 @@ public:
 	// ona bilan telefon suhbati davom etyapti (E/Enter shu paytda telefonga tegishli)
 	bool TelefonFaol() const { return Telefon != nullptr; }
 
-	// ekran nuqtasida qaysi javob varianti tugmasi turibdi (oxirgi chizilgan kadr bo'yicha), yo'q bo'lsa INDEX_NONE
-	int32 TanlovQayerda(const FVector2D& Nuqta) const;
 
 private:
 	UBozorHamyon* Hamyon() const;
 	void QogozChiz(float Ochiqlik);
 	void MaslahatChiz();
 	void BelgiChiz();
+	// o'rgatish: o'yinchi biror narsani birinchi marta uchratganda tepada "nima qilish kerak" kartasi
+	void OrgatishYangila(float Dt);
+	void OrgatishChiz();
 	// sotuvchi oldida "E — Gaplashish" belgisi va suhbat oynasi (sotuvchi gapi)
 	void SotuvChiz();
 	// ro'yxat tugagach: chiqishga qaytish belgisi; yetib borganda - natija
@@ -55,7 +56,6 @@ private:
 	double QongiroqTestVaqt = -1.0;   // -QongiroqTest: ro'yxat surati olinib, o'yin yopiladi
 	bool bQongiroqSurat = false;
 
-	TArray<FBox2D> TanlovJoylari;
 
 	bool bFaol = false;       // intro tugadi, HUD ishlaydi
 	bool bOchiq = false;
@@ -75,4 +75,12 @@ private:
 	bool bBelgi = false;
 	float BelgiAlfa = 0.f;
 	bool bMaslahatSurat = false;
+
+	// o'rgatish kartasi
+	bool bOrgatishOchiq = true;   // sinov/bot rejimlarida o'chiq
+	int32 OrgatishJoriy = INDEX_NONE;   // hozir ko'rsatilayotgan maslahat (BozorHud.cpp dagi ro'yxatda)
+	double OrgatishBosh = 0.0;
+	float OrgatishAlfa = 0.f;
+	int32 OrgatishOxirgi = INDEX_NONE;   // so'nib borayotgan karta (alfa 0 ga tushguncha chiziladi)
+	FVector OrgatishJoy = FVector::ZeroVector;
 };

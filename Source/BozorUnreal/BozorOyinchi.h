@@ -209,7 +209,6 @@ private:
 	// yakuniy gapni (LLM qayta yozgan bo'lsa ham) Navoiy bilan ovozlashtiradi; bo'lmasa - yozilgan bo'lakli ovoz (Asl gap bo'yicha)
 	void JonliAyt(int32 Raqam, const FString& Matn, const FString& Asl);
 	void YaqinSotuvchiniTop();
-	void SichqonchaBosildi();
 	void KursorniKorsat(bool bHa);
 	void TestRastasigaBor();
 

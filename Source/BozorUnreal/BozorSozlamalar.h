@@ -58,6 +58,9 @@ public:
 	UPROPERTY(Config) float Sezgirlik = 1.f;      // sichqoncha qarash tezligi ko'paytuvchisi
 	UPROPERTY(Config) bool bTeskariY = false;
 	UPROPERTY(Config) TArray<FBozorTugmaBog> Tugmalar;
+	// o'yinchiga bir marta ko'rsatiladigan o'rgatish maslahatlari (ABozorHud) - qaysilari ko'rildi.
+	// Qayta ko'rsatish: konsolda "bozor.OrgatishniTikla"
+	UPROPERTY(Config) TArray<FName> KorilganOrgatish;
 
 private:
 	UPROPERTY(Transient) TMap<TObjectPtr<UInputMappingContext>, TObjectPtr<UInputMappingContext>> ImcNusxalar;

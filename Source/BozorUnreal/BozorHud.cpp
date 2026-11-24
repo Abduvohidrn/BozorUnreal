@@ -1,7 +1,9 @@
 #include "BozorHud.h"
 
+#include "BozorAiMiya.h"
 #include "BozorAvtobus.h"
 #include "BozorOyinchi.h"
+#include "BozorQuloq.h"
 #include "BozorSozlamalar.h"
 #include "BozorTelefon.h"
 #include "CanvasItem.h"
@@ -10,6 +12,7 @@
 #include "Engine/Font.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
+#include "HAL/IConsoleManager.h"
 #include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
@@ -72,6 +75,7 @@ void ABozorHud::Tick(float Dt)
 		const FBozorDaraja* D = Tz ? Tz->GetDaraja() : nullptr;
 		const bool bSinov = FParse::Param(Cmd, TEXT("DarajaTest")) || FParse::Param(Cmd, TEXT("SotuvTest")) || FParse::Param(Cmd, TEXT("BozorAutoTest"))
 			|| FParse::Param(Cmd, TEXT("BozorQadamTest")) || (bTest && !FParse::Param(Cmd, TEXT("QongiroqTest")));
+		bOrgatishOchiq = !bSinov && !bTest && !FParse::Param(Cmd, TEXT("QongiroqTest"));
 		if (D && D->QongiroqGaplar.Num() > 0 && PlayerOwner && !bSinov && !FParse::Param(Cmd, TEXT("QongiroqYoq")))
 		{
 			Telefon = NewObject<UBozorTelefon>(this);
@@ -142,6 +146,7 @@ void ABozorHud::Tick(float Dt)
 	}
 	MaslahatAlfa = FMath::FInterpConstantTo(MaslahatAlfa, MaslahatBosh >= 0.0 && !bMaslahatTugadi ? 1.f : 0.f, Dt, 2.f);
 	QaytishniTekshir();
+	OrgatishYangila(Dt);
 	BelgiAlfa = FMath::FInterpConstantTo(BelgiAlfa, bBelgi && !bOchiq ? 1.f : 0.f, Dt, 2.f);
 
 	if (bTest && !bTestSurat && Ochiqlik >= 1.f)
@@ -206,6 +211,7 @@ void ABozorHud::DrawHUD()
 	if (MaslahatAlfa > 0.f) MaslahatChiz();
 	if (Ochiqlik > 0.f) QogozChiz(Ochiqlik);
 	SotuvChiz();
+	if (OrgatishAlfa > 0.f) OrgatishChiz();
 	if (Telefon) Telefon->Chiz(Canvas);
 
 	// yopiq paytda burchakda eslatma (maslahat ko'rinib turganda - unda Tab bor)
@@ -316,6 +322,247 @@ void ABozorHud::QogozChiz(float A)
 	T.Scale = FVector2D(1.6f * S);
 	T.EnableShadow(FLinearColor(0.f, 0.f, 0.f, 0.7f * Yuz));
 	Canvas->DrawItem(T);
+}
+
+// ================= o'rgatish: o'yinchi biror narsani birinchi marta uchratganda tepada kichik karta
+// Har maslahat bir marta: bajarilsa (yoki 25 s ko'rinib tursa) GameUserSettings'da "ko'rildi" deb saqlanadi.
+// -Orgatish - ko'rilganlariga qaramay hammasini ko'rsatish (saqlamaydi); konsol "bozor.OrgatishniTikla" - qaytadan
+
+namespace
+{
+	struct FOrgatishHol
+	{
+		const ABozorOyinchi* O = nullptr;
+		bool bIntroBor = false;
+		bool bRoyxatOchiq = false;
+		double Otdi = 0.0;     // karta ko'rinayotganiga necha soniya
+		float Yurdi = 0.f;     // karta chiqqandan beri o'yinchi qancha yurdi (sm)
+		EBozorBosqich Bosqich = EBozorBosqich::Boshlanish;
+	};
+
+	struct FOrgatish
+	{
+		const TCHAR* Id;
+		bool bHarakat;   // o'yinchi aytilgan ishni qildi - darhol o'rgangan hisoblanadi
+		bool (*Shart)(const FOrgatishHol&);
+		bool (*Bajarildi)(const FOrgatishHol&);
+		TArray<FString> (*Tugmalar)(const FOrgatishHol&);
+		FString (*Matn)(const FOrgatishHol&);
+	};
+
+	FString Tn(const TCHAR* Amal) { return UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(Amal)).ToString(); }
+	bool Qolsiz(const FOrgatishHol& H) { return H.O->GetQuloq() && H.O->GetQuloq()->Qolsizmi(); }
+	bool Bosqichda(const FOrgatishHol& H, EBozorBosqich B) { return H.O->Suhbatda() && !H.O->Xayrlashdi() && H.Bosqich == B; }
+	TArray<FString> Yoq(const FOrgatishHol&) { return {}; }
+
+	const TArray<FOrgatish>& Orgatishlar()
+	{
+		static const TArray<FOrgatish> R = {
+			{ TEXT("Yurish"), false,
+				[](const FOrgatishHol& H) { return !H.bIntroBor && !H.O->Suhbatda(); },
+				[](const FOrgatishHol& H) { return (H.Otdi > 5.0 && H.Yurdi > 400.f) || H.Otdi > 14.0; },
+				[](const FOrgatishHol&) { return TArray<FString>{ Tn(TEXT("Oldinga")), Tn(TEXT("Chapga")), Tn(TEXT("Orqaga")), Tn(TEXT("Onga")) }; },
+				[](const FOrgatishHol&) { return FString(TEXT("yurish, sichqoncha - atrofga qarash. Ro'yxatdagi narsalarni olish uchun rastalarga boring")); } },
+			{ TEXT("Gaplashish"), true,
+				[](const FOrgatishHol& H) { return !H.O->Suhbatda() && H.O->GetYaqinSotuvchi() != nullptr; },
+				[](const FOrgatishHol& H) { return H.O->Suhbatda(); },
+				[](const FOrgatishHol&) { return TArray<FString>{ Tn(TEXT("Gaplashish")) }; },
+				[](const FOrgatishHol&) { return FString(TEXT("bosing - sotuvchi bilan gaplashish. Suhbatdan chiqish ham shu tugma")); } },
+			{ TEXT("Gapirish"), true,
+				[](const FOrgatishHol& H) { return H.O->Suhbatda() && !H.O->Xayrlashdi(); },
+				[](const FOrgatishHol& H) { return !H.O->GetOxirgiGapim().IsEmpty(); },
+				[](const FOrgatishHol& H) { return TArray<FString>{ Qolsiz(H) ? FString(TEXT("Mikrofon")) : FString(TEXT("V")) }; },
+				[](const FOrgatishHol& H)
+				{
+					return Qolsiz(H)
+						? FString(TEXT("ovoz chiqarib gapiring - sotuvchi sizni eshitadi. Avval salom bering, keyin nima kerakligini ayting"))
+						: FString(TEXT("ni bosib turib gapiring, gapirib bo'lgach qo'yib yuboring. Avval salom bering!"));
+				} },
+			{ TEXT("Savdo"), false,
+				[](const FOrgatishHol& H) { return Bosqichda(H, EBozorBosqich::NarxAytildi); },
+				[](const FOrgatishHol& H) { return !Bosqichda(H, EBozorBosqich::NarxAytildi); },
+				Yoq,
+				[](const FOrgatishHol&) { return FString(TEXT("Sotuvchi narx aytdi. Qimmat bo'lsa savdolashib ko'ring: \"Arzonroq bering\"")); } },
+			{ TEXT("Tarozi"), false,
+				[](const FOrgatishHol& H) { return Bosqichda(H, EBozorBosqich::TaroziTekshir); },
+				[](const FOrgatishHol& H) { return !Bosqichda(H, EBozorBosqich::TaroziTekshir); },
+				Yoq,
+				[](const FOrgatishHol&) { return FString(TEXT("Tarozini kuzating: siz so'raganchami? Ko'p yoki kam bo'lsa sotuvchiga ayting")); } },
+			{ TEXT("Tolov"), false,
+				[](const FOrgatishHol& H) { return Bosqichda(H, EBozorBosqich::PulKutilmoqda); },
+				[](const FOrgatishHol& H) { return !Bosqichda(H, EBozorBosqich::PulKutilmoqda); },
+				Yoq,
+				[](const FOrgatishHol&) { return FString(TEXT("Pul bering: qancha berayotganingizni ayting, masalan \"Mana, yigirma ming\"")); } },
+			{ TEXT("Qaytim"), false,
+				[](const FOrgatishHol& H) { return Bosqichda(H, EBozorBosqich::QaytimTekshir); },
+				[](const FOrgatishHol& H) { return !Bosqichda(H, EBozorBosqich::QaytimTekshir); },
+				Yoq,
+				[](const FOrgatishHol&) { return FString(TEXT("Qaytimni sanang! Kam bo'lsa sotuvchiga ayting, to'g'ri bo'lsa \"Rahmat\" deng")); } },
+			{ TEXT("Xayr"), false,
+				[](const FOrgatishHol& H) { return Bosqichda(H, EBozorBosqich::Tugadi); },
+				[](const FOrgatishHol& H) { return !Bosqichda(H, EBozorBosqich::Tugadi); },
+				Yoq,
+				[](const FOrgatishHol&) { return FString(TEXT("Xarid tugadi. Sotuvchi bilan xayrlashing: \"Rahmat, xayr\"")); } },
+			{ TEXT("Royxat"), true,
+				[](const FOrgatishHol& H) { return !H.O->Suhbatda() && UBozorSozlamalar::Get()->KorilganOrgatish.Contains(FName(TEXT("Xayr"))); },
+				[](const FOrgatishHol& H) { return H.bRoyxatOchiq || H.Otdi > 12.0; },
+				[](const FOrgatishHol&) { return TArray<FString>{ Tn(TEXT("Royxat")) }; },
+				[](const FOrgatishHol&) { return FString(TEXT("bosib turing - ro'yxatda nima qolganini ko'ring")); } },
+		};
+		return R;
+	}
+
+	FAutoConsoleCommand OrgatishniTikla(TEXT("bozor.OrgatishniTikla"), TEXT("O'rgatish maslahatlarini qaytadan ko'rsatish (ko'rilganlar ro'yxatini tozalaydi)"),
+		FConsoleCommandDelegate::CreateLambda([]()
+		{
+			UBozorSozlamalar::Get()->KorilganOrgatish.Reset();
+			UBozorSozlamalar::Get()->Saqla();
+		}));
+}
+
+void ABozorHud::OrgatishYangila(float Dt)
+{
+	const ABozorOyinchi* O = PlayerOwner ? Cast<ABozorOyinchi>(PlayerOwner->GetPawn()) : nullptr;
+	if (!bOrgatishOchiq || !O)
+	{
+		OrgatishAlfa = 0.f;
+		return;
+	}
+	const double Hozir = GetWorld()->GetTimeSeconds();
+	UBozorSozlamalar* Sz = UBozorSozlamalar::Get();
+	static const bool bMajburiy = FParse::Param(FCommandLine::Get(), TEXT("Orgatish"));
+	static TSet<FName> BuSafar;   // -Orgatish: bitta o'yin ichida takrorlanmasin
+	auto Korildimi = [&](const TCHAR* Id) { return bMajburiy ? BuSafar.Contains(FName(Id)) : Sz->KorilganOrgatish.Contains(FName(Id)); };
+
+	FOrgatishHol H;
+	H.O = O;
+	H.bIntroBor = bIntroBor;
+	H.bRoyxatOchiq = bOchiq;
+	if (const UBozorSuhbat* Sh = O->GetSuhbat()) H.Bosqich = Sh->GetHolat().Bosqich;
+	// qog'oz, telefon, boshqaruv maslahati yoki natija ochiq bo'lsa karta kutib turadi
+	const bool bBand = Ochiqlik > 0.3f || Telefon || MaslahatAlfa > 0.f || O->NatijaKorinadi();
+	const TArray<FOrgatish>& R = Orgatishlar();
+
+	if (OrgatishJoriy != INDEX_NONE)
+	{
+		const FOrgatish& T = R[OrgatishJoriy];
+		H.Otdi = Hozir - OrgatishBosh;
+		H.Yurdi = FVector::Dist2D(O->GetActorLocation(), OrgatishJoy);
+		const bool bTugadi = T.Bajarildi(H);
+		if (bTugadi || H.Otdi > 25.0 || !T.Shart(H))
+		{
+			// o'rganildi: aytilgan ishni qildi yoki karta yetarlicha ko'rindi. Shart shunchaki yo'qolsa - keyinroq yana chiqadi
+			if ((bTugadi && (T.bHarakat || H.Otdi > 2.0)) || H.Otdi > 25.0)
+			{
+				if (bMajburiy) BuSafar.Add(FName(T.Id));
+				else if (!Sz->KorilganOrgatish.Contains(FName(T.Id)))
+				{
+					Sz->KorilganOrgatish.Add(FName(T.Id));
+					Sz->Saqla();
+				}
+			}
+			OrgatishOxirgi = OrgatishJoriy;
+			OrgatishJoriy = INDEX_NONE;
+		}
+	}
+	// yangisi - eskisi to'liq so'ngach
+	if (OrgatishJoriy == INDEX_NONE && OrgatishAlfa <= 0.f && !bBand)
+		for (int32 I = 0; I < R.Num(); ++I)
+		{
+			H.Otdi = 0.0;
+			H.Yurdi = 0.f;
+			if (Korildimi(R[I].Id) || !R[I].Shart(H)) continue;
+			OrgatishJoriy = I;
+			OrgatishBosh = Hozir;
+			OrgatishJoy = O->GetActorLocation();
+			break;
+		}
+	OrgatishAlfa = FMath::FInterpConstantTo(OrgatishAlfa, OrgatishJoriy != INDEX_NONE && !bBand ? 1.f : 0.f, Dt, 4.f);
+}
+
+// Tepada, o'rtada: "MASLAHAT" sarlavhasi, tugma qopqoqlari va nima qilish kerakligi
+void ABozorHud::OrgatishChiz()
+{
+	const ABozorOyinchi* O = PlayerOwner ? Cast<ABozorOyinchi>(PlayerOwner->GetPawn()) : nullptr;
+	const int32 N = OrgatishJoriy != INDEX_NONE ? OrgatishJoriy : OrgatishOxirgi;
+	if (!O || N == INDEX_NONE) return;
+	const FOrgatish& T = Orgatishlar()[N];
+	FOrgatishHol H;
+	H.O = O;
+	H.bIntroBor = bIntroBor;
+	const TArray<FString> Tugmalar = T.Tugmalar(H);
+	const FString Matn = T.Matn(H);
+
+	const float S = Canvas->ClipY / 1080.f;
+	const float A = OrgatishAlfa;
+	UFont* Shrift = GEngine->GetLargeFont();
+	const float Kt = 1.4f * S, Ks = 1.05f * S;
+	const float QopH = 40.f * S, Pad = 18.f * S, Oraliq = 8.f * S;
+	auto Olcham = [this, Shrift](const FString& M, float K) { float W = 0.f, Hh = 0.f; Canvas->TextSize(Shrift, M, W, Hh, K, K); return FVector2D(W, Hh); };
+	auto Tort = [this](float X, float Y, float W, float Hh, const FLinearColor& C)
+	{
+		FCanvasTileItem I(FVector2D(X, Y), FVector2D(W, Hh), C);
+		I.BlendMode = SE_BLEND_Translucent;
+		Canvas->DrawItem(I);
+	};
+	auto Yoz = [this, Shrift](const FString& M, float X, float Y, float K, const FLinearColor& C)
+	{
+		FCanvasTextItem I(FVector2D(X, Y), FText::FromString(M), Shrift, C);
+		I.Scale = FVector2D(K);
+		I.EnableShadow(FLinearColor(0.f, 0.f, 0.f, 0.6f * C.A));
+		Canvas->DrawItem(I);
+	};
+
+	// tugmalar kengligi
+	float TugmaW = 0.f;
+	for (const FString& Tg : Tugmalar) TugmaW += FMath::Max(QopH, Olcham(Tg, Kt).X + 24.f * S) + Oraliq;
+	if (TugmaW > 0.f) TugmaW += 6.f * S;
+	// matn so'zlar bo'yicha qatorlarga (karta eni ekranning ~55% idan oshmaydi)
+	const float MaxMatnW = FMath::Max(300.f * S, Canvas->ClipX * 0.55f - TugmaW - 2.f * Pad);
+	TArray<FString> Sozlar, Qatorlar;
+	Matn.ParseIntoArrayWS(Sozlar);
+	FString Q;
+	for (const FString& W : Sozlar)
+	{
+		const FString Sinov = Q.IsEmpty() ? W : Q + TEXT(" ") + W;
+		if (!Q.IsEmpty() && Olcham(Sinov, Kt).X > MaxMatnW) { Qatorlar.Add(Q); Q = W; }
+		else Q = Sinov;
+	}
+	if (!Q.IsEmpty()) Qatorlar.Add(Q);
+	float MatnW = 0.f;
+	for (const FString& L : Qatorlar) MatnW = FMath::Max(MatnW, Olcham(L, Kt).X);
+	const float QatorH = Olcham(TEXT("Ay"), Kt).Y * 1.1f;
+	const float SarlavhaH = Olcham(TEXT("M"), Ks).Y + 6.f * S;
+	const float IchH = FMath::Max(QopH, QatorH * Qatorlar.Num());
+	const float W = TugmaW + MatnW + 2.f * Pad;
+	const float Hc = Pad * 0.8f + SarlavhaH + IchH + Pad * 0.8f;
+	const float X = (Canvas->ClipX - W) * 0.5f;
+	const float Y = 170.f * S - (1.f - A) * 12.f * S;   // tepadan sal sirg'alib tushadi
+
+	Tort(X, Y, W, Hc, FLinearColor(0.02f, 0.03f, 0.06f, 0.75f * A));
+	Tort(X, Y, 5.f * S, Hc, FLinearColor(1.f, 0.78f, 0.25f, 0.95f * A));
+	Yoz(TEXT("MASLAHAT"), X + Pad, Y + Pad * 0.8f, Ks, FLinearColor(1.f, 0.78f, 0.25f, A));
+	const float IchY = Y + Pad * 0.8f + SarlavhaH;
+	float Cx = X + Pad;
+	for (const FString& Tg : Tugmalar)
+	{
+		const FVector2D Om = Olcham(Tg, Kt);
+		const float Qw = FMath::Max(QopH, Om.X + 24.f * S);
+		const float Qy = IchY + (IchH - QopH) * 0.5f;
+		Tort(Cx, Qy + 3.f * S, Qw, QopH, FLinearColor(0.f, 0.f, 0.f, 0.6f * A));
+		Tort(Cx, Qy, Qw, QopH, FLinearColor(0.95f, 0.95f, 0.93f, 0.95f * A));
+		FCanvasTextItem I(FVector2D(Cx + (Qw - Om.X) * 0.5f, Qy + (QopH - Om.Y) * 0.5f), FText::FromString(Tg), Shrift, FLinearColor(0.08f, 0.08f, 0.1f, A));
+		I.Scale = FVector2D(Kt);
+		Canvas->DrawItem(I);
+		Cx += Qw + Oraliq;
+	}
+	if (TugmaW > 0.f) Cx += 6.f * S;
+	float Ly = IchY + (IchH - QatorH * Qatorlar.Num()) * 0.5f;
+	for (const FString& L : Qatorlar)
+	{
+		Yoz(L, Cx, Ly, Kt, FLinearColor(1.f, 1.f, 1.f, A));
+		Ly += QatorH;
+	}
 }
 
 // Pastda, o'rtada: tugmalar va nima qilishi. Tugma - oq qopqoq ichida qora harf
@@ -453,115 +700,57 @@ void ABozorHud::SotuvChiz()
 		Yoz(O->GetXabar(), (Canvas->ClipX - Om.X) * 0.5f, Canvas->ClipY * 0.55f, 1.5f * S, FLinearColor(1.f, 0.75f, 0.3f, 1.f));
 	}
 
-	// suhbat oynasi: bolaning oxirgi gapi, sotuvchi (kayfiyati bilan) va gapi, pastida javob variantlari
-	TanlovJoylari.Reset();
+	// suhbat - film subtitri kabi: pastda, chapdan, yarim shaffof qora chiziq ustida "Kim: gap".
+	// O'yinchi gapi "Siz:", sotuvchi gapi - uning ismi bilan. Javob variantlari yo'q (faqat ovoz/matn)
 	const float A = O->Suhbatda() ? 1.f : FMath::Clamp(1.f - static_cast<float>(Hozir - O->GetGapVaqti() - 3.0), 0.f, 1.f);
-	if (A <= 0.f || O->GetSotuvchiGapi().IsEmpty()) return;
-	const TArray<FBozorTanlov> Tanlovlar = O->GetTanlovlar();
-	const float W = FMath::Min(1200.f * S, Canvas->ClipX - 80.f * S);
-	const float Ichki = W - 60.f * S;
-	const float Kt = 1.75f * S;
-	const TArray<FString> Gap = Qatorla(O->GetSotuvchiGapi(), Kt, Ichki);
-	const float QatorH = Olcham(TEXT("Ay"), Kt).Y * 1.15f;
-	const bool bMenGapi = !O->GetOxirgiGapim().IsEmpty();
-	const float TugmaH = 54.f * S, TugmaOraliq = 8.f * S;
-	// kupyuralar - bir qatorda plitka; qolgan variantlar - qatorma-qator
-	const float PlitkaW = 150.f * S, PlitkaH = 74.f * S, PlitkaOraliq = 10.f * S;
-	int32 Plitkalar = 0;
-	for (const FBozorTanlov& T : Tanlovlar) Plitkalar += T.Tur == EBozorTanlovTur::KupyuraQoy ? 1 : 0;
-	const int32 BirQatorda = FMath::Max(1, FMath::FloorToInt((Ichki + PlitkaOraliq) / (PlitkaW + PlitkaOraliq)));
-	const int32 PlitkaQatorlari = FMath::DivideAndRoundUp(Plitkalar, BirQatorda);
-	const UBozorSuhbat* Sh0 = O->GetSuhbat();
-	const bool bTolov = Sh0 && Sh0->Tolovda() && O->Suhbatda();
-	const float TanlovH = Tanlovlar.Num() ? 24.f * S + (Tanlovlar.Num() - Plitkalar) * (TugmaH + TugmaOraliq) + PlitkaQatorlari * (PlitkaH + PlitkaOraliq) : 0.f;
-	const float H = 30.f * S + (bMenGapi ? 44.f * S : 0.f) + 44.f * S + QatorH * Gap.Num() + (bTolov ? 48.f * S : 0.f) + TanlovH + 70.f * S;
-	const float X = (Canvas->ClipX - W) * 0.5f;
-	const float Y = Canvas->ClipY - H - 40.f * S;
-	Tort(X, Y, W, H, FLinearColor(0.02f, 0.03f, 0.06f, 0.72f * A));
-	Tort(X, Y, 6.f * S, H, FLinearColor(1.f, 0.78f, 0.25f, 0.9f * A));
-	float Ty = Y + 22.f * S;
-	if (bMenGapi)
-	{
-		Yoz(FString::Printf(TEXT("Siz: %s"), *O->GetOxirgiGapim()), X + 30.f * S, Ty, 1.35f * S, FLinearColor(0.75f, 0.78f, 0.82f, A));
-		Ty += 44.f * S;
-	}
-	Yoz(TEXT("Sotuvchi"), X + 30.f * S, Ty, 1.4f * S, FLinearColor(1.f, 0.78f, 0.25f, A));
-	// sotuvchining kayfiyati - bolaning tanlovlari unga qanday ta'sir qilayotgani ko'rinsin
-	if (const UBozorSuhbat* Sh = O->GetSuhbat())
-	{
-		const int32 M = Sh->GetHolat().Munosabat;
-		const FString K = M >= 70 ? TEXT("kayfiyati: yaxshi") : M >= 30 ? TEXT("kayfiyati: oddiy") : TEXT("kayfiyati: yomon");
-		const FLinearColor R = M >= 70 ? FLinearColor(0.45f, 0.9f, 0.45f, A) : M >= 30 ? FLinearColor(0.8f, 0.8f, 0.8f, A) : FLinearColor(1.f, 0.4f, 0.35f, A);
-		Yoz(K, X + 30.f * S + Olcham(TEXT("Sotuvchi"), 1.4f * S).X + 24.f * S, Ty + 4.f * S, 1.2f * S, R);
-	}
-	Ty += 44.f * S;
-	for (const FString& Q : Gap)
-	{
-		Yoz(Q, X + 30.f * S, Ty, Kt, FLinearColor(1.f, 1.f, 1.f, A));
-		Ty += QatorH;
-	}
+	if (A <= 0.f) return;
+	const UBozorSuhbat* Sh = O->GetSuhbat();
+	FString Ism = TEXT("Sotuvchi");
+	if (Sh && Sh->GetSotuvchi()) Ism = UBozorAiMiya::Shaxs(Sh->GetSotuvchi(), Sh->GetHolat().Fel).Ism;
+	struct FSatr { FString Kim, Gap; };
+	TArray<FSatr> Satrlar;
+	if (!O->GetOxirgiGapim().IsEmpty()) Satrlar.Add({ TEXT("Siz"), O->GetOxirgiGapim() });
+	const FString& SGap = O->GetSotuvchiGapi();
+	if (!SGap.IsEmpty() && SGap != TEXT("...")) Satrlar.Add({ Ism, SGap });
+	if (Satrlar.IsEmpty()) return;
 
-	// to'lov: peshtaxtadagi kupyuralar va kerakli summa
-	if (bTolov)
+	const float Kt = 1.45f * S;
+	const float Chap = Canvas->ClipX * 0.1f;
+	const float MaxW = Canvas->ClipX * 0.8f;
+	const float PadX = 14.f * S, PadY = 7.f * S;
+	const float QatorH = Olcham(TEXT("Ay"), Kt).Y * 1.1f;
+	// har satr: ism + gap, so'zlar bo'yicha qatorlarga bo'linadi; birinchi qator "Ism: " bilan boshlanadi
+	TArray<TArray<FString>> Bloklar;
+	float JamiH = 0.f;
+	for (const FSatr& R : Satrlar)
 	{
-		int32 Jami = 0;
-		TArray<FString> K;
-		for (int32 N : Sh0->GetPeshtaxta()) { Jami += N; K.Add(BozorSotuv::Som(N)); }
-		const FString M = K.IsEmpty()
-			? FString::Printf(TEXT("Narxi: %s so'm. Kupyuralarni bosib peshtaxtaga qo'ying"), *BozorSotuv::Som(Sh0->GetHolat().Summa))
-			: FString::Printf(TEXT("Peshtaxtada: %s  (jami %s so'm, narxi %s so'm)"), *FString::Join(K, TEXT(" + ")), *BozorSotuv::Som(Jami), *BozorSotuv::Som(Sh0->GetHolat().Summa));
-		Ty += 8.f * S;
-		Yoz(M, X + 30.f * S, Ty, 1.3f * S, FLinearColor(0.6f, 0.95f, 0.6f, A));
-		Ty += 40.f * S;
+		Bloklar.Add(Qatorla(R.Kim + TEXT(": ") + R.Gap, Kt, MaxW - 2.f * PadX));
+		JamiH += Bloklar.Last().Num() * QatorH + 2.f * PadY + 6.f * S;
 	}
-
-	// javob variantlari: raqam qopqog'i + matn; sichqoncha ustida - yorqinroq. Kupyuralar - yashil plitkalar
-	if (Tanlovlar.Num())
+	float Ty = Canvas->ClipY - 60.f * S - JamiH;
+	for (int32 B = 0; B < Bloklar.Num(); ++B)
 	{
-		Ty += 24.f * S;
-		float Mx = -1.f, My = -1.f;
-		if (PlayerOwner) PlayerOwner->GetMousePosition(Mx, My);
-		TanlovJoylari.SetNum(Tanlovlar.Num());
-		int32 P = 0;
-		for (int32 I = 0; I < Tanlovlar.Num(); ++I)
+		float W = 0.f;
+		for (const FString& Q : Bloklar[B]) W = FMath::Max(W, Olcham(Q, Kt).X);
+		const float H = Bloklar[B].Num() * QatorH + 2.f * PadY;
+		Tort(Chap, Ty, W + 2.f * PadX, H, FLinearColor(0.f, 0.f, 0.f, 0.55f * A));
+		const bool bMen = Satrlar[B].Kim == TEXT("Siz");
+		const FLinearColor IsmRang = bMen ? FLinearColor(0.6f, 0.8f, 1.f, A) : FLinearColor(1.f, 0.8f, 0.35f, A);
+		float Qy = Ty + PadY;
+		for (int32 L = 0; L < Bloklar[B].Num(); ++L)
 		{
-			if (Tanlovlar[I].Tur != EBozorTanlovTur::KupyuraQoy) continue;
-			const float Px = X + 24.f * S + (P % BirQatorda) * (PlitkaW + PlitkaOraliq);
-			const float Py = Ty + (P / BirQatorda) * (PlitkaH + PlitkaOraliq);
-			const FBox2D Joy(FVector2D(Px, Py), FVector2D(Px + PlitkaW, Py + PlitkaH));
-			const bool bUstida = Joy.IsInside(FVector2D(Mx, My));
-			Tort(Px, Py, PlitkaW, PlitkaH, bUstida ? FLinearColor(0.35f, 0.7f, 0.35f, 0.95f * A) : FLinearColor(0.2f, 0.45f, 0.25f, 0.9f * A));
-			Tort(Px + 4.f * S, Py + 4.f * S, PlitkaW - 8.f * S, 2.f * S, FLinearColor(1.f, 1.f, 1.f, 0.35f * A));
-			const FVector2D Om = Olcham(Tanlovlar[I].Matn, 1.45f * S);
-			Yoz(Tanlovlar[I].Matn, Px + (PlitkaW - Om.X) * 0.5f, Py + 10.f * S, 1.45f * S, FLinearColor(1.f, 1.f, 1.f, A));
-			const FString Son = FString::Printf(TEXT("%d.   × %d"), I + 1, Tanlovlar[I].Soni);
-			const FVector2D Os = Olcham(Son, 1.05f * S);
-			Yoz(Son, Px + (PlitkaW - Os.X) * 0.5f, Py + PlitkaH - Os.Y - 8.f * S, 1.05f * S, FLinearColor(0.9f, 1.f, 0.9f, 0.85f * A));
-			TanlovJoylari[I] = Joy;
-			++P;
+			const FString& Q = Bloklar[B][L];
+			if (L == 0)
+			{
+				// ism rangli, gap oq
+				const FString Bosh = Satrlar[B].Kim + TEXT(":");
+				Yoz(Bosh, Chap + PadX, Qy, Kt, IsmRang);
+				Yoz(Q.RightChop(Bosh.Len()), Chap + PadX + Olcham(Bosh, Kt).X, Qy, Kt, FLinearColor(1.f, 1.f, 1.f, A));
+			}
+			else Yoz(Q, Chap + PadX, Qy, Kt, FLinearColor(1.f, 1.f, 1.f, A));
+			Qy += QatorH;
 		}
-		if (P > 0) Ty += PlitkaQatorlari * (PlitkaH + PlitkaOraliq);
-		for (int32 I = 0; I < Tanlovlar.Num(); ++I)
-		{
-			if (Tanlovlar[I].Tur == EBozorTanlovTur::KupyuraQoy) continue;
-			const FBox2D Joy(FVector2D(X + 24.f * S, Ty), FVector2D(X + W - 24.f * S, Ty + TugmaH));
-			const bool bUstida = Joy.IsInside(FVector2D(Mx, My));
-			Tort(Joy.Min.X, Joy.Min.Y, Joy.GetSize().X, TugmaH, bUstida ? FLinearColor(1.f, 0.78f, 0.25f, 0.35f * A) : FLinearColor(1.f, 1.f, 1.f, 0.08f * A));
-			Tugma(FString::FromInt(I + 1), Joy.Min.X + 6.f * S, Ty + (TugmaH - 46.f * S) * 0.5f, A);
-			const FVector2D Om = Olcham(Tanlovlar[I].Matn, 1.5f * S);
-			Yoz(Tanlovlar[I].Matn, Joy.Min.X + 70.f * S, Ty + (TugmaH - Om.Y) * 0.5f, 1.5f * S, FLinearColor(1.f, 1.f, 1.f, A));
-			TanlovJoylari[I] = Joy;
-			Ty += TugmaH + TugmaOraliq;
-		}
-	}
-
-	if (O->Suhbatda() && !O->Xayrlashdi())
-	{
-		const FString M = TEXT("xayrlashmasdan ketish");
-		const FVector2D Om = Olcham(M, 1.25f * S);
-		const float Bx = X + W - Om.X - 30.f * S - 46.f * S - 12.f * S, By = Y + H - 60.f * S;
-		const float Q = Tugma(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))).ToString(), Bx, By, 0.8f * A);
-		Yoz(M, Bx + Q + 12.f * S, By + (Q - Om.Y) * 0.5f, 1.25f * S, FLinearColor(1.f, 1.f, 1.f, 0.7f * A));
+		Ty += H + 6.f * S;
 	}
 }
 
@@ -707,13 +896,6 @@ void ABozorHud::NatijaChiz()
 	const FString Pastki = bKeyingi ? TEXT("Enter — keyingi daraja     R — qaytadan")
 		: Y3 > 0 ? TEXT("Hamma darajalar tugadi!     Enter — yana o'ynash") : TEXT("Enter — qaytadan o'ynash");
 	Yoz(Pastki, Canvas->ClipX * 0.5f, Y + Hh - 70.f * S, 1.5f * S, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.7f), true);
-}
-
-int32 ABozorHud::TanlovQayerda(const FVector2D& Nuqta) const
-{
-	for (int32 I = 0; I < TanlovJoylari.Num(); ++I)
-		if (TanlovJoylari[I].IsInside(Nuqta)) return I;
-	return INDEX_NONE;
 }
 
 // Bozor darvozasi belgisi: ekranda bo'lsa - darvoza ustida, orqada yoki chetda bo'lsa - ekran chetida, o'sha tomonda.

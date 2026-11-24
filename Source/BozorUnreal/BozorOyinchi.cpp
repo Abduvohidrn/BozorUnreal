@@ -481,18 +481,9 @@ void ABozorOyinchi::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		FInputKeyBinding& Har = PlayerInputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &ABozorOyinchi::TugmaBosildi);
 		Har.bConsumeInput = false;
 	}
-	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ABozorOyinchi::SichqonchaBosildi);
 	PlayerInputComponent->BindKey(EKeys::Enter, IE_Pressed, this, &ABozorOyinchi::EnterBosildi);
 	PlayerInputComponent->BindKey(EKeys::V, IE_Pressed, this, &ABozorOyinchi::VBosildi);
 	PlayerInputComponent->BindKey(EKeys::V, IE_Released, this, &ABozorOyinchi::VQoyildi);
-	// 1-9 raqamlari - javob variantlari (to'lovda kupyuralar ham)
-	const FKey Raqamlar[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
-	for (int32 I = 0; I < UE_ARRAY_COUNT(Raqamlar); ++I)
-	{
-		FInputKeyBinding B(FInputChord(Raqamlar[I]), IE_Pressed);
-		B.KeyDelegate.GetDelegateForManualSet().BindWeakLambda(this, [this, I]() { if (bSuhbatda) Tanla(I); });
-		PlayerInputComponent->KeyBindings.Add(B);
-	}
 }
 
 void ABozorOyinchi::Move(const FInputActionValue& Value)
@@ -651,7 +642,7 @@ bool ABozorOyinchi::SuhbatniBoshla()
 		Pc->SetIgnoreMoveInput(true);
 		Pc->SetIgnoreLookInput(true);
 	}
-	KursorniKorsat(true);
+	// javob variantlari yo'q - suhbat faqat ovoz/matn orqali, kursor kerak emas
 	GetCharacterMovement()->StopMovementImmediately();
 	Chiqar(TEXT("Sotuvchi"), FString::Printf(TEXT("%s, fe'li: %s, munosabat %d"), R->Xulq.Ism.IsEmpty() ? *GetNameSafe(V) : *R->Xulq.Ism,
 		BozorSotuv::FelNomi(R->Fel), Suhbat->GetHolat().Munosabat), FColor::Yellow);
@@ -722,7 +713,7 @@ void ABozorOyinchi::Natija()
 		Pc->SetIgnoreMoveInput(true);
 		Pc->SetIgnoreLookInput(true);
 	}
-	KursorniKorsat(true);
+	// javob variantlari yo'q - suhbat faqat ovoz/matn orqali, kursor kerak emas
 	GetCharacterMovement()->StopMovementImmediately();
 	for (const FBozorNatijaQator& Q : Hamyon->NatijaQatorlari())
 		Chiqar(TEXT("Xarid"), FString::Printf(TEXT("%s: kerak %s, olindi %s %s, to'landi %s so'm - %s"), *Q.Nomi,
@@ -750,17 +741,6 @@ void ABozorOyinchi::DarajagaOt(bool bKeyingi)
 	if (bKeyingi && Tz && N < Tz->DarajalarSoni()) ++N;
 	if (APlayerController* Pc = Cast<APlayerController>(GetController()))
 		Pc->ConsoleCommand(FString::Printf(TEXT("open %s?Daraja=%d"), *UGameplayStatics::GetCurrentLevelName(this, false), N));
-}
-
-void ABozorOyinchi::SichqonchaBosildi()
-{
-	if (!bSuhbatda) return;
-	APlayerController* Pc = Cast<APlayerController>(GetController());
-	const ABozorHud* Hud = Pc ? Cast<ABozorHud>(Pc->GetHUD()) : nullptr;
-	float X = 0.f, Y = 0.f;
-	if (!Hud || !Pc->GetMousePosition(X, Y)) return;
-	const int32 I = Hud->TanlovQayerda(FVector2D(X, Y));
-	if (I != INDEX_NONE) Tanla(I);
 }
 
 // javob turiga mos harakat va (bor bo'lsa) yozilgan ovoz; xayrlashsa suhbat 2 s dan keyin o'zi yopiladi

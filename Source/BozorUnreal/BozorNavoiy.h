@@ -42,7 +42,7 @@ public:
 
 	static UBozorNavoiy* Get(const UObject* WorldContext);
 
-	// server modellarni yuklab bo'ldimi va bozor.Navoiy yoqiqmi
+	// server modellarni yuklab bo'ldimi (Navoiy yoki Malika) va bozor.Navoiy yoqiqmi
 	bool Tayyormi() const;
 	static bool FayllarBormi();
 
@@ -74,6 +74,22 @@ private:
 	bool MasofaviySozlama();
 	void MasofaviyniTekshir();
 	FString MasofaviyOvoz(const FString& Fel, bool bAyol) const;
+
+	// Malika ovozi API (ofis DGX Spark, Ming R6): AI/navoiy/malika.json {"url": "http://172.17.2.36:8014", "kalit": "...",
+	// "ohanglar": {"malika_kore": "oddiy", "malika_kore_xursand": "xursand", ...}}; kalit MALIKA_KEY muhit o'zgaruvchisidan ham.
+	// Server ovozi "ohanglar"da bo'lsa yoki "malika:<ohang>" bo'lsa - gap Malikaga ketadi; Malika band (503 qo'ng'iroq, 429)
+	// yoki javob bermasa - shu gap Navoiy bilan. -MalikaYoq yoki bozor.Malika 0 - o'chirish
+	bool MalikaSozlama();
+	void MalikaniTekshir();
+	FString MalikaOhangi(const FString& ServerOvoz) const;   // bo'sh - Malika emas
+	bool bMalika = false;
+	double MlBandGacha = 0.0;   // 503/429 dan keyin Retry-After tugaguncha Malikaga so'rov yuborilmaydi
+	FString MlUrl, MlKalit;
+	TMap<FString, FString> MlOhanglar;
+
+	void AytIchki(const FString& Fel, bool bAyol, const FString& Matn, TFunction<void(USoundWave* Ovoz)> Tayyor, float Ohang, const FString& Namuna,
+		const FString& ServerOvoz, float ServerTezlik, bool bMalikaMumkin);
+
 	bool bMasofaviy = false;
 	FString MUrl, MKalit;
 	TMap<FString, FString> MOvozlar;

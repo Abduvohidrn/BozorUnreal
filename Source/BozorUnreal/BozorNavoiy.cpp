@@ -33,6 +33,10 @@ static TAutoConsoleVariable<float> CVarNavoiyKutish(TEXT("bozor.NavoiyKutish"), 
 	TEXT("Navoiy ovozini eng ko'pi bilan necha soniya kutish (oshsa - yozilgan ovoz)"));
 static TAutoConsoleVariable<float> CVarNavoiyFps(TEXT("bozor.NavoiyFps"), 30.f,
 	TEXT("Navoiy gap yozayotganda o'yin kadrini shunga cheklaydi (videokarta Navoiy'ga bo'shasin), 0 - cheklamaslik"));
+static TAutoConsoleVariable<int32> CVarMalika(TEXT("bozor.Malika"), 1,
+	TEXT("1 - Malika ovozli sotuvchilar (xulq.json ovoz.server malika_kore*) Malika API'da gapiradi, 0 - Navoiy'da"));
+static TAutoConsoleVariable<float> CVarMalikaKutish(TEXT("bozor.MalikaKutish"), 5.f,
+	TEXT("Malika birinchi bo'lagini necha soniya kutish (oshsa - shu gap Navoiy'da yoki yozilgan ovozda)"));
 
 namespace
 {
@@ -71,6 +75,8 @@ void UBozorNavoiy::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 	const TCHAR* Cmd = FCommandLine::Get();
 	if (FParse::Param(Cmd, TEXT("NavoiyYoq")) || FParse::Param(Cmd, TEXT("AiYoq")) || IsRunningCommandlet() || IsRunningDedicatedServer()) return;
+	// Malika - Navoiy'dan mustaqil: ikkalasi birga ishlaydi (Malika ayol ovozlari, Navoiy erkaklar va zaxira)
+	if (!FParse::Param(Cmd, TEXT("MalikaYoq")) && MalikaSozlama()) MalikaniTekshir();
 	// ofis serveri bor bo'lsa - avval u (javob bermasa MasofaviyniTekshir lokalni ishga tushiradi)
 	if (!FParse::Param(Cmd, TEXT("NavoiyLokal")) && MasofaviySozlama())
 	{
@@ -112,7 +118,7 @@ UBozorNavoiy* UBozorNavoiy::Get(const UObject* WorldContext)
 
 bool UBozorNavoiy::Tayyormi() const
 {
-	return bTayyor && CVarNavoiy.GetValueOnGameThread() != 0;
+	return (bTayyor || (bMalika && CVarMalika.GetValueOnGameThread() != 0)) && CVarNavoiy.GetValueOnGameThread() != 0;
 }
 
 bool UBozorNavoiy::FayllarBormi()
@@ -213,6 +219,67 @@ void UBozorNavoiy::MasofaviyniTekshir()
 	R->ProcessRequest();
 }
 
+bool UBozorNavoiy::MalikaSozlama()
+{
+	// standart: avvalgi malika_kore* ovozlari (Gemini namunasi) endi haqiqiy Malika ovozi; qo'shimcha -> ohang
+	MlOhanglar = {
+		{TEXT("malika_kore"), TEXT("oddiy")}, {TEXT("malika_kore_xursand"), TEXT("xursand")},
+		{TEXT("malika_kore_afsus"), TEXT("afsus")}, {TEXT("malika_kore_shoshilinch"), TEXT("shoshilinch")} };
+	FString Matn;
+	TSharedPtr<FJsonObject> J;
+	if (FFileHelper::LoadFileToString(Matn, *(NavoiyPapka() / TEXT("malika.json"))))
+		FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Matn), J);
+	if (J.IsValid())
+	{
+		J->TryGetStringField(TEXT("url"), MlUrl);
+		J->TryGetStringField(TEXT("kalit"), MlKalit);
+		const TSharedPtr<FJsonObject>* Oh = nullptr;
+		if (J->TryGetObjectField(TEXT("ohanglar"), Oh))
+			for (const auto& P : (*Oh)->Values) MlOhanglar.Add(FString(P.Key), P.Value->AsString());
+	}
+	const FString EnvUrl = FPlatformMisc::GetEnvironmentVariable(TEXT("MALIKA_URL"));
+	const FString EnvKalit = FPlatformMisc::GetEnvironmentVariable(TEXT("MALIKA_KEY"));
+	if (!EnvUrl.IsEmpty()) MlUrl = EnvUrl;
+	if (!EnvKalit.IsEmpty()) MlKalit = EnvKalit;
+	if (MlUrl.IsEmpty() && !MlKalit.IsEmpty()) MlUrl = TEXT("http://172.17.2.36:8014");
+	MlUrl.RemoveFromEnd(TEXT("/"));
+	if (MlUrl.IsEmpty()) return false;
+	if (MlKalit.IsEmpty()) UE_LOG(LogBozorNavoiy, Warning, TEXT("Malika (%s): kalit yo'q - AI/navoiy/malika.json \"kalit\" yoki MALIKA_KEY"), *MlUrl);
+	return !MlKalit.IsEmpty();
+}
+
+// /v1/voices (kalit bilan): 200 - kalit to'g'ri va server tirik
+void UBozorNavoiy::MalikaniTekshir()
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> R = FHttpModule::Get().CreateRequest();
+	R->SetURL(MlUrl + TEXT("/v1/voices"));
+	R->SetVerb(TEXT("GET"));
+	R->SetHeader(TEXT("Authorization"), TEXT("Bearer ") + MlKalit);
+	R->SetTimeout(3.f);
+	TWeakObjectPtr<UBozorNavoiy> Men(this);
+	R->OnProcessRequestComplete().BindLambda([Men](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
+	{
+		if (!Men.IsValid()) return;
+		const int32 Kod = bOk && Javob.IsValid() ? Javob->GetResponseCode() : 0;
+		if (Kod == 200)
+		{
+			Men->bMalika = true;
+			UE_LOG(LogBozorNavoiy, Log, TEXT("Malika tayyor: %s (%d ovoz -> ohang)"), *Men->MlUrl, Men->MlOhanglar.Num());
+			return;
+		}
+		const FString Sabab = Kod == 401 ? FString(TEXT("kalit noto'g'ri (401)")) : Kod ? FString::Printf(TEXT("javob %d"), Kod) : FString(TEXT("javob yo'q (ofis tarmog'ida emasmi?)"));
+		UE_LOG(LogBozorNavoiy, Warning, TEXT("Malika (%s) ishlamaydi: %s - Malika ovozli sotuvchilar Navoiy'da gapiradi"), *Men->MlUrl, *Sabab);
+	});
+	R->ProcessRequest();
+}
+
+FString UBozorNavoiy::MalikaOhangi(const FString& ServerOvoz) const
+{
+	if (ServerOvoz.StartsWith(TEXT("malika:"))) return ServerOvoz.Mid(7);
+	const FString* S = MlOhanglar.Find(ServerOvoz);
+	return S ? *S : FString();
+}
+
 // fe'l x jins -> server ovozi (masofaviy.json "ovozlar" ustun; serverda faqat bitta erkak ovozi bor)
 FString UBozorNavoiy::MasofaviyOvoz(const FString& Fel, bool bAyol) const
 {
@@ -263,10 +330,32 @@ void UBozorNavoiy::Sogmi(int32 Urinish)
 void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFunction<void(USoundWave* Ovoz)> Tayyor, float Ohang, const FString& Namuna,
 	const FString& ServerOvoz, float ServerTezlik)
 {
-	if (!Tayyormi() || Matn.TrimStartAndEnd().IsEmpty())
+	AytIchki(Fel, bAyol, Matn, MoveTemp(Tayyor), Ohang, Namuna, ServerOvoz, ServerTezlik, true);
+}
+
+void UBozorNavoiy::AytIchki(const FString& Fel, bool bAyol, const FString& Matn, TFunction<void(USoundWave* Ovoz)> Tayyor, float Ohang, const FString& Namuna,
+	const FString& ServerOvoz, float ServerTezlik, bool bMalikaMumkin)
+{
+	// Malikaga ketadimi: sotuvchining server ovozi Malika ohangiga mos kelsa va Malika band deb belgilanmagan bo'lsa
+	FString MlOhang;
+	if (bMalikaMumkin && bMalika && CVarMalika.GetValueOnGameThread() != 0 && FPlatformTime::Seconds() >= MlBandGacha)
+		MlOhang = MalikaOhangi(ServerOvoz.IsEmpty() ? MasofaviyOvoz(Fel, bAyol) : ServerOvoz);
+	const bool bMl = !MlOhang.IsEmpty();
+	if (CVarNavoiy.GetValueOnGameThread() == 0 || (!bMl && !bTayyor) || Matn.TrimStartAndEnd().IsEmpty())
 	{
 		Tayyor(nullptr);
 		return;
+	}
+	// Malika ovoz bermasa (band, kalit, tarmoq) - shu gap Navoiy bilan (sotuvchi jim qolmasin)
+	if (bMl && bTayyor)
+	{
+		TWeakObjectPtr<UBozorNavoiy> Zaxira(this);
+		Tayyor = [Zaxira, Fel, bAyol, Matn, Asl = MoveTemp(Tayyor), Ohang, Namuna, ServerOvoz, ServerTezlik](USoundWave* W) mutable
+		{
+			if (W || !Zaxira.IsValid()) { Asl(W); return; }
+			UE_LOG(LogBozorNavoiy, Log, TEXT("Malika ovoz bermadi - Navoiy: %s"), *Matn);
+			Zaxira->AytIchki(Fel, bAyol, Matn, MoveTemp(Asl), Ohang, Namuna, ServerOvoz, ServerTezlik, false);
+		};
 	}
 	++Sorovlar;
 	TSharedRef<FJsonObject> Tana = MakeShared<FJsonObject>();
@@ -287,7 +376,29 @@ void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFun
 	O->Nomi = FString::Printf(TEXT("[%s %s] %s"), *Fel, bAyol ? TEXT("ayol") : TEXT("erkak"), *Matn);
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> R = FHttpModule::Get().CreateRequest();
-	if (bMasofaviy)
+	if (bMl)
+	{
+		// Malika: PCM s16le 24 kHz mono oqimi; bitta so'rovda 400 belgigacha - uzunini oxirgi gap chegarasida qisqartiramiz
+		FString Kirish = Matn.TrimStartAndEnd();
+		if (Kirish.Len() > 400)
+		{
+			int32 Chek = 0;
+			for (int32 I = 0; I < 400; ++I) if (Kirish[I] == TEXT('.') || Kirish[I] == TEXT('!') || Kirish[I] == TEXT('?')) Chek = I + 1;
+			Kirish = Kirish.Left(Chek > 0 ? Chek : 400);
+		}
+		TSharedRef<FJsonObject> M = MakeShared<FJsonObject>();
+		M->SetStringField(TEXT("input"), Kirish);
+		M->SetStringField(TEXT("tone"), MlOhang);
+		M->SetStringField(TEXT("response_format"), TEXT("pcm"));
+		Body.Reset();
+		FJsonSerializer::Serialize(M, TJsonWriterFactory<>::Create(&Body));
+		R->SetURL(MlUrl + TEXT("/v1/audio/speech"));
+		R->SetHeader(TEXT("Authorization"), TEXT("Bearer ") + MlKalit);
+		O->bSarlavha = true;
+		O->Chastota = 24000;
+		O->Nomi = TEXT("malika/") + MlOhang + TEXT(" ") + O->Nomi;
+	}
+	else if (bMasofaviy)
 	{
 		// ofis serveri (OpenAI'ga o'xshash): javob - sarlavhasiz PCM s16le 24 kHz mono oqimi
 		TSharedRef<FJsonObject> M = MakeShared<FJsonObject>();
@@ -305,7 +416,14 @@ void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFun
 		O->bSarlavha = true;
 		O->Chastota = 24000;
 		O->Nomi = Ovoz + TEXT(" ") + O->Nomi;
-		// xato javobi (401/404/422 - JSON matn) ovoz deb chalinmasin
+	}
+	else
+	{
+		R->SetURL(FString::Printf(TEXT("http://127.0.0.1:%d/ayt_oqim"), Port));
+	}
+	if (bMl || bMasofaviy)
+	{
+		// xato javobi (401/404/422/429/503 - JSON matn) ovoz deb chalinmasin
 		R->OnHeaderReceived().BindLambda([O](FHttpRequestPtr, const FString& Nom, const FString& Qiymat)
 		{
 			if (Nom.Equals(TEXT("Content-Type"), ESearchCase::IgnoreCase) && !Qiymat.Contains(TEXT("audio")))
@@ -314,10 +432,6 @@ void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFun
 				O->bHttpXato = true;
 			}
 		});
-	}
-	else
-	{
-		R->SetURL(FString::Printf(TEXT("http://127.0.0.1:%d/ayt_oqim"), Port));
 	}
 	R->SetVerb(TEXT("POST"));
 	R->SetHeader(TEXT("Content-Type"), TEXT("application/json; charset=utf-8"));
@@ -334,14 +448,18 @@ void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFun
 		AsyncTask(ENamedThreads::GameThread, [O, Men]() { if (Men.IsValid()) Men->OqimIshla(O, false); });
 	}));
 	// kadrni cheklash faqat lokal Navoiy uchun (u o'yin bilan bitta videokartada)
-	const bool bChekla = !bMasofaviy;
+	const bool bChekla = !bMasofaviy && !bMl;
 	if (bChekla) KadrChekla(true);
-	R->OnProcessRequestComplete().BindLambda([Men, O, bChekla](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
+	R->OnProcessRequestComplete().BindLambda([Men, O, bChekla, bMl](FHttpRequestPtr, FHttpResponsePtr Javob, bool bOk)
 	{
 		if (!Men.IsValid()) return;
 		if (bChekla) Men->KadrChekla(false);
-		if (Javob.IsValid() && Javob->GetResponseCode() != 200)
-			UE_LOG(LogBozorNavoiy, Warning, TEXT("Navoiy javobi %d: %s"), Javob->GetResponseCode(), *Javob->GetContentAsString().Left(200));
+		const int32 Kod = Javob.IsValid() ? Javob->GetResponseCode() : 0;
+		if (Kod && Kod != 200)
+			UE_LOG(LogBozorNavoiy, Warning, TEXT("%s javobi %d: %s"), bMl ? TEXT("Malika") : TEXT("Navoiy"), Kod, *Javob->GetContentAsString().Left(200));
+		// Malika band (503 - telefon qo'ng'irog'ida, 429 - chegara): Retry-After tugaguncha Malika gaplari Navoiy'ga
+		if (bMl && (Kod == 503 || Kod == 429))
+			Men->MlBandGacha = FPlatformTime::Seconds() + FMath::Clamp(FCString::Atof(*Javob->GetHeader(TEXT("Retry-After"))), 2.f, 60.f);
 		Men->OqimIshla(O, true);
 	});
 	// birinchi bo'lak NavoiyKutish ichida kelmasa - so'rov bekor (OnProcessRequestComplete Tayyor(nullptr) beradi)
@@ -351,7 +469,7 @@ void UBozorNavoiy::Ayt(const FString& Fel, bool bAyol, const FString& Matn, TFun
 		if (!O->bJavob)
 			if (TSharedPtr<IHttpRequest, ESPMode::ThreadSafe> Rq = RZaif.Pin()) Rq->CancelRequest();
 		return false;
-	}), FMath::Max(1.f, CVarNavoiyKutish.GetValueOnGameThread()));
+	}), FMath::Max(1.f, (bMl ? CVarMalikaKutish : CVarNavoiyKutish).GetValueOnGameThread()));
 	R->ProcessRequest();
 }
 

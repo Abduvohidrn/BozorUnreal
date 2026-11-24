@@ -61,4 +61,7 @@ AI/tts/namuna/
 AI/tts/gaplar/
 # masofaviy Navoiy sozlamasi - API kaliti bor, git'ga kirmasin
 AI/navoiy/masofaviy.json
+AI/navoiy/malika.json
 AI/stt/masofaviy.json
+# Blender avtomatik zaxira nusxalari
+*.blend1

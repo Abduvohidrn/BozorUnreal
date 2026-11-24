@@ -1,0 +1,11 @@
+{
+  "_izoh": "Nusxalab malika.json deb saqlang va kalitni yozing (malika.json git'ga kirmaydi). Kalitni MALIKA_KEY muhit o'zgaruvchisi bilan ham berish mumkin. ohanglar: xulq.json ovoz.server -> Malika tone (oddiy, jiddiy, pichir barqaror; xotirjam, xursand, afsus, hayron, hayajonli, shoshilinch, jahldor, xavotir tajriba). xulq.json'da to'g'ridan-to'g'ri \"malika:jiddiy\" ham yozish mumkin.",
+  "url": "http://172.17.2.36:8014",
+  "kalit": "",
+  "ohanglar": {
+    "malika_kore": "oddiy",
+    "malika_kore_xursand": "xursand",
+    "malika_kore_afsus": "afsus",
+    "malika_kore_shoshilinch": "shoshilinch"
+  }
+}

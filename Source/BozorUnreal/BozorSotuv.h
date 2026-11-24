@@ -299,6 +299,8 @@ struct FBozorRoyxatQator
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Birlik = TEXT("dona");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bOlindi = false;
 	UPROPERTY(BlueprintReadOnly) float Olindi = 0.f;   // hamma xariddan jami olingani
+	// bola so'rab, pulini to'lagani (sotuvchi kam tortib, bola indamay olgan bo'lsa ham) - ro'yxatda belgilash uchun
+	UPROPERTY(BlueprintReadOnly) float Soralgan = 0.f;
 };
 
 // Bitta xarid (to'langanda yoziladi) - natija statistikasi uchun

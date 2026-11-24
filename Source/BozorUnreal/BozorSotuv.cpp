@@ -887,12 +887,15 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 				X.Tolandi = Holat.Summa;
 				X.Tarozi = Holat.Tarozi;
 			}
-			// xarid ro'yxatida bo'lsa - jami yetarli miqdorda olinganda belgilanadi
+			// xarid ro'yxatida bo'lsa - jami yetarli miqdorda olinganda (yoki so'ralib, puli to'langanda) belgilanadi.
+			// Sotuvchi kam tortib, bola indamay olsa ham mol olingan hisoblanadi: kamomad natijada ("kam") va yulduzda
+			// (TaroziOtkazildi) ko'rinadi. Aks holda qator hech qachon belgilanmas, qolganini (0,5 dan kam) olib ham bo'lmasdi
 			for (FBozorRoyxatQator& R : Hamyon->Royxat)
 				if (R.Nomi.Equals(Holat.Mahsulot.Nomi, ESearchCase::IgnoreCase))
 				{
 					R.Olindi += Holat.Miqdor;
-					if (R.Olindi + KINDA_SMALL_NUMBER >= R.Miqdor) R.bOlindi = true;
+					R.Soralgan += FMath::Max(Holat.Miqdor, Holat.SoralganMiqdor);
+					if (FMath::Max(R.Olindi, R.Soralgan) + KINDA_SMALL_NUMBER >= R.Miqdor) R.bOlindi = true;
 				}
 			Holat.Bosqich = Qaytim > 0 ? EBozorBosqich::QaytimTekshir : EBozorBosqich::Tugadi;
 			bSotibOldi = true;

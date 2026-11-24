@@ -57,6 +57,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
 	TObjectPtr<UMaterialInterface> UstunMaterial;
 
+	// belgining ikki yuzi: ko'k plita, oq maydonda qora avtobus (Scripts/bekat_belgi_chiz.ps1 + bekat_belgi_yangila.py).
+	// Bo'sh bo'lsa - eski matnli belgi (AVTOBUS BEKATI, yo'nalishlar, bekat nomi)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bozor")
+	TObjectPtr<UMaterialInterface> BelgiMaterial;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bozor")
 	TObjectPtr<UStaticMeshComponent> Soyabon;
 
@@ -76,6 +81,10 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 private:
+	void BelgiYuzlariniQoy();
+
+	UPROPERTY() TObjectPtr<UStaticMeshComponent> BelgiYuz;
+	UPROPERTY() TObjectPtr<UStaticMeshComponent> BelgiYuzOrqa;
 	UPROPERTY() TObjectPtr<UTextRenderComponent> BelgiMatn;
 	UPROPERTY() TObjectPtr<UTextRenderComponent> BelgiOrqa;
 	UPROPERTY() TObjectPtr<UTextRenderComponent> NomMatn;

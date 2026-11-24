@@ -34,6 +34,9 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogBozorOyinchi, Log, All);
 
+static TAutoConsoleVariable<float> CVarMiyaKorinishKutish(TEXT("bozor.MiyaKorinishKutish"), 5.f,
+	TEXT("AI (bulut) javobini necha soniya kutish; kech qolsa sotuvchi tayyor gapni aytadi"));
+
 // 1 edi: karnaydan qaytgan bozor ovozi gap deb olinardi (2026-11-19) - endi faqat V bosib turib gapiriladi
 static TAutoConsoleVariable<int32> CVarQolsiz(TEXT("bozor.Qolsiz"), 0,
 	TEXT("Ovozli chat kabi qo'lsiz suhbat: 1 - suhbatda mikrofon o'zi tinglaydi (tugmasiz, gapni bo'lish mumkin), 0 - faqat V bosib turib"));
@@ -535,6 +538,9 @@ void ABozorOyinchi::Tick(float DeltaSeconds)
 			: TEXT("Tinglayapman - bemalol gapiravering");
 		XabarVaqti = GetWorld()->GetTimeSeconds();
 	}
+	// AI javobi kech qoldi - sotuvchi tayyor gapni aytadi (bulut 10 s gacha javob bermasligi mumkin)
+	if (KutilganRaqam != 0 && FPlatformTime::Seconds() - KutilganVaqt > FMath::Max(1.f, CVarMiyaKorinishKutish.GetValueOnGameThread()))
+		KutilganniAyt();
 	MolYangila(DeltaSeconds);
 	if (bTest) SotuvTestQadami();
 	if (bBot) BotQadami();
@@ -769,7 +775,15 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	UBozorNavoiy* Navoiy = UBozorNavoiy::Get(this);
 	const bool bJonli = Navoiy && Navoiy->Tayyormi() && V && !Matn.IsEmpty() && (!bTest || bAiSinov) && !bBot;
 	AytVaqt = FPlatformTime::Seconds();
-	if (Miya && Miya->Tayyormi() && V && !Matn.IsEmpty() && (!bTest || bAiSinov) && !bBot)
+	// oldingi gapning AI javobi hali kelmagan bo'lsa (bola tez-tez gapirdi / bosdi) yoki AI yaqinda kech qoldi - bu gap
+	// AI'siz, darhol aytiladi. Aks holda har yangi gap eskisini bekor qilib, sotuvchi umuman gapirmay qolardi
+	const bool bOldingiKutilmoqda = KutilganRaqam != 0 && KutilganRaqam == Raqam - 1;
+	KutilganRaqam = 0;
+	const bool bMiyaBand = bOldingiKutilmoqda || FPlatformTime::Seconds() < MiyaDamOlish;
+	if (bMiyaBand && Miya && Miya->Tayyormi() && V && !Matn.IsEmpty())
+		UE_LOG(LogBozorOyinchi, Display, TEXT("[AiOvoz] %s - tayyor gap darhol: %s"),
+			bOldingiKutilmoqda ? TEXT("oldingi AI javobi kelmagan") : TEXT("AI sekin"), *Matn);
+	if (!bMiyaBand && Miya && Miya->Tayyormi() && V && !Matn.IsEmpty() && (!bTest || bAiSinov) && !bBot)
 	{
 		// sotuvchi "o'ylab turadi": matn LLM'dan qaytguncha (yoki kutish vaqti tugaguncha) uch nuqta
 		SotuvchiGapi = TEXT("...");
@@ -787,11 +801,17 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 		const FString Izoh = Suhbat->GetOxirgiIzoh();
 		FString Mano = Matn;
 		if (!Izoh.IsEmpty() && Mano.StartsWith(Izoh)) Mano = Mano.RightChop(Izoh.Len()).TrimStart();
+		KutilganRaqam = Raqam;
+		KutilganMatn = Matn;
+		KutilganVaqt = FPlatformTime::Seconds();
+		bKutilganJonli = bJonli;
 		auto Tugadi = [Men, Raqam, Matn, Izoh, bJonli, NavoiyZaif](const FString& Javob0, bool)
 		{
 			const FString Javob = Izoh.IsEmpty() ? Javob0 : Izoh + TEXT(" ") + Javob0;
-			if (Men.IsValid() && Men->MiyaSorov == Raqam)
+			// kutish vaqti o'tib, tayyor matn allaqachon aytilgan bo'lsa (KutilganRaqam tozalangan) - kech kelgan javob tashlanadi
+			if (Men.IsValid() && Men->MiyaSorov == Raqam && Men->KutilganRaqam == Raqam)
 			{
+				Men->KutilganRaqam = 0;
 				Men->SotuvchiMatni(Javob);
 				if (bJonli) Men->JonliAyt(Raqam, Javob, Matn);   // Navoiy o'z cheklovini oladi - bu yerdagisi keyin qo'yib yuboriladi
 			}
@@ -816,7 +836,7 @@ void ABozorOyinchi::SotuvchiAytdi(const FString& Matn)
 	// shu gap uchun yozilgan ovoz bo'lsa (Ovoz/unreal_eksport.py) - o'shani aytadi, umumiy salom/rahmat klipi kerak emas.
 	// Jonli ovoz bo'lsa - gap tayyor bo'lgach JonliAyt o'qiydi. Ular bo'lmasa - oldindan yozilgan Navoiy bo'laklari (SayGap;
 	// faqat AI gapni qayta yozmagan bo'lsa: bo'laklar asl matnga mos)
-	const bool bAiYoz = Miya && Miya->Tayyormi() && !Matn.IsEmpty() && (!bTest || bAiSinov) && !bBot;
+	const bool bAiYoz = !bMiyaBand && Miya && Miya->Tayyormi() && !Matn.IsEmpty() && (!bTest || bAiSinov) && !bBot;
 	const bool bOvozli = bJonli || ABozorSotuvchiOvozi::SayLine(V, BozorSotuv::FelNomi(Suhbat->GetHolat().Fel), Matn)
 		|| (!bAiYoz && ABozorSotuvchiOvozi::SayGap(V, Suhbat->GetBolaklar(), Suhbat->GetUslub()));
 	FName Harakat;
@@ -1147,6 +1167,20 @@ void ABozorOyinchi::SotuvchiMatni(const FString& Matn)
 	if (TugatishVaqti > 0.0) TugatishVaqti = FMath::Max(TugatishVaqti, GapVaqti + 2.0);
 }
 
+void ABozorOyinchi::KutilganniAyt()
+{
+	const int32 Raqam = KutilganRaqam;
+	KutilganRaqam = 0;
+	// orada yangi gap boshlangan, gap bo'lingan yoki suhbat tugagan bo'lsa - aytilmaydi
+	if (Raqam != MiyaSorov || !bSuhbatda || !Suhbat || !Suhbat->GetSotuvchi()) return;
+	UE_LOG(LogBozorOyinchi, Display, TEXT("[AiOvoz] AI %.1f s da javob bermadi - tayyor gap: %s"), FPlatformTime::Seconds() - KutilganVaqt, *KutilganMatn);
+	// bulut sekinlashgan: keyingi gaplar ham bir muddat AI'siz (har gapda yana kutib qolmaslik uchun)
+	MiyaDamOlish = FPlatformTime::Seconds() + 20.0;
+	SotuvchiMatni(KutilganMatn);
+	if (bKutilganJonli) JonliAyt(Raqam, KutilganMatn, KutilganMatn);
+	else ABozorSotuvchiOvozi::SayGap(Suhbat->GetSotuvchi(), Suhbat->GetBolaklar(), Suhbat->GetUslub());
+}
+
 void ABozorOyinchi::JonliAyt(int32 Raqam, const FString& Matn, const FString& Asl)
 {
 	ABozorNpc* V = Suhbat ? Suhbat->GetSotuvchi() : nullptr;
@@ -1189,7 +1223,9 @@ void ABozorOyinchi::JonliAyt(int32 Raqam, const FString& Matn, const FString& As
 		// orada yangi gap boshlangan yoki suhbat tugagan bo'lsa - eski ovoz aytilmaydi
 		if (!Sotuvchi.IsValid() || Men->MiyaSorov != Raqam || !Men->Suhbat || Men->Suhbat->GetSotuvchi() != Sotuvchi.Get()) return;
 		const bool bJonliAytdi = ABozorSotuvchiOvozi::SayWave(Sotuvchi.Get(), Ovoz);
-		if (!bJonliAytdi) ABozorSotuvchiOvozi::SayLine(Sotuvchi.Get(), Fel, Asl);
+		// Navoiy ovoz bermadi: shu gapning yozilgan ovozi, u ham bo'lmasa - oldindan yozilgan bo'laklar (sotuvchi ovozsiz qolmasin)
+		if (!bJonliAytdi && !ABozorSotuvchiOvozi::SayLine(Sotuvchi.Get(), Fel, Asl))
+			ABozorSotuvchiOvozi::SayGap(Sotuvchi.Get(), Men->Suhbat->GetBolaklar(), Men->Suhbat->GetUslub());
 		const double Hozir = FPlatformTime::Seconds();
 		UE_LOG(LogBozorOyinchi, Display, TEXT("[AiOvoz] %s: matn %.1f s + ovoz %.1f s = %.1f s kutish, gap %.1f s | %s"), bJonliAytdi ? TEXT("jonli") : TEXT("yozilgan"),
 			MatnVaqt - Men->AytVaqt, Hozir - MatnVaqt, Hozir - Men->AytVaqt, Ovoz ? Ovoz->Duration : 0.f, *Gap);

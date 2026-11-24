@@ -228,6 +228,13 @@ private:
 	double GapVaqti = -100.0, XabarVaqti = -100.0;
 	double TugatishVaqti = -1.0;   // xayrlashgandan keyin suhbat o'zi yopiladigan payt
 	int32 MiyaSorov = 0;           // AI miyaga oxirgi so'rov raqami (eskisining javobi kelsa - tashlanadi)
+	// AI javobi kutilayotgan gap: kech qolsa (bozor.MiyaKorinishKutish) tayyor matn aytiladi - sotuvchi jim qolmaydi
+	int32 KutilganRaqam = 0;       // 0 - kutilayotgan gap yo'q
+	FString KutilganMatn;
+	double KutilganVaqt = 0.0;
+	bool bKutilganJonli = false;
+	double MiyaDamOlish = 0.0;     // AI kech qolgandan keyin shu paytgacha tayyor gaplar (bulut sekinlashgan)
+	void KutilganniAyt();
 	// ovozli chat: o'yinchi gapira boshladi (qo'lsiz rejim) - sotuvchi gapirayotgan bo'lsa, gapi bo'linadi
 	void GapBoshlandi();
 	// shu suhbatning tarixi (bola gapi, sotuvchi javobi) - erkin suhbatda LLM oldingi gaplarni eslasin

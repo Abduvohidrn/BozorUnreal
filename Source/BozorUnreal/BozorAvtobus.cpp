@@ -32,6 +32,9 @@ ABozorBekat::ABozorBekat()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Kub(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> LedMat(TEXT("/Game/City_Bus/Materials/Font/M_Destination_Font.M_Destination_Font"));
 	static ConstructorHelpers::FObjectFinder<UFont> LedFont(TEXT("/Game/City_Bus/Materials/Font/Font_DestinationSign.Font_DestinationSign"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Tekislik(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BelgiMat(TEXT("/Game/Bekat/MI_Bekat_Belgi.MI_Bekat_Belgi"));
+	if (BelgiMat.Succeeded()) BelgiMaterial = BelgiMat.Object;
 
 	auto Mesh = [this](const TCHAR* Nom, UStaticMesh* M)
 	{
@@ -61,6 +64,13 @@ ABozorBekat::ABozorBekat()
 	Belgi->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	TabloQuti = Mesh(TEXT("TabloQuti"), Kub.Object);
 	TabloQuti->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BelgiYuz = Mesh(TEXT("BelgiYuz"), Tekislik.Object);
+	BelgiYuzOrqa = Mesh(TEXT("BelgiYuzOrqa"), Tekislik.Object);
+	for (UStaticMeshComponent* Y : { BelgiYuz.Get(), BelgiYuzOrqa.Get() })
+	{
+		Y->SetupAttachment(Belgi);
+		Y->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 
 	BelgiMatn = Matn(TEXT("BelgiMatn"), Belgi, 13.f, FColor::White);
 	BelgiOrqa = Matn(TEXT("BelgiOrqa"), Belgi, 13.f, FColor::White);
@@ -69,6 +79,30 @@ ABozorBekat::ABozorBekat()
 	TabloMatn->SetHorizontalAlignment(EHTA_Left);
 	if (LedMat.Succeeded()) TabloMatn->SetTextMaterial(LedMat.Object);
 	if (LedFont.Succeeded()) TabloMatn->SetFont(LedFont.Object);
+	BelgiYuzlariniQoy();
+}
+
+// rasmli belgi: tekisliklar plita kubining ikki yuziga 1.5 mm oldinga (kub 100 sm, masshtab Belgi'dan - 60x75 sm, tekstura ham
+// shu nisbatda). Tekislik normali +Z, U o'qi X bo'ylab: har bir yuzda tomoshabinning o'ng tomoniga qaratiladi.
+// Konstruktorda ham chaqiriladi: xaritada saqlangan eski bekat o'yinda (construction qayta ishlamasa) ham to'g'ri chiqsin
+void ABozorBekat::BelgiYuzlariniQoy()
+{
+	const bool bRasm = BelgiMaterial != nullptr;
+	// konstruktorda plita hali masshtablanmagan - avto-joylashdagi o'lcham (OnConstruction'dagi bilan bir xil)
+	const FVector S = Belgi->GetRelativeScale3D().Equals(FVector::OneVector) ? FVector(0.6f, 0.03f, 0.75f) : Belgi->GetRelativeScale3D();
+	for (UStaticMeshComponent* Y : { BelgiYuz.Get(), BelgiYuzOrqa.Get() })
+	{
+		const bool bOrqa = Y == BelgiYuzOrqa;
+		const FVector Normal(0.f, bOrqa ? 1.f : -1.f, 0.f);
+		Y->SetRelativeLocation(Normal * 55.f);
+		Y->SetRelativeRotation(FRotationMatrix::MakeFromZX(Normal, FVector(bOrqa ? 1.f : -1.f, 0.f, 0.f)).Rotator());
+		// UE ota masshtabini bolaga o'z o'qlari bo'yicha ko'paytiradi (burilishni hisobga olmay): tekislikning Y o'qi plita
+		// balandligi (ota Z) bo'ylab yotadi, lekin ota Y (qalinlik 0.03) bilan ko'paytiriladi - qoplaymiz
+		Y->SetRelativeScale3D(FVector(1.f, S.Z / FMath::Max(S.Y, KINDA_SMALL_NUMBER), 1.f));
+		Y->SetVisibility(bRasm);
+		if (bRasm) Y->SetMaterial(0, BelgiMaterial);
+	}
+	for (UTextRenderComponent* T : { BelgiMatn.Get(), BelgiOrqa.Get(), NomMatn.Get() }) T->SetVisibility(!bRasm);
 }
 
 // Matn va materiallar har safar yangilanadi. Qismlarning joyi esa faqat bAvtoJoylash bo'lsa (birinchi marta) soyabon o'lchamiga
@@ -86,6 +120,8 @@ void ABozorBekat::OnConstruction(const FTransform& Transform)
 	BelgiOrqa->SetText(FText::FromString(BelgiYozuv));
 	NomMatn->SetText(FText::FromString(BekatNomi));
 	TabloMatn->SetText(FText::FromString(Tablo));
+
+	BelgiYuzlariniQoy();
 
 	if (!bAvtoJoylash) return;
 	bAvtoJoylash = false;

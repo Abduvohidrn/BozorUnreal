@@ -159,6 +159,8 @@ public:
 	const FString& GetOxirgiGapim() const { return OxirgiGapim; }
 	const FString& GetXabar() const { return Xabar; }
 	double GetGapVaqti() const { return GapVaqti; }
+	// sotuvchi oxirgi marta gapirgan / o'ylagan payt: subtitr undan keyin 3 s turib yopiladi
+	double GetOvozOxiri() const { return OvozOxiri; }
 	double GetXabarVaqti() const { return XabarVaqti; }
 
 protected:
@@ -224,7 +226,7 @@ private:
 	TWeakObjectPtr<class ABozorNpc> YaqinSotuvchi;   // E bosilsa shu bilan gaplashadi
 	bool bSuhbatda = false;
 	FString SotuvchiGapi, OxirgiGapim, Xabar;
-	double GapVaqti = -100.0, XabarVaqti = -100.0;
+	double GapVaqti = -100.0, XabarVaqti = -100.0, OvozOxiri = -100.0;
 	double TugatishVaqti = -1.0;   // xayrlashgandan keyin suhbat o'zi yopiladigan payt
 	int32 MiyaSorov = 0;           // AI miyaga oxirgi so'rov raqami (eskisining javobi kelsa - tashlanadi)
 	// AI javobi kutilayotgan gap: kech qolsa (bozor.MiyaKorinishKutish) tayyor matn aytiladi - sotuvchi jim qolmaydi

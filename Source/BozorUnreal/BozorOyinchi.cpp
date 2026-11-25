@@ -509,6 +509,8 @@ void ABozorOyinchi::Tick(float DeltaSeconds)
 	const bool bSotuvchiGapiryapti = SuhbatSotuvchi && ABozorSotuvchiOvozi::Gapiryapti(SuhbatSotuvchi);
 	// karnaydan qaytgan sotuvchi ovozi o'yinchi gapi deb olinmasin: u gapirayotganda esik baland
 	if (bQolsiz) Quloq->SetAksSado(bSotuvchiGapiryapti ? 3.f : 1.f);
+	if (bSotuvchiGapiryapti || (bSuhbatda && (SotuvchiGapi == TEXT("...") || bJonliKutish)))
+		OvozOxiri = GetWorld()->GetTimeSeconds();
 	if (Quloq->Tinglayapti())
 	{
 		const int32 ChiziqSoni = FMath::Clamp(FMath::RoundToInt(Quloq->GetBalandlik() * 12.f), 0, 10);
@@ -533,6 +535,30 @@ void ABozorOyinchi::Tick(float DeltaSeconds)
 	if (KutilganRaqam != 0 && FPlatformTime::Seconds() - KutilganVaqt > FMath::Max(1.f, CVarMiyaKorinishKutish.GetValueOnGameThread()))
 		KutilganniAyt();
 	MolYangila(DeltaSeconds);
+	// -VBelgiTest: birinchi rastaga borib E (suhbat), "V Gapiring" belgisi va subtitr suratlari, keyin chiqish
+	static const bool bVBelgiTest = FParse::Param(FCommandLine::Get(), TEXT("VBelgiTest"));
+	if (bVBelgiTest)
+	{
+		static int32 Qadam = 0;
+		static double Keyingi = 4.0;
+		const double Hozir = GetWorld()->GetTimeSeconds();
+		const FString Dir = FPaths::ProjectSavedDir() / TEXT("Screenshots/VBelgiTest/");
+		if (Hozir >= Keyingi)
+		{
+			APlayerController* Pc = Cast<APlayerController>(GetController());
+			const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this);
+			if (Qadam == 0 && Tz && Tz->GetRastalar().Num())
+			{
+				RastagaBor(Tz->GetRastalar()[0]);
+				Qadam = 1; Keyingi = Hozir + 1.5;
+			}
+			else if (Qadam == 1) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("1_E.png"), true, false); Qadam = 2; Keyingi = Hozir + 1.0; }
+			else if (Qadam == 2) { EBosildi(); Qadam = 3; Keyingi = Hozir + 2.0; }
+			else if (Qadam == 3) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("2_V.png"), true, false); Qadam = 4; Keyingi = Hozir + 12.0; }
+			else if (Qadam == 4) { FScreenshotRequest::RequestScreenshot(Dir + TEXT("3_keyin.png"), true, false); Qadam = 5; Keyingi = Hozir + 1.0; }
+			else if (Qadam == 5 && Pc) { Pc->ConsoleCommand(TEXT("quit")); Qadam = 6; }
+		}
+	}
 	if (bTest) SotuvTestQadami();
 	if (bBot) BotQadami();
 	if (!bSuhbatda) YaqinSotuvchiniTop();
@@ -669,7 +695,7 @@ void ABozorOyinchi::SuhbatniTugat()
 		Pc->SetIgnoreLookInput(false);
 	}
 	KursorniKorsat(false);
-	GapVaqti = GetWorld()->GetTimeSeconds();   // oxirgi gap yana biroz ko'rinib turadi
+	// subtitr suhbatdan chiqqanda qayta yonmaydi: gap tugagan bo'lsa 3 s dan keyin allaqachon yopilgan
 }
 
 void ABozorOyinchi::KursorniKorsat(bool bHa)

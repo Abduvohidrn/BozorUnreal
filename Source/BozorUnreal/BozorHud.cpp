@@ -351,7 +351,6 @@ namespace
 	};
 
 	FString Tn(const TCHAR* Amal) { return UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(Amal)).ToString(); }
-	bool Qolsiz(const FOrgatishHol& H) { return H.O->GetQuloq() && H.O->GetQuloq()->Qolsizmi(); }
 	bool Bosqichda(const FOrgatishHol& H, EBozorBosqich B) { return H.O->Suhbatda() && !H.O->Xayrlashdi() && H.Bosqich == B; }
 	TArray<FString> Yoq(const FOrgatishHol&) { return {}; }
 
@@ -368,16 +367,7 @@ namespace
 				[](const FOrgatishHol& H) { return H.O->Suhbatda(); },
 				[](const FOrgatishHol&) { return TArray<FString>{ Tn(TEXT("Gaplashish")) }; },
 				[](const FOrgatishHol&) { return FString(TEXT("bosing - sotuvchi bilan gaplashish. Suhbatdan chiqish ham shu tugma")); } },
-			{ TEXT("Gapirish"), true,
-				[](const FOrgatishHol& H) { return H.O->Suhbatda() && !H.O->Xayrlashdi(); },
-				[](const FOrgatishHol& H) { return !H.O->GetOxirgiGapim().IsEmpty(); },
-				[](const FOrgatishHol& H) { return TArray<FString>{ Qolsiz(H) ? FString(TEXT("Mikrofon")) : FString(TEXT("V")) }; },
-				[](const FOrgatishHol& H)
-				{
-					return Qolsiz(H)
-						? FString(TEXT("ovoz chiqarib gapiring - sotuvchi sizni eshitadi. Avval salom bering, keyin nima kerakligini ayting"))
-						: FString(TEXT("ni bosib turib gapiring, gapirib bo'lgach qo'yib yuboring. Avval salom bering!"));
-				} },
+			// "V - Gapiring" bu yerda emas: SotuvChiz'da E belgisi o'rnida, butun o'yinda bir marta
 			{ TEXT("Savdo"), false,
 				[](const FOrgatishHol& H) { return Bosqichda(H, EBozorBosqich::NarxAytildi); },
 				[](const FOrgatishHol& H) { return !Bosqichda(H, EBozorBosqich::NarxAytildi); },
@@ -681,16 +671,46 @@ void ABozorHud::SotuvChiz()
 		return Q;
 	};
 
-	// E belgisi
-	if (!O->Suhbatda() && O->GetYaqinSotuvchi() && Ochiqlik < 0.5f)
+	// E belgisi; E bosilgach o'sha joyda bir marta "V Gapiring" (butun o'yinda bir marta: V bosib gapirguncha
+	// yoki suhbat tugaguncha, keyin GameUserSettings'da "VGapiring" ko'rildi deb saqlanadi)
+	auto Belgi = [&](const FString& Harf, const FString& M)
 	{
-		const FString M = TEXT("Gaplashish");
 		const FVector2D Om = Olcham(M, 1.7f * S);
 		const float W = 46.f * S + 16.f * S + Om.X;
 		const float X = (Canvas->ClipX - W) * 0.5f, Y = Canvas->ClipY * 0.62f;
 		Tort(X - 20.f * S, Y - 14.f * S, W + 40.f * S, 74.f * S, FLinearColor(0.f, 0.f, 0.f, 0.45f));
-		const float Q = Tugma(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))).ToString(), X, Y, 1.f);
+		const float Q = Tugma(Harf, X, Y, 1.f);
 		Yoz(M, X + Q + 16.f * S, Y + (Q - Om.Y) * 0.5f, 1.7f * S, FLinearColor::White);
+	};
+	if (!O->Suhbatda() && O->GetYaqinSotuvchi() && Ochiqlik < 0.5f)
+		Belgi(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))).ToString(), TEXT("Gaplashish"));
+	{
+		// Id yangi ("Gapirish" - eski katta karta edi, ko'p saqlanmalarda allaqachon ko'rilgan). -Orgatish: saqlanmaydi, har o'yinda bir marta
+		static bool bVKorindi = false;   // shu o'yinda ko'rsatildi - suhbat tugasa saqlanadi
+		static bool bVTugadi = false;
+		static const bool bMajburiy = FParse::Param(FCommandLine::Get(), TEXT("Orgatish"));
+		UBozorSozlamalar* Sz = UBozorSozlamalar::Get();
+		const FName VId(TEXT("VGapiring"));
+		const bool bQolsiz = O->GetQuloq() && O->GetQuloq()->Qolsizmi();
+		const bool bGapirdi = (O->GetQuloq() && O->GetQuloq()->Tinglayapti()) || !O->GetOxirgiGapim().IsEmpty();
+		const bool bKorilgan = bMajburiy ? bVTugadi : Sz->KorilganOrgatish.Contains(VId);
+		if (bOrgatishOchiq && !bQolsiz && !bKorilgan)
+		{
+			if (O->Suhbatda() && !O->Xayrlashdi() && !bGapirdi)
+			{
+				bVKorindi = true;
+				if (Ochiqlik < 0.5f) Belgi(TEXT("V"), TEXT("Gapiring"));
+			}
+			else if (bVKorindi || bGapirdi)
+			{
+				bVTugadi = true;
+				if (!bMajburiy)
+				{
+					Sz->KorilganOrgatish.Add(VId);
+					Sz->Saqla();
+				}
+			}
+		}
 	}
 
 	// "sotuvchi band" kabi qisqa xabar (3 s)
@@ -702,7 +722,12 @@ void ABozorHud::SotuvChiz()
 
 	// suhbat - film subtitri kabi: pastda, chapdan, yarim shaffof qora chiziq ustida "Kim: gap".
 	// O'yinchi gapi "Siz:", sotuvchi gapi - uning ismi bilan. Javob variantlari yo'q (faqat ovoz/matn)
-	const float A = O->Suhbatda() ? 1.f : FMath::Clamp(1.f - static_cast<float>(Hozir - O->GetGapVaqti() - 3.0), 0.f, 1.f);
+	// Gap tugagach (ovoz to'xtagach) 3 s turadi, so'ng 0.5 s da so'nadi - suhbat davom etsa ham. Ovoz kechiksa yoki
+	// umuman chiqmasa ham matn o'qishga ulgurilsin: kamida ~15 harf/s hisobidagi o'qish vaqti
+	const FString& OqishGapi = O->GetSotuvchiGapi().IsEmpty() ? O->GetOxirgiGapim() : O->GetSotuvchiGapi();
+	const double OqishOxiri = O->GetGapVaqti() + FMath::Max(2.0, OqishGapi.Len() / 15.0);
+	const double SubtitrOxiri = FMath::Max(O->GetOvozOxiri(), OqishOxiri) + 3.0;
+	const float A = FMath::Clamp(static_cast<float>(SubtitrOxiri - Hozir) * 2.f + 1.f, 0.f, 1.f);
 	if (A <= 0.f) return;
 	const UBozorSuhbat* Sh = O->GetSuhbat();
 	FString Ism = TEXT("Sotuvchi");

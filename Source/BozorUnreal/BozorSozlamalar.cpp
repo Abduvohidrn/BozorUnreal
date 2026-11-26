@@ -23,6 +23,7 @@ const TArray<FBozorAmal>& UBozorSozlamalar::Amallar()
 		{ TEXT("Gaplashish"), LOCTEXT("Gaplashish", "Gaplashish / xayrlashish"), EKeys::E },
 		{ TEXT("Royxat"),     LOCTEXT("Royxat", "Xarid ro'yxati (bosib turish)"), EKeys::Tab },
 		{ TEXT("Qaytadan"),   LOCTEXT("Qaytadan", "Darajani qaytadan o'ynash"), EKeys::R },
+		{ TEXT("Mashina"),    LOCTEXT("Mashina", "Mashinaga o'tirish / tushish"), EKeys::F },
 	};
 	return Royxat;
 }

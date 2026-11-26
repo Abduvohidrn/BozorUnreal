@@ -6,6 +6,7 @@
 
 class USoundBase;
 class UBozorHamyon;
+class UBozorMobil;
 
 // Xarid ro'yxati qog'ozi. Intro tugagach bola uni cho'ntagidan chiqaradi: qog'oz ekran pastidan o'ng tomonga ko'tariladi
 // (ro'yxat, pul, onaning eslatmasi). Birinchi marta - E/Enter yoki yura boshlasa yopiladi; keyin Tab bosib turilganda ochiq.
@@ -21,11 +22,15 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void DrawHUD() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	void Qogoz(bool bOch);
 
 	// ona bilan telefon suhbati davom etyapti (E/Enter shu paytda telefonga tegishli)
 	bool TelefonFaol() const { return Telefon != nullptr; }
+	bool BoshqaruvFaol() const { return bFaol; }
+	void MobilRoyxat();
+	void MobilAmal();
 
 
 private:
@@ -50,6 +55,8 @@ private:
 	bool bBoshJoy = false;
 
 	UPROPERTY() TObjectPtr<USoundBase> Shitir;
+	UPROPERTY() TObjectPtr<UBozorMobil> Mobil;
+	bool bMobilRoyxat = false;
 
 	// darajada qo'ng'iroq bo'lsa: intro tugagach ona telefon qiladi, qog'oz suhbatdan keyin chiqadi
 	UPROPERTY() TObjectPtr<class UBozorTelefon> Telefon;

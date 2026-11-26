@@ -146,12 +146,14 @@ namespace
 void UBozorAiMiya::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+#if PLATFORM_WINDOWS
 	if (FParse::Param(FCommandLine::Get(), TEXT("AiYoq")) || IsRunningCommandlet() || IsRunningDedicatedServer()) return;
 	// mikrofon STT (rubaiSTT, ~0.8 GB + GPU isitish): o'yin ochilishi bilan fonda - menyu/avtobus paytida tayyor bo'ladi,
 	// o'yinchining birinchi gapi kutmaydi (suhbat boshida yuklansa ulgurmasdi: birinchi gap ~9 s)
 	if (BozorRubai::Tanlangan() && !GIsAutomationTesting)
 		Async(EAsyncExecution::Thread, []() { BozorRubai::Yukla(); });
 	Boshla();
+#endif
 }
 
 void UBozorAiMiya::Deinitialize()

@@ -73,6 +73,7 @@ namespace
 void UBozorNavoiy::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+#if PLATFORM_WINDOWS
 	const TCHAR* Cmd = FCommandLine::Get();
 	if (FParse::Param(Cmd, TEXT("NavoiyYoq")) || FParse::Param(Cmd, TEXT("AiYoq")) || IsRunningCommandlet() || IsRunningDedicatedServer()) return;
 	// Malika - Navoiy'dan mustaqil: ikkalasi birga ishlaydi (Malika ayol ovozlari, Navoiy erkaklar va zaxira)
@@ -89,6 +90,7 @@ void UBozorNavoiy::Initialize(FSubsystemCollectionBase& Collection)
 		return;
 	}
 	Ishga();
+#endif
 }
 
 void UBozorNavoiy::Deinitialize()

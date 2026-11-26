@@ -5,7 +5,7 @@ GLB: Scripts/cobalt_eksport.py (Blender) -> Saved/CobaltSource/SM_Cobalt.glb
 Ishga tushirish (muharrir yopiq):
   UnrealEditor-Cmd BozorUnreal.uproject -run=pythonscript -script=Scripts/cobalt_import.py
 BOZOR_COBALT=import - faqat import; sinov - almashtirish saqlanmasdan; hammasi (standart) - import qilingan Cobalt bilan almashtirib, sahnani saqlaydi;
-oyna - qayta import (kuzov + oyna) va sahnaga oyna nusxalarini qo'shib saqlaydi.
+oyna - qayta import (kuzov + oyna) va sahnaga oyna nusxalarini qo'shib saqlaydi; nanite - faqat materiallarga Nanite belgisi.
 """
 import os
 import stat
@@ -74,8 +74,8 @@ def _glb(fayl, pl):
 def oyna_material():
     """To'q tusli avtomobil shishasi: yarim shaffof (chetdan qaraganda Fresnel bo'yicha qalinroq), past roughness, aks ettiradi."""
     path = DEST + "/M_Cobalt_Oyna"
-    if EAL.does_asset_exist(path):
-        EAL.delete_asset(path)
+    if EAL.does_asset_exist(path):   # Damas ham ishlatadi - o'chirilmaydi, borini qoldiradi
+        return ue.load_asset(path)
     mel = ue.MaterialEditingLibrary
     m = ue.AssetToolsHelpers.get_asset_tools().create_asset("M_Cobalt_Oyna", DEST, ue.Material, ue.MaterialFactoryNew())
     m.set_editor_property("blend_mode", ue.BlendMode.BLEND_TRANSLUCENT)
@@ -107,6 +107,7 @@ def oyna_material():
 
 
 def import_cobalt():
+    yozish_ruxsati()
     pl = pipeline()
     body = _glb(GLB, pl)
     oyna = _glb(GLB.replace(".glb", "_Oyna.glb"), pl)
@@ -128,9 +129,32 @@ def import_cobalt():
     eski = DEST + "/MI_Cobalt_Automotive_solar_glass"   # glTF dan kelgan mat shisha - endi kerak emas
     if EAL.does_asset_exist(eski) and not EAL.find_package_referencers_for_asset(eski):
         EAL.delete_asset(eski)
+    nanite_belgisi()
     for p in EAL.list_assets(DEST, recursive=True, include_folder=False):
         EAL.save_asset(p.split(".")[0], only_if_is_dirty=False)
     return sm
+
+
+def yozish_ruxsati():
+    """git LFS 'lockable' .uasset fayllari checkout'dan keyin faqat o'qish uchun - saqlashdan oldin yozish ruxsati."""
+    papka = os.path.join(PROJ, "Content", *DEST.split("/")[2:])
+    for ildiz, _, fayllar in os.walk(papka):
+        for f in fayllar:
+            os.chmod(os.path.join(ildiz, f), stat.S_IREAD | stat.S_IWRITE)
+
+
+def nanite_belgisi():
+    """glTF materiallari Nanite/ISM belgisisiz keladi: belgisiz bo'lsa o'yinda kuzov qo'pol zaxira mesh bilan chiziladi."""
+    yozish_ruxsati()
+    for p in EAL.list_assets(DEST, recursive=True, include_folder=False):
+        a = ue.load_asset(p.split(".")[0])
+        if isinstance(a, ue.Material) and a.get_name() != "M_Cobalt_Oyna" and not (
+                a.get_editor_property("used_with_nanite") and a.get_editor_property("used_with_instanced_static_meshes")):
+            a.set_editor_property("used_with_nanite", True)
+            a.set_editor_property("used_with_instanced_static_meshes", True)
+            ue.MaterialEditingLibrary.recompile_material(a)
+            EAL.save_loaded_asset(a, False)
+            log("Nanite belgisi:", a.get_name())
 
 
 def uzun_oq(sm):
@@ -237,6 +261,8 @@ def oynalar(actors):
 def main():
     open(LOG, "w").close()
     sm = import_cobalt() if REJIM in ("import", "oyna") else ue.load_asset(MESH)
+    if REJIM == "nanite":
+        nanite_belgisi()
     b = sm.get_bounding_box()
     log("SM_Cobalt o'lchami (sm):", round(b.max.x - b.min.x), round(b.max.y - b.min.y), round(b.max.z - b.min.z),
         "material slotlari:", [str(m.material_slot_name) + "=" + (m.material_interface.get_name() if m.material_interface else "-")

@@ -1,4 +1,6 @@
 #include "BozorHud.h"
+#include "BozorMobil.h"
+#include "BozorMashina.h"
 
 #include "BozorAiMiya.h"
 #include "BozorAvtobus.h"
@@ -55,6 +57,11 @@ void ABozorHud::Qogoz(bool bOch)
 void ABozorHud::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	if (!Mobil && BozorMobil::Faol() && PlayerOwner && PlayerOwner->IsLocalPlayerController() && PlayerOwner->GetLocalPlayer())
+	{
+		Mobil = CreateWidget<UBozorMobil>(PlayerOwner.Get(), UBozorMobil::StaticClass());
+		if (Mobil) Mobil->AddToPlayerScreen(20);
+	}
 	if (!bFaol)
 	{
 		// intro tugaguncha qog'oz yo'q; intro bo'lgan bo'lsa - darhol cho'ntakdan chiqariladi
@@ -111,7 +118,7 @@ void ABozorHud::Tick(float Dt)
 	if (P)
 	{
 		// Tab bosib turilganda ochiq, qo'yib yuborilsa yopiladi. Introdan keyingi birinchi ochilishda Tab bosilsa - shu rejimga o'tadi
-		if (P->IsInputKeyDown(UBozorSozlamalar::Get()->Tugma(TEXT("Royxat"))))
+		if (bMobilRoyxat || P->IsInputKeyDown(UBozorSozlamalar::Get()->Tugma(TEXT("Royxat"))))
 		{
 			bBirinchi = false;
 			Qogoz(true);
@@ -172,6 +179,32 @@ void ABozorHud::Tick(float Dt)
 	}
 }
 
+void ABozorHud::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (Mobil) Mobil->RemoveFromParent();
+	Super::EndPlay(EndPlayReason);
+}
+
+void ABozorHud::MobilRoyxat()
+{
+	bMobilRoyxat = !bOchiq;
+	Qogoz(bMobilRoyxat);
+}
+
+void ABozorHud::MobilAmal()
+{
+	if (!bFaol)
+	{
+		for (TActorIterator<ABozorAvtobusIntro> It(GetWorld()); It; ++It)
+		{
+			if (It->BoshqaruvKutilmoqda()) It->Otkazish();
+		}
+	}
+	else if (Telefon) Telefon->MobilDavom();
+	else if (bOchiq) { bMobilRoyxat = false; Qogoz(false); }
+	else if (ABozorOyinchi* O = PlayerOwner ? Cast<ABozorOyinchi>(PlayerOwner->GetPawn()) : nullptr) O->EBosildi();
+}
+
 void ABozorHud::DrawHUD()
 {
 	Super::DrawHUD();
@@ -183,6 +216,20 @@ void ABozorHud::DrawHUD()
 		return;
 	}
 	if (BelgiAlfa > 0.f) BelgiChiz();
+	// haydaladigan mashina: yonida - "F - o'tirish", ichida - tezlik, uzatma va boshqaruv
+	for (TActorIterator<ABozorMashina> It(GetWorld()); It; ++It)
+	{
+		const FString M = It->Maslahat();
+		if (M.IsEmpty()) continue;
+		const float S = Canvas->ClipY / 1080.f;
+		FCanvasTextItem T(FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * (It->Haydalyapti() ? 0.92f : 0.66f)), FText::FromString(M),
+			GEngine->GetLargeFont(), FLinearColor::White);
+		T.Scale = FVector2D((It->Haydalyapti() ? 1.3f : 1.7f) * S);
+		T.bCentreX = true;
+		T.EnableShadow(FLinearColor(0.f, 0.f, 0.f, 0.85f));
+		Canvas->DrawItem(T);
+		break;
+	}
 	// daraja nomi (boshida 5 s)
 	if (GetWorld()->GetTimeSeconds() - FaolVaqti < 5.0)
 		if (const UBozorSotuvTizimi* Tz = UBozorSotuvTizimi::Get(this))
@@ -215,7 +262,7 @@ void ABozorHud::DrawHUD()
 	if (Telefon) Telefon->Chiz(Canvas);
 
 	// yopiq paytda burchakda eslatma (maslahat ko'rinib turganda - unda Tab bor)
-	if (Ochiqlik < 1.f && MaslahatAlfa < 1.f && !Telefon)
+	if (!Mobil && Ochiqlik < 1.f && MaslahatAlfa < 1.f && !Telefon)
 	{
 		const float S = Canvas->ClipY / 1080.f;
 		FCanvasTextItem T(FVector2D(40.f * S, Canvas->ClipY - 70.f * S), FText::FromString(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Royxat"))).ToString() + TEXT(" (bosib turing) — ro'yxat")), GEngine->GetMediumFont(),
@@ -480,8 +527,23 @@ void ABozorHud::OrgatishChiz()
 	FOrgatishHol H;
 	H.O = O;
 	H.bIntroBor = bIntroBor;
-	const TArray<FString> Tugmalar = T.Tugmalar(H);
-	const FString Matn = T.Matn(H);
+	TArray<FString> Tugmalar = T.Tugmalar(H);
+	FString Matn = T.Matn(H);
+	if (Mobil && FCString::Strcmp(T.Id, TEXT("Yurish")) == 0)
+	{
+		Tugmalar.Reset();
+		Matn = TEXT("Chap joystik bilan yuring. Atrofga qarash uchun o'ng tomonda barmog'ingizni suring.");
+	}
+	else if (Mobil && FCString::Strcmp(T.Id, TEXT("Gaplashish")) == 0)
+	{
+		Tugmalar = {TEXT("Gaplashish")};
+		Matn = TEXT("tugmasini bosing va sotuvchiga yozing");
+	}
+	else if (Mobil && FCString::Strcmp(T.Id, TEXT("Royxat")) == 0)
+	{
+		Tugmalar = {TEXT("Ro'yxat")};
+		Matn = TEXT("tugmasi bilan qolgan xaridlarni ko'ring");
+	}
 
 	const float S = Canvas->ClipY / 1080.f;
 	const float A = OrgatishAlfa;
@@ -565,9 +627,9 @@ void ABozorHud::MaslahatChiz()
 	struct FBand { TArray<FString> Tugmalar; FString Nima; };
 	auto Tn = [](const TCHAR* Amal) { return UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(Amal)).ToString(); };
 	const FBand Bandlar[] = {
-		{ { Tn(TEXT("Oldinga")), Tn(TEXT("Chapga")), Tn(TEXT("Orqaga")), Tn(TEXT("Onga")) }, TEXT("yurish") },
-		{ { TEXT("Sichqoncha") }, TEXT("atrofga qarash") },
-		{ { Tn(TEXT("Royxat")) }, TEXT("ro'yxat (bosib turing)") },
+		{ Mobil ? TArray<FString>{TEXT("Joystik")} : TArray<FString>{Tn(TEXT("Oldinga")), Tn(TEXT("Chapga")), Tn(TEXT("Orqaga")), Tn(TEXT("Onga"))}, TEXT("yurish") },
+		{ { Mobil ? TEXT("O'ngda suring") : TEXT("Sichqoncha") }, TEXT("atrofga qarash") },
+		{ { Mobil ? FString(TEXT("Ro'yxat")) : Tn(TEXT("Royxat")) }, Mobil ? TEXT("xaridlar") : TEXT("ro'yxat (bosib turing)") },
 	};
 	const float Pad = 14.f * S, Oraliq = 8.f * S, BandOraliq = 46.f * S, QopH = 46.f * S;
 
@@ -682,7 +744,7 @@ void ABozorHud::SotuvChiz()
 		const float Q = Tugma(Harf, X, Y, 1.f);
 		Yoz(M, X + Q + 16.f * S, Y + (Q - Om.Y) * 0.5f, 1.7f * S, FLinearColor::White);
 	};
-	if (!O->Suhbatda() && O->GetYaqinSotuvchi() && Ochiqlik < 0.5f)
+	if (!Mobil && !O->Suhbatda() && O->GetYaqinSotuvchi() && Ochiqlik < 0.5f)
 		Belgi(UBozorSozlamalar::TugmaNomi(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))).ToString(), TEXT("Gaplashish"));
 	{
 		// Id yangi ("Gapirish" - eski katta karta edi, ko'p saqlanmalarda allaqachon ko'rilgan). -Orgatish: saqlanmaydi, har o'yinda bir marta
@@ -694,7 +756,7 @@ void ABozorHud::SotuvChiz()
 		const bool bQolsiz = O->GetQuloq() && O->GetQuloq()->Qolsizmi();
 		const bool bGapirdi = (O->GetQuloq() && O->GetQuloq()->Tinglayapti()) || !O->GetOxirgiGapim().IsEmpty();
 		const bool bKorilgan = bMajburiy ? bVTugadi : Sz->KorilganOrgatish.Contains(VId);
-		if (bOrgatishOchiq && !bQolsiz && !bKorilgan)
+		if (!Mobil && bOrgatishOchiq && !bQolsiz && !bKorilgan)
 		{
 			if (O->Suhbatda() && !O->Xayrlashdi() && !bGapirdi)
 			{
@@ -920,7 +982,8 @@ void ABozorHud::NatijaChiz()
 	const bool bKeyingi = Y3 > 0 && D && D->Raqam < Tz->DarajalarSoni();
 	const FString Pastki = bKeyingi ? TEXT("Enter — keyingi daraja     R — qaytadan")
 		: Y3 > 0 ? TEXT("Hamma darajalar tugadi!     Enter — yana o'ynash") : TEXT("Enter — qaytadan o'ynash");
-	Yoz(Pastki, Canvas->ClipX * 0.5f, Y + Hh - 70.f * S, 1.5f * S, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.7f), true);
+	if (!Mobil)
+		Yoz(Pastki, Canvas->ClipX * 0.5f, Y + Hh - 70.f * S, 1.5f * S, Siyoh * FLinearColor(1.f, 1.f, 1.f, 0.7f), true);
 }
 
 // Bozor darvozasi belgisi: ekranda bo'lsa - darvoza ustida, orqada yoki chetda bo'lsa - ekran chetida, o'sha tomonda.

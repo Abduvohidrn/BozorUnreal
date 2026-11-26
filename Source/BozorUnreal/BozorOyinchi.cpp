@@ -765,8 +765,8 @@ void ABozorOyinchi::DarajagaOt(bool bKeyingi)
 	const FBozorDaraja* D = Tz ? Tz->GetDaraja() : nullptr;
 	int32 N = D ? D->Raqam : 1;
 	if (bKeyingi && Tz && N < Tz->DarajalarSoni()) ++N;
-	if (APlayerController* Pc = Cast<APlayerController>(GetController()))
-		Pc->ConsoleCommand(FString::Printf(TEXT("open %s?Daraja=%d"), *UGameplayStatics::GetCurrentLevelName(this, false), N));
+	if (IsPlayerControlled())
+		UGameplayStatics::OpenLevel(this, FName(*UGameplayStatics::GetCurrentLevelName(this, false)), true, FString::Printf(TEXT("Daraja=%d"), N));
 }
 
 // javob turiga mos harakat va (bor bo'lsa) yozilgan ovoz; xayrlashsa suhbat 2 s dan keyin o'zi yopiladi

@@ -1,4 +1,6 @@
 #include "BozorUI.h"
+#include "BozorMobil.h"
+#include "Components/SafeZone.h"
 
 #include "BozorSozlamalar.h"
 #include "Blueprint/WidgetTree.h"
@@ -183,7 +185,13 @@ namespace
 	void OyinUchunKirish(APlayerController* Pc)
 	{
 		if (!Pc) return;
-		Pc->SetInputMode(FInputModeGameOnly());
+		if (BozorMobil::Faol())
+		{
+			FInputModeGameAndUI M;
+			M.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			Pc->SetInputMode(M);
+		}
+		else Pc->SetInputMode(FInputModeGameOnly());
 		Pc->SetShowMouseCursor(false);
 	}
 
@@ -453,6 +461,12 @@ FReply UBozorSplash::NativeOnMouseButtonDown(const FGeometry& InGeometry, const 
 	return FReply::Handled();
 }
 
+FReply UBozorSplash::NativeOnTouchStarted(const FGeometry& InGeometry, const FPointerEvent& InTouchEvent)
+{
+	OtkazibYubor();
+	return FReply::Handled();
+}
+
 // ---------------------------------------------------------------- sozlamalar
 
 namespace
@@ -495,6 +509,12 @@ void UBozorSozlamalarOyna::Qur()
 
 	UOverlay* Ov = Yasa<UOverlay>(WidgetTree);
 	WidgetTree->RootWidget = Ov;
+	if (BozorMobil::Faol())
+	{
+		USafeZone* Xavfsiz = Yasa<USafeZone>(WidgetTree);
+		Xavfsiz->AddChild(Ov);
+		WidgetTree->RootWidget = Xavfsiz;
+	}
 	Qosh(Ov, Rang(WidgetTree, FLinearColor(0.f, 0.f, 0.f, 0.6f)));
 
 	USizeBox* Quti = Yasa<USizeBox>(WidgetTree);
@@ -776,6 +796,12 @@ void UBozorBoshMenyu::Qur()
 	SetIsFocusable(true);
 	UOverlay* Ov = Yasa<UOverlay>(WidgetTree);
 	WidgetTree->RootWidget = Ov;
+	if (BozorMobil::Faol())
+	{
+		USafeZone* Xavfsiz = Yasa<USafeZone>(WidgetTree);
+		Xavfsiz->AddChild(Ov);
+		WidgetTree->RootWidget = Xavfsiz;
+	}
 	Qosh(Ov, Rang(WidgetTree, FLinearColor(0.01f, 0.02f, 0.04f)));
 
 	// fon: bozor darvozasining kino kadri, ekranni to'liq qoplaydi va juda sekin yaqinlashadi
@@ -866,8 +892,9 @@ void UBozorBoshMenyu::Qur()
 	Qosh(Ov, Chap, HAlign_Left, VAlign_Center, FMargin(130.f, 0.f, 0.f, 40.f));
 
 	// pastki satr: boshqaruv izohi va kompaniya logosi
-	Qosh(Ov, Yozuv(WidgetTree, LOCTEXT("MenyuIzoh", "↑ ↓  tanlash     Enter  tasdiqlash"), 16, FLinearColor(1.f, 1.f, 1.f, 0.45f), TEXT("Regular"), 80, false),
-		HAlign_Left, VAlign_Bottom, FMargin(134.f, 0.f, 0.f, 46.f));
+	if (!BozorMobil::Faol())
+		Qosh(Ov, Yozuv(WidgetTree, LOCTEXT("MenyuIzoh", "↑ ↓  tanlash     Enter  tasdiqlash"), 16, FLinearColor(1.f, 1.f, 1.f, 0.45f), TEXT("Regular"), 80, false),
+			HAlign_Left, VAlign_Bottom, FMargin(134.f, 0.f, 0.f, 46.f));
 	UHorizontalBox* Ong = Yasa<UHorizontalBox>(WidgetTree);
 	UImage* Logo = Rasm(WidgetTree, Tekstura(TEXT("/Game/UI/Logo/T_Logo_Toliq.T_Logo_Toliq")), FLinearColor(1.f, 1.f, 1.f, 0.85f));
 	USizeBox* LogoQuti = Yasa<USizeBox>(WidgetTree);
@@ -1001,6 +1028,12 @@ void UBozorPauza::Qur()
 	SetIsFocusable(true);
 	UOverlay* Ov = Yasa<UOverlay>(WidgetTree);
 	WidgetTree->RootWidget = Ov;
+	if (BozorMobil::Faol())
+	{
+		USafeZone* Xavfsiz = Yasa<USafeZone>(WidgetTree);
+		Xavfsiz->AddChild(Ov);
+		WidgetTree->RootWidget = Xavfsiz;
+	}
 	Qosh(Ov, Rang(WidgetTree, FLinearColor(0.f, 0.01f, 0.03f, 0.62f)));
 	USizeBox* GrQuti = Yasa<USizeBox>(WidgetTree);
 	GrQuti->SetWidthOverride(1000.f);

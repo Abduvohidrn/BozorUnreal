@@ -27,6 +27,7 @@ public:
 
 	void Boshla(APlayerController* P, const FBozorDaraja& D);
 	void Tick(float Dt);
+	void MobilDavom() { bMobilDavom = true; }
 	void Chiz(UCanvas* C);
 	bool Tugadimi() const { return Holat == EHolat::Tugadi; }
 
@@ -62,4 +63,5 @@ private:
 	int32 OvozKutilyapti = -1;    // shu gap uchun Navoiy ovozi so'ralgan
 	float Chiqish = 0.f;          // 0 - cho'ntakda, 1 - ekranda
 	bool bTest = false;
+	bool bMobilDavom = false;
 };

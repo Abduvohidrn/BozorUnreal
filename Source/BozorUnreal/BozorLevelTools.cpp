@@ -1,4 +1,9 @@
 #include "BozorLevelTools.h"
+#include "PhysicsEngine/PhysicsAsset.h"
+#include "AnimationRuntime.h"
+#include "Engine/SkeletalMesh.h"
+#include "PhysicsEngine/SkeletalBodySetup.h"
+#include "PhysicsEngine/PhysicsConstraintTemplate.h"
 
 #include "Animation/AnimSequence.h"
 #include "Animation/Skeleton.h"
@@ -252,4 +257,39 @@ void UBozorLevelTools::SetSurfaceType(UPhysicalMaterial* Material, int32 Surface
 	Material->SurfaceType = static_cast<EPhysicalSurface>(SurfaceType);
 	Material->MarkPackageDirty();
 #endif
+}
+
+bool UBozorLevelTools::MashinaFizikasi(UPhysicsAsset* Asset, USkeletalMesh* Mesh, FName Suyak, FVector Markaz, FVector Olcham)
+{
+	if (!Asset || !Mesh) return false;
+	const FReferenceSkeleton& Skelet = Mesh->GetRefSkeleton();
+	const int32 Indeks = Skelet.FindBoneIndex(Suyak);
+	if (Indeks == INDEX_NONE) return false;
+	const FTransform SuyakCS = FAnimationRuntime::GetComponentSpaceTransformRefPose(Skelet, Indeks);
+	Asset->Modify();
+	Asset->ConstraintSetup.Reset();
+	USkeletalBodySetup* Jism = nullptr;
+	for (USkeletalBodySetup* B : Asset->SkeletalBodySetups)
+		if (B && B->BoneName == Suyak) Jism = B;
+	if (!Jism)
+	{
+		Jism = NewObject<USkeletalBodySetup>(Asset, NAME_None, RF_Transactional);
+		Jism->BoneName = Suyak;
+	}
+	Asset->SkeletalBodySetups.Reset();
+	Asset->SkeletalBodySetups.Add(Jism);
+	Jism->Modify();
+	Jism->AggGeom.EmptyElements();
+	FKBoxElem Quti(Olcham.X, Olcham.Y, Olcham.Z);
+	Quti.Center = SuyakCS.InverseTransformPosition(Markaz);
+	Quti.Rotation = SuyakCS.GetRotation().Inverse().Rotator();
+	Jism->AggGeom.BoxElems.Add(Quti);
+	Jism->PhysicsType = PhysType_Default;
+	Jism->CollisionTraceFlag = CTF_UseSimpleAsComplex;
+	Jism->InvalidatePhysicsData();
+	Jism->CreatePhysicsMeshes();
+	Asset->UpdateBodySetupIndexMap();
+	Asset->UpdateBoundsBodiesArray();
+	Asset->MarkPackageDirty();
+	return true;
 }

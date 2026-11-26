@@ -192,6 +192,7 @@ public:
 	// intro o'ynalyapti va boshqaruv hali o'yinchiga berilmagan (HUD shu paytda hech narsa ko'rsatmaydi)
 	bool BoshqaruvKutilmoqda() const { return bOynaldi && !bBoshqaruvBerildi; }
 	bool Oynaldi() const { return bOynaldi; }
+	void Otkazish();
 
 private:
 	enum class EBosqich : uint8 { Kutish, Kelish, Toxtadi, EshikOchiq, Tushish, Ketish, Tugadi };
@@ -205,7 +206,6 @@ private:
 	FVector TushishOxiri(ACharacter* C) const;   // yo'lakdagi joy (kapsula markazi)
 	void Kadr(int32 N);
 	void KinoTick(float Dt);
-	void Otkazish();
 	void Bosqich(EBosqich B);
 	void Surat(const TCHAR* Nom);
 	FTransform AvtobusTransform() const;

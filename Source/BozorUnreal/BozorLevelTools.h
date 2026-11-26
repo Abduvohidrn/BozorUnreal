@@ -58,6 +58,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Bozor")
 	static void SetComplexCollision(UStaticMesh* Mesh);
 
+	// Mashina (Chaos Vehicle) fizika asseti: faqat Suyak uchun bitta quti (Markaz - mesh komponent fazosida, To'liq o'lcham - sm;
+	// suyakning boshlang'ich pozasi bo'yicha suyak fazosiga o'giriladi), boshqa jism va
+	// bog'lanishlar o'chiriladi (g'ildirak suyaklarida jism bo'lmasligi kerak - Chaos g'ildiraklari nur bilan ishlaydi)
+	UFUNCTION(BlueprintCallable, Category = "Bozor")
+	static bool MashinaFizikasi(class UPhysicsAsset* Asset, class USkeletalMesh* Mesh, FName Suyak, FVector Markaz, FVector Olcham);
+
 	UFUNCTION(BlueprintCallable, Category = "Bozor", meta = (WorldContext = "WorldContext"))
 	static bool BuildNavigation(UObject* WorldContext);
 

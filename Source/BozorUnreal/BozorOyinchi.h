@@ -170,6 +170,8 @@ protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
+	friend class UBozorMobil;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void TugmaBosildi(FKey Tugma);   // qayta tayinlanadigan amallar (Gaplashish, Qaytadan) va Esc

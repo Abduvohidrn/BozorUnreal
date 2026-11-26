@@ -220,7 +220,8 @@ void UBozorTelefon::Tick(float Dt)
 	if (!P || !P->GetWorld()) return;
 	Vaqt = P->GetWorld()->GetTimeSeconds();
 	const double T = Vaqt - HolatVaqt;
-	const bool bTugma = P->WasInputKeyJustPressed(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))) || P->WasInputKeyJustPressed(EKeys::Enter);
+	const bool bTugma = bMobilDavom || P->WasInputKeyJustPressed(UBozorSozlamalar::Get()->Tugma(TEXT("Gaplashish"))) || P->WasInputKeyJustPressed(EKeys::Enter);
+	bMobilDavom = false;
 	// -QongiroqTest: jiringlash va suhbat suratlari (Saved/Screenshots/QongiroqTest)
 	if (bTest)
 	{

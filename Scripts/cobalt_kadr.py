@@ -48,18 +48,21 @@ def tick(dt):
     t = holat["tick"]
     if t == 30:
         tayyorla()
-    if t < 400:   # shader va Nanite oqimi tayyor bo'lsin
+    if t < 900:   # shader va Nanite oqimi tayyor bo'lsin
         return
     i = holat["i"]
     if i < len(kadrlar) and t % 60 == 0:
         cam, fayl = kadrlar[i]
         ue.AutomationLibrary.take_high_res_screenshot(1280, 720, fayl, cam)
         holat["i"] += 1
-    elif i >= len(kadrlar) and t > 400 + 60 * (len(kadrlar) + 3):
+    elif i >= len(kadrlar) and t > 900 + 60 * (len(kadrlar) + 3):
         ue.unregister_slate_post_tick_callback(h)
         for cam, _ in kadrlar:
             cam.destroy_actor()
         ue.SystemLibrary.execute_console_command(None, "QUIT_EDITOR")
 
 
-h = ue.register_slate_post_tick_callback(tick)
+# startup skript ikki marta bajarilishi mumkin - ikkinchi load_level birinchi kameralarni yo'q qiladi
+if not getattr(ue, "_cobalt_kadr", False):
+    setattr(ue, "_cobalt_kadr", True)
+    h = ue.register_slate_post_tick_callback(tick)

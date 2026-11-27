@@ -479,17 +479,38 @@ FBozorTushuncha UBozorTayyorJavob::Tushun(const FString& Gap, const FBozorSuhbat
 		else if (bKilo && Kilo < 0.f) Kilo = N.Qiymat;
 	}
 
-	const bool bSavdo = Bor(S, {TEXT("arzon"), TEXT("tushir"), TEXT("kamaytir"), TEXT("qimmat"), TEXT("chegirma"), TEXT("kamroq"), TEXT("kelish"), TEXT("insof")}) || Yaqin({TEXT("arzon"), TEXT("tushiring"), TEXT("qimmat")});
+	const bool bSavdo = Bor(S, {TEXT("arzon"), TEXT("tushir"), TEXT("kamaytir"), TEXT("qimmat"), TEXT("chegirma"), TEXT("kamroq"), TEXT("insof")})
+		|| (Bor(S, {TEXT("kelish")}) && !Bor(S, {TEXT("kelishdi")}))   // "kelishaylik" - savdo, "kelishdik" - rozilik
+		|| Yaqin({TEXT("arzon"), TEXT("tushiring"), TEXT("qimmat")});
 	const bool bNarx = Bor(S, {TEXT("necha"), TEXT("qancha"), TEXT("narx")}) || Yaqin({TEXT("qancha"), TEXT("necha"), TEXT("narxi")});
 	const bool bRad = Bor(S, {TEXT("kerak emas"), TEXT("olmayman"), TEXT("kerakmas")});
 	const bool bXayr = Bor(S, {TEXT("rahmat"), TEXT("raxmat"), TEXT("xayr"), TEXT("sog' bo'ling")}) || Yaqin({TEXT("rahmat")});
-	const bool bRozi = Bor(S, {TEXT("olaman"), TEXT("mayli"), TEXT("xo'p"), TEXT(" xop "), TEXT("bering"), TEXT("tortib"), TEXT("torting"), TEXT("olay"), TEXT("kerak")});
+	// olish niyati: "mayli, olaman" emas, istalgan rozilik/olish gapi ("bo'pti", "shuni olay", "ha, bering", "kelishdik",
+	// "hisoblang", "pulini beray"). "kerak emas", "olmayman" - rad (rad olishdan ustun)
+	bool bHa = false;
+	for (const FString& W0 : Soz)
+	{
+		FString W = W0;
+		W.ReplaceInline(TEXT(","), TEXT(""));
+		W.ReplaceInline(TEXT("."), TEXT(""));
+		bHa |= W == TEXT("ha") || W == TEXT("xa") || W == TEXT("haa") || W == TEXT("albatta") || W == TEXT("ok") || W == TEXT("okey");
+	}
+	const bool bRozi = !bRad && (bHa || Bor(S, {TEXT("olaman"), TEXT("olay"), TEXT("olsam"), TEXT("olamiz"), TEXT("olib ket"), TEXT("sotib ol"),
+		TEXT("olaqol"), TEXT("oldim"), TEXT("mayli"), TEXT("xo'p"), TEXT(" xop "), TEXT("bo'pti"), TEXT("bopti"), TEXT("bo'ldi"), TEXT("kelishdi"),
+		TEXT("roziman"), TEXT("ma'qul"), TEXT("maqul"), TEXT("shuni"), TEXT("shundan"),
+		TEXT("bering"), TEXT("beraqol"), TEXT("bera qol"), TEXT("tortib"), TEXT("torting"), TEXT("tortsangiz"), TEXT("kerak"),
+		TEXT("pul ber"), TEXT("pulini ber"), TEXT("to'lay"), TEXT("to'lov"), TEXT("hisobla"), TEXT("qancha bo'l"), TEXT("necha pul bo'l"),
+		TEXT("nechpul bo'l")}));
 
 	if (Holat.Bosqich == EBozorBosqich::TaroziTekshir && Bor(S, {TEXT(" ko'p"), TEXT(" kop "), TEXT(" kam"), TEXT("so'ragan"), TEXT("noto'g'ri"), TEXT("xato")})) T.Harakat = EBozorHarakat::TaroziAyt;
-	else if (Holat.Bosqich == EBozorBosqich::TaroziTekshir && (bXayr || bRozi)) T.Harakat = EBozorHarakat::TaroziRozi;
+	// tarozidagiga rozi (yoki "qancha bo'ldi?") - pul bosqichiga o'tadi va to'lov oynasi ochiladi
+	else if (Holat.Bosqich == EBozorBosqich::TaroziTekshir && !bSavdo && Kilo <= 0.f && (bXayr || bRozi || bNarx)) T.Harakat = EBozorHarakat::TaroziRozi;
 	else if (Holat.Bosqich == EBozorBosqich::QaytimTekshir && Bor(S, {TEXT(" kam"), TEXT("yetmaydi"), TEXT("xato")})) T.Harakat = EBozorHarakat::QaytimKam;
 	else if (Holat.Bosqich == EBozorBosqich::QaytimTekshir && (bXayr || bRozi)) T.Harakat = EBozorHarakat::QaytimRozi;
 	else if (Holat.Bosqich == EBozorBosqich::PulKutilmoqda && Pul > 0.f) { T.Harakat = EBozorHarakat::PulQabul; T.Qiymat = Pul; }
+	// narx kelishilgan, pul kutilyapti: "mayli, olaman" / "pul beraman" - summa aytilmagan, bola hamyonini ochadi
+	else if (Holat.Bosqich == EBozorBosqich::PulKutilmoqda && Kilo <= 0.f && !bSavdo && !bRad
+		&& (bRozi || bNarx || bXayr || Bor(S, {TEXT("mana"), TEXT("marhamat")}))) T.Harakat = EBozorHarakat::PulBerish;
 	else if (Kilo > 0.f) { T.Harakat = EBozorHarakat::Tortish; T.Qiymat = Kilo; }
 	// pul kutilmayotganda aytilgan katta son - narx taklifi ("o'n mingdan bering", "o'n ming qilib bering")
 	else if (Pul > 0.f && Holat.Bosqich != EBozorBosqich::PulKutilmoqda) { T.Harakat = EBozorHarakat::Savdolashish; T.Qiymat = Pul; }
@@ -671,7 +692,26 @@ FString UBozorSuhbat::KutibOl()
 FString UBozorSuhbat::Yoz(const FString& Gap)
 {
 	if (!Miya) return FString();
-	return Bajar(Miya->Tushun(Gap, Holat));
+	const EBozorBosqich Oldin = Holat.Bosqich;
+	const FString J = Bajar(Miya->Tushun(Gap, Holat));
+	TolovniMosla(Oldin);
+	return J;
+}
+
+void UBozorSuhbat::TolovniMosla(EBozorBosqich Oldin)
+{
+	if (Holat.Bosqich != EBozorBosqich::PulKutilmoqda)
+	{
+		bTolov = false;
+		Peshtaxta.Reset();
+	}
+	else if (Oldin != EBozorBosqich::PulKutilmoqda)
+	{
+		// bola tarozidagiga rozi bo'ldi ("mayli, olaman") - sotuvchi summani aytadi va hamyon (to'lov oynasi) ochiladi
+		bTolov = true;
+		bMiqdorTanlash = bMolRoyxati = false;
+		Peshtaxta.Reset();
+	}
 }
 
 FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
@@ -777,14 +817,21 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 	}
 
 	case EBozorHarakat::Tortish:
-		if (T.Qiymat <= 0.f)
+	{
+		// "olaman" deb miqdor aytilmasa - xarid ro'yxatida bo'lsa qolgan miqdori tortiladi ("necha kilo?" deb qayta so'ramaydi)
+		float Miqdor = T.Qiymat;
+		if (Miqdor <= 0.f)
+			for (const FBozorRoyxatQator& R : Hamyon->Royxat)
+				if (R.Nomi.Equals(Holat.Mahsulot.Nomi, ESearchCase::IgnoreCase) && !R.bOlindi)
+					Miqdor = R.Miqdor - FMath::Max(R.Olindi, R.Soralgan);
+		if (Miqdor < MiqdorQadami() - KINDA_SMALL_NUMBER) Miqdor = 0.f;
+		if (Miqdor <= 0.f)
 		{
 			if (Holat.Bosqich == EBozorBosqich::Boshlanish) Holat.Bosqich = EBozorBosqich::NarxAytildi;
 			Asosiy = Javob(EBozorJavob::MiqdorSora);
 			break;
 		}
-	{
-		Holat.SoralganMiqdor = FMath::Clamp(T.Qiymat, 0.5f, 20.f);
+		Holat.SoralganMiqdor = FMath::Clamp(Miqdor, 0.5f, 20.f);
 		Holat.Miqdor = Holat.HisobMiqdor = Holat.SoralganMiqdor;
 		// tarozi: daraja rejasidagi navbatdagi xato. "ortiq" - ko'p tortadi (ko'piga pul so'raydi),
 		// "kam" - kam tortadi, lekin so'ralganicha deb to'liq pul so'raydi
@@ -903,6 +950,19 @@ FString UBozorSuhbat::Bajar(const FBozorTushuncha& T)
 		}
 		break;
 	}
+
+	case EBozorHarakat::PulBerish:
+		if (Holat.Bosqich != EBozorBosqich::PulKutilmoqda)
+		{
+			Asosiy = Javob(EBozorJavob::Tushunmadim);
+			break;
+		}
+		// to'lov oynasi ochiladi (yopilgan bo'lsa - qayta), sotuvchi summani eslatadi
+		bTolov = true;
+		bMiqdorTanlash = bMolRoyxati = false;
+		Peshtaxta.Reset();
+		Asosiy = Javob(EBozorJavob::TaroziKelishdi);
+		break;
 
 	case EBozorHarakat::QaytimKam:
 		if (Holat.Bosqich != EBozorBosqich::QaytimTekshir)
@@ -1128,13 +1188,10 @@ bool UBozorSuhbat::Tanla(int32 I, FString& OutMen, FString& OutSotuvchi)
 	}
 	bMiqdorTanlash = bMolRoyxati = false;
 	OutMen = T.Matn;
+	const EBozorBosqich Oldin = Holat.Bosqich;
 	OutSotuvchi = Bajar(T.Niyat);
 	// pul yetmasa to'lov oynasi ochiq qoladi (peshtaxtadagi pul ham) - yana kupyura qo'shish mumkin
-	if (Holat.Bosqich != EBozorBosqich::PulKutilmoqda)
-	{
-		bTolov = false;
-		Peshtaxta.Reset();
-	}
+	TolovniMosla(Oldin);
 	return true;
 }
 

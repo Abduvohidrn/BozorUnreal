@@ -820,7 +820,9 @@ void UBozorBoshMenyu::Qur()
 		Pleer = NewObject<UMediaPlayer>(this);
 		Pleer->SetLooping(true);
 		Pleer->PlayOnOpen = true;
+#if !PLATFORM_ANDROID
 		Pleer->SetDesiredPlayerName(TEXT("ElectraPlayer"));   // WMF bilan ijro qotib qolardi
+#endif
 		VideoTekstura = NewObject<UMediaTexture>(this);
 		VideoTekstura->AutoClear = true;
 		VideoTekstura->ClearColor = FLinearColor::Black;
@@ -1075,6 +1077,12 @@ void UBozorPauza::Tanla(int32 I)
 
 void UBozorPauza::Bajar(int32 I)
 {
+	if (I != 3 && bChiqishniTasdiqlash)
+	{
+		bChiqishniTasdiqlash = false;
+		Tugmalar[3]->SetMatn(LOCTEXT("PChiqish", "O'YINDAN CHIQISH"));
+	}
+
 	switch (I)
 	{
 	case 0:
@@ -1088,7 +1096,13 @@ void UBozorPauza::Bajar(int32 I)
 		if (UBozorUITizimi* Ui = UBozorUITizimi::Get(this)) Ui->PauzadanChiq();
 		UGameplayStatics::OpenLevel(this, FName(BozorUI::BoshMenyuXaritasi));
 		break;
-	default:
+	case 3:
+		if (BozorMobil::Faol() && !bChiqishniTasdiqlash)
+		{
+			bChiqishniTasdiqlash = true;
+			Tugmalar[3]->SetMatn(LOCTEXT("PChiqishTasdiq", "CHIQISHNI TASDIQLANG"), BozorUI::Sariq());
+			return;
+		}
 		UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, false);
 		break;
 	}

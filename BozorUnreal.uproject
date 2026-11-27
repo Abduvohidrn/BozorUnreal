@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.8",
+	"EngineAssociation": "5.9",
 	"Category": "",
 	"Description": "Dehqon bozori: Unity'dan Unreal'ga ko'chirilgan sinov loyihasi (Third Person)",
 	"Modules": [
@@ -121,7 +121,8 @@
 		},
 		{
 			"Name": "ElectraPlayer",
-			"Enabled": true
+			"Enabled": true,
+			"PlatformDenyList": ["Android"]
 		}
 	]
 }

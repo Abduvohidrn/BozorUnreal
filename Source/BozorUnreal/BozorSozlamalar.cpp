@@ -90,7 +90,7 @@ bool UBozorSozlamalar::TayinlashMumkin(const FKey& K)
 	return true;
 }
 
-UInputMappingContext* UBozorSozlamalar::MoslashganImc(UInputMappingContext* Asl)
+UInputMappingContext* UBozorSozlamalar::MoslashganImc(UInputMappingContext* Asl, UObject* Egasi) const
 {
 	if (!Asl) return nullptr;
 	// standart tugma -> amal (faqat IA_Move / IA_Jump xaritalari almashadi; strelkalar va gamepad o'z joyida)
@@ -98,31 +98,37 @@ UInputMappingContext* UBozorSozlamalar::MoslashganImc(UInputMappingContext* Asl)
 	const FJuft Juftlar[] = { { EKeys::W, TEXT("Oldinga") }, { EKeys::S, TEXT("Orqaga") }, { EKeys::A, TEXT("Chapga") },
 		{ EKeys::D, TEXT("Onga") }, { EKeys::SpaceBar, TEXT("Sakrash") } };
 
-	UInputMappingContext* Nusxa = DuplicateObject<UInputMappingContext>(Asl, GetTransientPackage());
-	const TArray<FEnhancedActionKeyMapping> Eski = Nusxa->GetMappings();
 	// avval hamma o'zgaradiganlarni yig'amiz, keyin olib tashlab qayta qo'shamiz (W<->S almashuvi ham to'g'ri bo'lsin)
-	TArray<TPair<FEnhancedActionKeyMapping, FKey>> Ozgarish;
-	for (const FEnhancedActionKeyMapping& M : Eski)
+	const TArray<FEnhancedActionKeyMapping>& AslBoglar = Asl->GetMappings();
+	TArray<TPair<int32, FKey>> Ozgarish;
+	for (int32 I = 0; I < AslBoglar.Num(); ++I)
 	{
+		const FEnhancedActionKeyMapping& M = AslBoglar[I];
 		const FString ActNomi = M.Action ? M.Action->GetName() : FString();
 		if (ActNomi != TEXT("IA_Move") && ActNomi != TEXT("IA_Jump")) continue;
 		for (const FJuft& J : Juftlar)
 		{
 			if (M.Key != J.Standart) continue;
 			const FKey Yangi = Tugma(J.Amal);
-			if (Yangi != J.Standart) Ozgarish.Emplace(M, Yangi);
+			if (Yangi != J.Standart) Ozgarish.Emplace(I, Yangi);
 			break;
 		}
 	}
-	for (const TPair<FEnhancedActionKeyMapping, FKey>& O : Ozgarish)
-		Nusxa->UnmapKey(O.Key.Action, O.Key.Key);
-	for (const TPair<FEnhancedActionKeyMapping, FKey>& O : Ozgarish)
+	if (Ozgarish.IsEmpty()) return Asl;
+	UInputMappingContext* Nusxa = DuplicateObject<UInputMappingContext>(Asl, Egasi);
+	const TArray<FEnhancedActionKeyMapping> NusxaBoglar = Nusxa->GetMappings();
+	for (const TPair<int32, FKey>& O : Ozgarish)
 	{
-		FEnhancedActionKeyMapping& N = Nusxa->MapKey(O.Key.Action, O.Value);
-		N.Modifiers = O.Key.Modifiers;
-		N.Triggers = O.Key.Triggers;
+		const FEnhancedActionKeyMapping& Eski = NusxaBoglar[O.Key];
+		Nusxa->UnmapKey(Eski.Action, Eski.Key);
 	}
-	ImcNusxalar.Add(Asl, Nusxa);
+	for (const TPair<int32, FKey>& O : Ozgarish)
+	{
+		const FEnhancedActionKeyMapping& Eski = NusxaBoglar[O.Key];
+		FEnhancedActionKeyMapping& N = Nusxa->MapKey(Eski.Action, O.Value);
+		N.Modifiers = Eski.Modifiers;
+		N.Triggers = Eski.Triggers;
+	}
 	return Nusxa;
 }
 

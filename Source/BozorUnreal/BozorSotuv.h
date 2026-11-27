@@ -140,7 +140,8 @@ enum class EBozorHarakat : uint8
 	QaytimRozi,    // qaytimni oldi, rahmat
 	QaytimKam,     // "qaytim kam berdingiz"
 	TaroziRozi,    // tarozidagini oladi (xato bo'lsa ham indamaydi)
-	TaroziAyt      // "men X so'ragandim" - ko'p yoki kam tortilganini aytadi
+	TaroziAyt,     // "men X so'ragandim" - ko'p yoki kam tortilganini aytadi
+	PulBerish      // pul kutilayotganda "mayli, olaman" (summasiz) - to'lov oynasi ochiladi
 };
 
 USTRUCT(BlueprintType)
@@ -467,6 +468,8 @@ public:
 private:
 	FString Javob(EBozorJavob J, int32 Qaytim = 0);
 	void MolniTanla(int32 I);
+	// Bajar'dan keyin: pul kutila boshlansa to'lov oynasi o'zi ochiladi, pul bosqichi tugasa yopiladi (peshtaxta bo'shaydi)
+	void TolovniMosla(EBozorBosqich Oldin);
 
 	UPROPERTY() FBozorSuhbatHolati Holat;
 	UPROPERTY() TObjectPtr<UBozorHamyon> Hamyon;

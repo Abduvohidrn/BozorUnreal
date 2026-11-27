@@ -205,6 +205,7 @@ protected:
 	UPROPERTY() TObjectPtr<UVerticalBox> Markaz;
 	int32 Tanlangan = 0;
 	float T = 0.f;
+	bool bChiqishniTasdiqlash = false;
 };
 
 UCLASS()

@@ -181,9 +181,9 @@ void ABozorSotuvchiOvozi::LoadDialog()
 			const TSharedPtr<FJsonObject>* Ib = nullptr;
 			if (!O || !O->TryGetObjectField(TEXT("iboralar"), Ib)) continue;
 			FDialogOvoz& D = Dialog.FindOrAdd(O->GetStringField(TEXT("fel")) + (O->GetBoolField(TEXT("ayol")) ? TEXT(" ayol") : TEXT(" erkak")));
-			for (const TPair<FString, TSharedPtr<FJsonValue>>& P : (*Ib)->Values)
+			for (const auto& P : (*Ib)->Values)
 			{
-				const FString K = NormalGap(P.Key);
+				const FString K = NormalGap(FString(*P.Key));
 				if (K.IsEmpty()) continue;
 				D.Iboralar.Add(K, FSoftObjectPath(P.Value->AsString()));
 				int32 Soz = 1;

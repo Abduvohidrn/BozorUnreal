@@ -432,8 +432,8 @@ void ABozorQatnov::Tick(float Dt)
 			if (OtishJoyidaPiyoda(O))
 			{
 				// to'xtash chizig'i oldida; ulgurmasa - o'tish joyi chetida
-				const float Chiziq = Old < Chet - ToxtashChizigi - MinOraliq + 20.f ? Chet - ToxtashChizigi : Chet + MinOraliq - 40.f;
-				Tosiq(Chiziq - Old, 0.f);
+				const float ToxtashNuqtasi = Old < Chet - ToxtashChizigi - MinOraliq + 20.f ? Chet - ToxtashChizigi : Chet + MinOraliq - 40.f;
+				Tosiq(ToxtashNuqtasi - Old, 0.f);
 				M.Kutish = JonashKutish;
 				bPiyodaUchun = true;
 			}

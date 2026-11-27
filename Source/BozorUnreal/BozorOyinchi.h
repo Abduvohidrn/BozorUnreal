@@ -10,6 +10,7 @@ class UCameraComponent;
 class UBozorQuloq;
 class UInputAction;
 class UInputMappingContext;
+class ABozorBekat;
 struct FInputActionValue;
 
 // Kaft va barmoqlar animatsiyadan keyin modelning o'z tabiiy pozasiga qaytariladi (bilak to'g'ri, barmoqlar
@@ -144,6 +145,8 @@ public:
 	void Tanla(int32 I);
 
 	TArray<FBozorTanlov> GetTanlovlar() const;
+	// to'lov oynasi ochiq (kupyuralarni sichqoncha yoki 1-9 bilan peshtaxtaga qo'yib, pul beriladi)
+	bool TolovOchiq() const;
 
 	// Natija oynasi (ro'yxat tugab chiqishga qaytganda; konsol "Natija" - darhol). Enter - qaytadan o'ynash
 	UFUNCTION(Exec)
@@ -173,6 +176,9 @@ private:
 	friend class UBozorMobil;
 
 	void Move(const FInputActionValue& Value);
+	UFUNCTION()
+	void BekatChegarasiniTekshir(float DeltaSeconds, FVector OldLocation, FVector OldVelocity);
+	TWeakObjectPtr<ABozorBekat> YurishBekati;
 	void Look(const FInputActionValue& Value);
 	void TugmaBosildi(FKey Tugma);   // qayta tayinlanadigan amallar (Gaplashish, Qaytadan) va Esc
 	void KameraJoyi(float Dt);
@@ -214,9 +220,13 @@ private:
 	void JonliAyt(int32 Raqam, const FString& Matn, const FString& Asl);
 	void YaqinSotuvchiniTop();
 	void KursorniKorsat(bool bHa);
+	// to'lov oynasidagi tugmani bosish (HUD oxirgi kadrda qayerga chizganiga qarab)
+	void SichqonchaBosildi();
+	bool bTolovKursor = false;   // to'lov oynasi uchun kursor ko'rsatilgan
 	void TestRastasigaBor();
 
 	UPROPERTY() TObjectPtr<UInputMappingContext> ImcDefault;
+	UPROPERTY(Transient) TObjectPtr<UInputMappingContext> ImcMahalliy;
 	UPROPERTY() TObjectPtr<UInputMappingContext> ImcMouse;
 	UPROPERTY() TObjectPtr<UInputAction> IaMove;
 	UPROPERTY() TObjectPtr<UInputAction> IaLook;
@@ -286,4 +296,12 @@ class BOZORUNREAL_API ABozorGameMode : public AGameModeBase
 
 public:
 	ABozorGameMode();
+
+protected:
+	virtual void StartPlay() override;
+
+private:
+	UPROPERTY() TObjectPtr<class UStaticMesh> MobilOsmonMesh;
+	UPROPERTY() TObjectPtr<class UMaterialInterface> MobilOsmonMaterial;
+	UPROPERTY() TObjectPtr<class UTextureCube> MobilOsmonNuri;
 };

@@ -89,6 +89,22 @@ namespace
 		{TEXT("yuz ming soʻm beraman"), Bq::PulKutilmoqda, Hr::PulQabul, 100000, Erk, Erk},
 		{TEXT("Mana 50 000"), Bq::PulKutilmoqda, Hr::PulQabul, 50000, Erk, Erk},
 		{TEXT("ikki yuz ming"), Bq::PulKutilmoqda, Hr::PulQabul, 200000, Erk, Erk},
+		// pul kutilganda summasiz rozilik - to'lov oynasi ochiladi
+		{TEXT("mayli olaman"), Bq::PulKutilmoqda, Hr::PulBerish, -1, Erk, Erk},
+		{TEXT("xo'p, pul beraman"), Bq::PulKutilmoqda, Hr::PulBerish, -1, Erk, Erk},
+		{TEXT("mayli rahmat"), Bq::PulKutilmoqda, Hr::PulBerish, -1, Erk, Erk},
+		{TEXT("bo'pti, qancha bo'ldi?"), Bq::PulKutilmoqda, Hr::PulBerish, -1, Erk, Erk},
+		{TEXT("ha, shuni olaman"), Bq::PulKutilmoqda, Hr::PulBerish, -1, Erk, Erk},
+		{TEXT("kelishdik, pulini beray"), Bq::PulKutilmoqda, Hr::PulBerish, -1, Erk, Erk},
+		{TEXT("arzonroq bo'lmaydimi"), Bq::PulKutilmoqda, Hr::Savdolashish, -1, Erk, Erk},
+		// tarozidan keyin olish niyati - pul bosqichi (to'lov oynasi)
+		{TEXT("bo'pti, olaman"), Bq::TaroziTekshir, Hr::TaroziRozi, -1, Erk, Erk},
+		{TEXT("ha, qancha bo'ldi"), Bq::TaroziTekshir, Hr::TaroziRozi, -1, Erk, Erk},
+		{TEXT("xo'p, hisoblang"), Bq::TaroziTekshir, Hr::TaroziRozi, -1, Erk, Erk},
+		{TEXT("kerak emas"), Bq::TaroziTekshir, Hr::Xayr, -1, Erk, Erk},
+		// narx aytilgach olish niyati - tortadi
+		{TEXT("bo'pti, shuni olaman"), Bq::NarxAytildi, Hr::Tortish, -1, Erk, Erk},
+		{TEXT("kelishdik"), Bq::NarxAytildi, Hr::Tortish, -1, Erk, Erk},
 		// tarozi va qaytim
 		{TEXT("men ikki kilo soʻragandim"), Bq::TaroziTekshir, Hr::TaroziAyt, -1, Erk, Erk},
 		{TEXT("koʻp tortibsiz"), Bq::TaroziTekshir, Hr::TaroziAyt, -1, Erk, Erk},

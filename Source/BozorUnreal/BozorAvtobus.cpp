@@ -239,6 +239,9 @@ void ABozorAvtobusIntro::BeginPlay()
 
 	bOynaldi = true;
 
+	// Yo'l, tezlik va g'ildiraklarni intro boshqaradi. BP harakatsiz fizika bilan hisob qilmasin.
+	Avtobus->SetActorTickEnabled(false);
+
 	// fizikasiz: yo'lni biz beramiz
 	TArray<UPrimitiveComponent*> Prims;
 	Avtobus->GetComponents(Prims);

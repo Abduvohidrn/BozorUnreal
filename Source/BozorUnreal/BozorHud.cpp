@@ -258,6 +258,7 @@ void ABozorHud::DrawHUD()
 	if (MaslahatAlfa > 0.f) MaslahatChiz();
 	if (Ochiqlik > 0.f) QogozChiz(Ochiqlik);
 	SotuvChiz();
+	TolovChiz();
 	if (OrgatishAlfa > 0.f) OrgatishChiz();
 	if (Telefon) Telefon->Chiz(Canvas);
 
@@ -839,6 +840,160 @@ void ABozorHud::SotuvChiz()
 		}
 		Ty += H + 6.f * S;
 	}
+}
+
+int32 ABozorHud::TolovTugmasi(const FVector2D& Nuqta) const
+{
+	for (const TPair<FBox2D, int32>& J : TolovJoylari)
+		if (J.Key.IsInside(Nuqta)) return J.Value;
+	return INDEX_NONE;
+}
+
+// Pul berish oynasi (bola "mayli, olaman" deganda ochiladi): tepada narx, o'rtada hamyondagi kupyuralar (bosilgani
+// peshtaxtaga qo'yiladi), pastda peshtaxtadagi jami va "Mana ... so'm". Qancha berishni bola o'zi tanlaydi:
+// kam bersa sotuvchi "yetmaydi" deydi, ko'p bersa qaytim beradi
+void ABozorHud::TolovChiz()
+{
+	TolovJoylari.Reset();
+	const ABozorOyinchi* O = PlayerOwner ? Cast<ABozorOyinchi>(PlayerOwner->GetPawn()) : nullptr;
+	const UBozorSuhbat* Sh = O ? O->GetSuhbat() : nullptr;
+	const UBozorHamyon* Hm = Hamyon();
+	if (!O || !Sh || !Hm || Ochiqlik >= 0.5f || Telefon) return;
+	const float S = Canvas->ClipY / 1080.f;
+	UFont* Shrift = GEngine->GetLargeFont();
+	if (!O->TolovOchiq())
+	{
+		// oyna yopib qo'yilgan, sotuvchi hali pul kutyapti - qanday qayta ochishni eslatadi
+		if (O->Suhbatda() && !O->Xayrlashdi() && Sh->GetHolat().Bosqich == EBozorBosqich::PulKutilmoqda)
+		{
+			FCanvasTextItem T(FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.3f),
+				FText::FromString(FString::Printf(TEXT("Sotuvchi %s so'm kutyapti - pul berish uchun \"Mayli, olaman\" deng"), *BozorSotuv::Som(Sh->GetHolat().Summa))),
+				Shrift, FLinearColor(1.f, 0.85f, 0.4f, 0.95f));
+			T.Scale = FVector2D(1.4f * S);
+			T.bCentreX = true;
+			T.EnableShadow(FLinearColor(0.f, 0.f, 0.f, 0.8f));
+			Canvas->DrawItem(T);
+		}
+		return;
+	}
+	auto Tort = [this](float X, float Y, float W, float H, const FLinearColor& C)
+	{
+		FCanvasTileItem T(FVector2D(X, Y), FVector2D(W, H), C);
+		T.BlendMode = SE_BLEND_Translucent;
+		Canvas->DrawItem(T);
+	};
+	auto Olcham = [this, Shrift](const FString& M, float K) { float W = 0.f, H = 0.f; Canvas->TextSize(Shrift, M, W, H, K, K); return FVector2D(W, H); };
+	auto Yoz = [this, Shrift](const FString& M, float X, float Y, float K, const FLinearColor& C)
+	{
+		FCanvasTextItem T(FVector2D(X, Y), FText::FromString(M), Shrift, C);
+		T.Scale = FVector2D(K);
+		T.EnableShadow(FLinearColor(0.f, 0.f, 0.f, 0.7f * C.A));
+		Canvas->DrawItem(T);
+	};
+	auto Markaz = [&](const FString& M, float Cx, float Y, float K, const FLinearColor& C) { Yoz(M, Cx - Olcham(M, K).X * 0.5f, Y, K, C); };
+	float Mx = -1.f, My = -1.f;
+	if (PlayerOwner) PlayerOwner->GetMousePosition(Mx, My);
+	const FVector2D Sichqon(Mx, My);
+
+	const TArray<FBozorTanlov> V = O->GetTanlovlar();
+	const int32 Summa = Sh->GetHolat().Summa;
+	int32 Jami = 0;
+	TArray<FString> Qoyilgan;
+	for (int32 K : Sh->GetPeshtaxta()) { Jami += K; Qoyilgan.Add(BozorSotuv::Som(K)); }
+
+	// o'lchamlar: kupyuralar plitka bo'lib qatorlarga, tugmalar bitta qatorda
+	const float W = FMath::Min(1040.f * S, Canvas->ClipX - 80.f * S);
+	const float Pad = 28.f * S;
+	const float PlitkaW = 150.f * S, PlitkaH = 84.f * S, Oraliq = 12.f * S;
+	int32 Plitkalar = 0;
+	for (const FBozorTanlov& T : V) Plitkalar += T.Tur == EBozorTanlovTur::KupyuraQoy ? 1 : 0;
+	const int32 BirQatorda = FMath::Max(1, FMath::FloorToInt((W - 2.f * Pad + Oraliq) / (PlitkaW + Oraliq)));
+	const int32 Qatorlar = FMath::Max(1, FMath::DivideAndRoundUp(Plitkalar, BirQatorda));
+	const float TugmaH = 56.f * S;
+	const float H = Pad + 50.f * S + 40.f * S + Qatorlar * (PlitkaH + Oraliq) + 20.f * S + 44.f * S + 16.f * S + TugmaH + 20.f * S + 30.f * S + Pad;
+	const float X = (Canvas->ClipX - W) * 0.5f;
+	const float Y = FMath::Max(20.f * S, Canvas->ClipY * 0.42f - H * 0.5f);
+	Tort(X, Y + 6.f * S, W, H, FLinearColor(0.f, 0.f, 0.f, 0.35f));
+	Tort(X, Y, W, H, FLinearColor(0.03f, 0.05f, 0.04f, 0.86f));
+	Tort(X, Y, W, 5.f * S, FLinearColor(0.45f, 0.85f, 0.45f, 0.95f));
+
+	// sarlavha va narx
+	float Ty = Y + Pad;
+	Yoz(TEXT("Pul berish"), X + Pad, Ty, 2.f * S, FLinearColor(0.75f, 1.f, 0.75f, 1.f));
+	{
+		const FString N = FString::Printf(TEXT("Narxi: %s so'm"), *BozorSotuv::Som(Summa));
+		const FVector2D On = Olcham(N, 1.8f * S);
+		Yoz(N, X + W - Pad - On.X, Ty + 2.f * S, 1.8f * S, FLinearColor(1.f, 0.85f, 0.35f, 1.f));
+	}
+	Ty += 50.f * S;
+	Yoz(FString::Printf(TEXT("Hamyoningizda: %s so'm. Qaysi pullarni berasiz? Bosib, peshtaxtaga qo'ying"), *BozorSotuv::Som(Hm->Pul)),
+		X + Pad, Ty, 1.2f * S, FLinearColor(0.85f, 0.88f, 0.9f, 0.9f));
+	Ty += 40.f * S;
+
+	// kupyuralar: yashil "pul" plitkalari - qiymati, nechtasi qolgani va raqam tugmasi
+	int32 P = 0;
+	for (int32 I = 0; I < V.Num(); ++I)
+	{
+		if (V[I].Tur != EBozorTanlovTur::KupyuraQoy) continue;
+		const float Px = X + Pad + (P % BirQatorda) * (PlitkaW + Oraliq);
+		const float Py = Ty + (P / BirQatorda) * (PlitkaH + Oraliq);
+		const FBox2D Joy(FVector2D(Px, Py), FVector2D(Px + PlitkaW, Py + PlitkaH));
+		const bool bUstida = Joy.IsInside(Sichqon);
+		const bool bTanga = V[I].Kupyura < 1000;
+		const FLinearColor Asos = bTanga ? FLinearColor(0.55f, 0.48f, 0.25f, 0.95f) : FLinearColor(0.2f, 0.45f, 0.26f, 0.95f);
+		Tort(Px, Py + 3.f * S, PlitkaW, PlitkaH, FLinearColor(0.f, 0.f, 0.f, 0.5f));
+		Tort(Px, Py, PlitkaW, PlitkaH, bUstida ? FLinearColor(Asos.R * 1.45f, Asos.G * 1.45f, Asos.B * 1.45f, 1.f) : Asos);
+		Tort(Px + 6.f * S, Py + 6.f * S, PlitkaW - 12.f * S, 2.f * S, FLinearColor(1.f, 1.f, 1.f, 0.3f));
+		Tort(Px + 6.f * S, Py + PlitkaH - 8.f * S, PlitkaW - 12.f * S, 2.f * S, FLinearColor(1.f, 1.f, 1.f, 0.3f));
+		Markaz(V[I].Matn, Px + PlitkaW * 0.5f, Py + 12.f * S, 1.6f * S, FLinearColor::White);
+		const FString Pastki = I < 9 ? FString::Printf(TEXT("[%d]    × %d"), I + 1, V[I].Soni) : FString::Printf(TEXT("× %d"), V[I].Soni);
+		Markaz(Pastki, Px + PlitkaW * 0.5f, Py + PlitkaH - 34.f * S, 1.1f * S, FLinearColor(0.9f, 1.f, 0.9f, 0.85f));
+		TolovJoylari.Add({ Joy, I });
+		++P;
+	}
+	if (P == 0) Yoz(TEXT("Hamyonda boshqa pul qolmadi"), X + Pad, Ty + 20.f * S, 1.3f * S, FLinearColor(1.f, 0.6f, 0.5f, 1.f));
+	Ty += Qatorlar * (PlitkaH + Oraliq) + 20.f * S;
+
+	// peshtaxta: nima qo'yildi, jami va yetadimi
+	{
+		const FString Pesh = Qoyilgan.IsEmpty() ? FString(TEXT("Peshtaxta bo'sh"))
+			: FString::Printf(TEXT("Peshtaxtada: %s = %s so'm"), *FString::Join(Qoyilgan, TEXT(" + ")), *BozorSotuv::Som(Jami));
+		Yoz(Pesh, X + Pad, Ty, 1.45f * S, FLinearColor::White);
+		FString Holat;
+		FLinearColor Rang = FLinearColor(0.8f, 0.8f, 0.8f, 1.f);
+		if (Hm->Pul < Summa) { Holat = TEXT("Pulingiz yetmaydi - arzonroq so'rang yoki kamroq oling"); Rang = FLinearColor(1.f, 0.45f, 0.4f, 1.f); }
+		else if (Jami > 0 && Jami < Summa) { Holat = FString::Printf(TEXT("yana %s so'm kerak"), *BozorSotuv::Som(Summa - Jami)); Rang = FLinearColor(1.f, 0.7f, 0.35f, 1.f); }
+		else if (Jami > Summa) { Holat = FString::Printf(TEXT("qaytim: %s so'm"), *BozorSotuv::Som(Jami - Summa)); Rang = FLinearColor(0.55f, 0.95f, 0.55f, 1.f); }
+		else if (Jami == Summa && Jami > 0) { Holat = TEXT("to'ppa-to'g'ri"); Rang = FLinearColor(0.55f, 0.95f, 0.55f, 1.f); }
+		if (!Holat.IsEmpty())
+		{
+			const FVector2D Oh = Olcham(Holat, 1.3f * S);
+			Yoz(Holat, X + W - Pad - Oh.X, Ty + 3.f * S, 1.3f * S, Rang);
+		}
+	}
+	Ty += 44.f * S + 16.f * S;
+
+	// tugmalar bitta qatorda: "Mana, X so'm" (asosiy), "Qaytarib olish", "Yopish"
+	{
+		float Bx = X + Pad;
+		for (int32 I = 0; I < V.Num(); ++I)
+		{
+			if (V[I].Tur == EBozorTanlovTur::KupyuraQoy) continue;
+			const bool bBer = V[I].Tur == EBozorTanlovTur::Gap;
+			const FString M = I < 9 ? FString::Printf(TEXT("[%d]  %s"), I + 1, *V[I].Matn) : V[I].Matn;
+			const FVector2D Om = Olcham(M, 1.4f * S);
+			const float Bw = Om.X + 44.f * S;
+			const FBox2D Joy(FVector2D(Bx, Ty), FVector2D(Bx + Bw, Ty + TugmaH));
+			const bool bUstida = Joy.IsInside(Sichqon);
+			const FLinearColor Asos = bBer ? FLinearColor(0.95f, 0.72f, 0.2f, 0.92f) : FLinearColor(1.f, 1.f, 1.f, 0.12f);
+			Tort(Bx, Ty, Bw, TugmaH, bUstida ? (bBer ? FLinearColor(1.f, 0.85f, 0.4f, 1.f) : FLinearColor(1.f, 1.f, 1.f, 0.25f)) : Asos);
+			Yoz(M, Bx + 22.f * S, Ty + (TugmaH - Om.Y) * 0.5f, 1.4f * S, bBer ? FLinearColor(0.1f, 0.08f, 0.02f, 1.f) : FLinearColor::White);
+			TolovJoylari.Add({ Joy, I });
+			Bx += Bw + 14.f * S;
+		}
+	}
+	Ty += TugmaH + 20.f * S;
+	Yoz(TEXT("Ovoz bilan ham bo'ladi: V ni bosib \"Mana, yigirma ming\" deng"), X + Pad, Ty, 1.15f * S, FLinearColor(0.75f, 0.78f, 0.8f, 0.75f));
 }
 
 // Ro'yxat tugagach: belgi chiqishga (intro bo'lsa - bozor darvozasi, bo'lmasa o'yin boshlangan joy) buriladi;

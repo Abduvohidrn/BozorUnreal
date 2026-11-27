@@ -30,6 +30,10 @@ private:
 		TWeakObjectPtr<USkeletalMeshComponent> Tana;              // animatsiya manbai
 		TArray<TWeakObjectPtr<USkeletalMeshComponent>> Korinadi;  // ekranda chiziladiganlar (qismlar yoki tananing o'zi)
 		bool bToxtagan = false;
+#if PLATFORM_ANDROID
+		bool bUzoq = false;
+		bool bAslAnimTejash = false;
+#endif
 	};
 
 	void Yigish();
@@ -39,4 +43,8 @@ private:
 	float YigishT = 0.f;
 	int32 Toxtaganlar = 0;
 	float LogT = 0.f;
+#if PLATFORM_ANDROID && !UE_BUILD_SHIPPING
+	double MobilOlchovBoshlanishi = 0.0;
+	int32 MobilKadrlar = 0;
+#endif
 };

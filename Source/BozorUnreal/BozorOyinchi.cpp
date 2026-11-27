@@ -1,5 +1,6 @@
 #include "BozorOyinchi.h"
 #include "BozorAiMiya.h"
+#include "BozorAvtobus.h"
 #include "BozorNavoiy.h"
 #include "BozorPaket.h"
 #include "AudioMixerBlueprintLibrary.h"
@@ -21,6 +22,18 @@
 #include "InputActionValue.h"
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/TextureCube.h"
+#include "EngineUtils.h"
+#include "Materials/MaterialInterface.h"
+#if PLATFORM_ANDROID
+#include "Components/DirectionalLightComponent.h"
+#include "Components/SkyLightComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/DirectionalLight.h"
+#include "Engine/SkyLight.h"
+#include "Engine/StaticMeshActor.h"
+#endif
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -336,6 +349,15 @@ void ABozorOyinchi::BeginPlay()
 
 	bTest =FParse::Param(FCommandLine::Get(), TEXT("SotuvTest"));
 	bBot = FParse::Param(FCommandLine::Get(), TEXT("DarajaTest"));
+	if (!bTest && !bBot)
+	{
+		TActorIterator<ABozorBekat> It(GetWorld());
+		if (It)
+		{
+			YurishBekati = *It;
+			OnCharacterMovementUpdated.AddDynamic(this, &ABozorOyinchi::BekatChegarasiniTekshir);
+		}
+	}
 	// -QuloqFayl=<audio>: mikrofonsiz STT sinovi (masofaviy Rubai yoki lokal) - natija logda "STT (...)" qatorida, keyin o'yin yopiladi
 	FString QuloqFayl;
 	if (FParse::Value(FCommandLine::Get(), TEXT("QuloqFayl="), QuloqFayl))
@@ -445,7 +467,8 @@ void ABozorOyinchi::KirishniYangila()
 		{
 			Sub->ClearAllMappings();
 			// o'yinchi sozlamalarda W/A/S/D/Probel ni o'zgartirgan bo'lsa - IMC nusxasi
-			if (ImcDefault) Sub->AddMappingContext(UBozorSozlamalar::Get()->MoslashganImc(ImcDefault), 0);
+			ImcMahalliy = UBozorSozlamalar::Get()->MoslashganImc(ImcDefault, this);
+			if (ImcMahalliy) Sub->AddMappingContext(ImcMahalliy, 0);
 			if (ImcMouse) Sub->AddMappingContext(ImcMouse, 0);
 		}
 }
@@ -481,6 +504,15 @@ void ABozorOyinchi::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		FInputKeyBinding& Har = PlayerInputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &ABozorOyinchi::TugmaBosildi);
 		Har.bConsumeInput = false;
 	}
+	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ABozorOyinchi::SichqonchaBosildi);
+	// to'lov oynasida 1-9 - shu tartibdagi tugma (kupyura, "Mana ... so'm", qaytarib olish, yopish)
+	const FKey Raqamlar[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
+	for (int32 I = 0; I < UE_ARRAY_COUNT(Raqamlar); ++I)
+	{
+		FInputKeyBinding B(FInputChord(Raqamlar[I]), IE_Pressed);
+		B.KeyDelegate.GetDelegateForManualSet().BindWeakLambda(this, [this, I]() { if (TolovOchiq()) Tanla(I); });
+		PlayerInputComponent->KeyBindings.Add(B);
+	}
 	PlayerInputComponent->BindKey(EKeys::Enter, IE_Pressed, this, &ABozorOyinchi::EnterBosildi);
 	PlayerInputComponent->BindKey(EKeys::V, IE_Pressed, this, &ABozorOyinchi::VBosildi);
 	PlayerInputComponent->BindKey(EKeys::V, IE_Released, this, &ABozorOyinchi::VQoyildi);
@@ -491,6 +523,34 @@ void ABozorOyinchi::Move(const FInputActionValue& Value)
 	const FVector2D V = Value.Get<FVector2D>();
 	AddMovementInput(GetActorForwardVector(), V.Y);
 	AddMovementInput(GetActorRightVector(), V.X);
+}
+
+void ABozorOyinchi::BekatChegarasiniTekshir(float, FVector OldLocation, FVector)
+{
+	const ABozorBekat* Bekat = YurishBekati.Get();
+	if (!Bekat || !IsPlayerControlled() || GetAttachParentActor()) return;
+
+	// Bekatning +Y tomoni: yo'l chapda, bino o'ngda. Bozor darvozasi boshqa tomonda.
+	const FVector Markaz = Bekat->GetActorLocation();
+	const FVector Yonalish = Bekat->GetActorRightVector().GetSafeNormal2D();
+	constexpr double Chegara = 500.0;
+	constexpr double YolakYarimKengligi = 450.0;
+	constexpr double OrqagaMasofa = 65.0;
+	const FVector HozirgiJoy = GetActorLocation();
+	const double OldingiMasofa = FVector::DotProduct(OldLocation - Markaz, Yonalish);
+	const double HozirgiMasofa = FVector::DotProduct(HozirgiJoy - Markaz, Yonalish);
+	if (OldingiMasofa > Chegara || HozirgiMasofa <= Chegara) return;
+
+	const FVector Kesishuv = FMath::Lerp(OldLocation, HozirgiJoy, (Chegara - OldingiMasofa) / (HozirgiMasofa - OldingiMasofa));
+	if (FMath::Abs(FVector::CrossProduct(Yonalish, Kesishuv - Markaz).Z) > YolakYarimKengligi) return;
+
+	UCharacterMovementComponent* Harakat = GetCharacterMovement();
+	Harakat->StopMovementImmediately();
+	// Qaytishda yo'lak qiyaligini saqlaymiz va mavjud kolliziyalarni hisobga olamiz.
+	const FVector Qaytish = FVector(Kesishuv.X, Kesishuv.Y, HozirgiJoy.Z) - Yonalish * OrqagaMasofa;
+	SetActorLocation(Qaytish, true, nullptr, ETeleportType::TeleportPhysics);
+	if (FVector::DotProduct(GetActorLocation() - Markaz, Yonalish) > Chegara)
+		SetActorLocation(OldLocation, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
 void ABozorOyinchi::Look(const FInputActionValue& Value)
@@ -561,6 +621,12 @@ void ABozorOyinchi::Tick(float DeltaSeconds)
 	}
 	if (bTest) SotuvTestQadami();
 	if (bBot) BotQadami();
+	// to'lov oynasi ochilsa - kupyuralarni bosish uchun kursor, yopilsa - yana o'yin boshqaruvi
+	if (TolovOchiq() != bTolovKursor)
+	{
+		bTolovKursor = !bTolovKursor;
+		KursorniKorsat(bTolovKursor);
+	}
 	if (!bSuhbatda) YaqinSotuvchiniTop();
 	else
 	{
@@ -716,6 +782,22 @@ void ABozorOyinchi::KursorniKorsat(bool bHa)
 TArray<FBozorTanlov> ABozorOyinchi::GetTanlovlar() const
 {
 	return bSuhbatda && Suhbat && !Xayrlashdi() ? Suhbat->Tanlovlar() : TArray<FBozorTanlov>();
+}
+
+bool ABozorOyinchi::TolovOchiq() const
+{
+	return bSuhbatda && Suhbat && !Xayrlashdi() && Suhbat->Tolovda();
+}
+
+void ABozorOyinchi::SichqonchaBosildi()
+{
+	if (!TolovOchiq()) return;
+	APlayerController* Pc = Cast<APlayerController>(GetController());
+	const ABozorHud* Hud = Pc ? Cast<ABozorHud>(Pc->GetHUD()) : nullptr;
+	float X = 0.f, Y = 0.f;
+	if (!Hud || !Pc->GetMousePosition(X, Y)) return;
+	const int32 I = Hud->TolovTugmasi(FVector2D(X, Y));
+	if (I != INDEX_NONE) Tanla(I);
 }
 
 void ABozorOyinchi::Tanla(int32 I)
@@ -1320,8 +1402,7 @@ void ABozorOyinchi::TestRastasigaBor()
 		Tur(EBozorTanlovTur::MiqdorOch),
 		Tur(EBozorTanlovTur::MiqdorKop),
 		Harakat(EBozorHarakat::Tortish),
-		Harakat(EBozorHarakat::TaroziRozi),
-		Tur(EBozorTanlovTur::TolovOch),
+		Harakat(EBozorHarakat::TaroziRozi),   // "mayli" - to'lov oynasi o'zi ochiladi
 		Tur(EBozorTanlovTur::KupyuraQoy),   // eng katta kupyura (ro'yxatda birinchi)
 		Harakat(EBozorHarakat::PulQabul),
 		Harakat(EBozorHarakat::QaytimKam),  // -XatoQaytim bilan sotuvchi kam beradi
@@ -1338,11 +1419,11 @@ void ABozorOyinchi::TestRastasigaBor()
 	TestSuratlar[3] = TEXT("3e_odobli_savdo.png");
 	TestSuratlar[5] = TEXT("3f_miqdor.png");
 	TestSuratlar[6] = TEXT("3f2_tarozi.png");
-	TestSuratlar[8] = TEXT("3g_kupyuralar.png");
-	TestSuratlar[9] = TEXT("3h_peshtaxta.png");
-	TestSuratlar[10] = TEXT("3i_qaytim.png");
-	TestSuratlar[11] = TEXT("3j_qaytim_kam.png");
-	TestSuratlar[15] = TEXT("3k_qopol.png");
+	TestSuratlar[7] = TEXT("3g_kupyuralar.png");
+	TestSuratlar[8] = TEXT("3h_peshtaxta.png");
+	TestSuratlar[9] = TEXT("3i_qaytim.png");
+	TestSuratlar[10] = TEXT("3j_qaytim_kam.png");
+	TestSuratlar[14] = TEXT("3k_qopol.png");
 	TestGaplar = {TEXT("-")};   // TestQadam==5 da qayta chaqirilmasin
 	RastalarniChiqar(false);
 }
@@ -1459,6 +1540,8 @@ void ABozorOyinchi::BotQadami()
 		int32 Jami = 0;
 		for (int32 K : Suhbat->GetPeshtaxta()) Jami += K;
 		if (Jami >= H.Summa) { I = Top(Gap(EBozorHarakat::PulQabul)); BotBerildi = Jami; BotSumma = H.Summa; }
+		// to'lov oynasi o'zi ochiladi; pul yetmasa - yopib, savdolashadi
+		else if (Hamyon->Pul < H.Summa) I = Top(Tur(EBozorTanlovTur::Ortga));
 		else
 		{
 			// qolgan summadan katta bo'lmagan eng katta kupyura, bo'lmasa undan kattasining eng kichigi
@@ -1636,4 +1719,57 @@ ABozorGameMode::ABozorGameMode()
 {
 	DefaultPawnClass = ABozorOyinchi::StaticClass();
 	HUDClass = ABozorHud::StaticClass();
+#if WITH_EDITOR || PLATFORM_ANDROID
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> OsmonMesh(TEXT("/Engine/EngineSky/SM_SkySphere.SM_SkySphere"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> OsmonMaterial(TEXT("/Engine/EngineSky/SkyAtmosphere/SkyAtmosphere_MaterialSkyDome.SkyAtmosphere_MaterialSkyDome"));
+	static ConstructorHelpers::FObjectFinder<UTextureCube> OsmonNuri(TEXT("/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap"));
+	MobilOsmonMesh = OsmonMesh.Object;
+	MobilOsmonMaterial = OsmonMaterial.Object;
+	MobilOsmonNuri = OsmonNuri.Object;
+#endif
+}
+
+void ABozorGameMode::StartPlay()
+{
+#if PLATFORM_ANDROID
+	UWorld* Dunyo = GetWorld();
+	if (Dunyo->GetFeatureLevel() == ERHIFeatureLevel::ES3_1)
+	{
+		if (MobilOsmonMesh && MobilOsmonMaterial)
+		{
+			AStaticMeshActor* Osmon = Dunyo->SpawnActor<AStaticMeshActor>();
+			if (Osmon)
+			{
+				UStaticMeshComponent* Mesh = Osmon->GetStaticMeshComponent();
+				Mesh->SetStaticMesh(MobilOsmonMesh);
+				Mesh->SetMaterial(0, MobilOsmonMaterial);
+				Mesh->SetCastShadow(false);
+				Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				Mesh->SetCanEverAffectNavigation(false);
+				Osmon->SetActorScale3D(FVector(1000000.0 / FMath::Max(1.0, MobilOsmonMesh->GetBounds().SphereRadius)));
+			}
+		}
+
+		for (TActorIterator<ASkyLight> It(Dunyo); It; ++It)
+		{
+			USkyLightComponent* Nur = It->GetLightComponent();
+			if (!Nur || !MobilOsmonNuri) continue;
+			Nur->SetRealTimeCaptureEnabled(false);
+			Nur->SourceType = SLS_SpecifiedCubemap;
+			Nur->SetCubemap(MobilOsmonNuri);
+			Nur->SetIntensity(0.5f);
+			Nur->SetLightColor(FLinearColor(1.0f, 0.94f, 0.86f));
+		}
+		for (TActorIterator<ADirectionalLight> It(Dunyo); It; ++It)
+		{
+			auto* Nur = Cast<UDirectionalLightComponent>(It->GetLightComponent());
+			if (!Nur || !Nur->bAtmosphereSunLight) continue;
+			Nur->SetIntensity(Nur->Intensity * 0.92f);
+			Nur->SetDynamicShadowDistanceMovableLight(FMath::Min(Nur->DynamicShadowDistanceMovableLight, 4500.f));
+			Nur->SetDynamicShadowDistanceStationaryLight(FMath::Min(Nur->DynamicShadowDistanceStationaryLight, 4500.f));
+			Nur->SetDynamicShadowCascades(2);
+		}
+	}
+#endif
+	Super::StartPlay();
 }

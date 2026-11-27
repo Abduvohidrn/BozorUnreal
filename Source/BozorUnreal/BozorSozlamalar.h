@@ -51,7 +51,7 @@ public:
 	static bool TayinlashMumkin(const FKey& K);
 
 	// IMC nusxasi: standart W/A/S/D/Probel o'rniga o'yinchi tanlagan tugmalar (modifikatorlar saqlanadi)
-	UInputMappingContext* MoslashganImc(UInputMappingContext* Asl);
+	UInputMappingContext* MoslashganImc(UInputMappingContext* Asl, UObject* Egasi) const;
 	// o'yindagi o'yinchiga darhol qo'llash (pauza menyusidan o'zgartirilganda)
 	static void OyinchigaQollash(APlayerController* Pc);
 
@@ -62,6 +62,4 @@ public:
 	// Qayta ko'rsatish: konsolda "bozor.OrgatishniTikla"
 	UPROPERTY(Config) TArray<FName> KorilganOrgatish;
 
-private:
-	UPROPERTY(Transient) TMap<TObjectPtr<UInputMappingContext>, TObjectPtr<UInputMappingContext>> ImcNusxalar;
 };

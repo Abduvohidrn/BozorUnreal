@@ -28,6 +28,9 @@ public:
 
 	// ona bilan telefon suhbati davom etyapti (E/Enter shu paytda telefonga tegishli)
 	bool TelefonFaol() const { return Telefon != nullptr; }
+
+	// to'lov oynasida ekran nuqtasida qaysi tugma (suhbat tanlovi indeksi) turibdi - oxirgi chizilgan kadr bo'yicha; yo'q - INDEX_NONE
+	int32 TolovTugmasi(const FVector2D& Nuqta) const;
 	bool BoshqaruvFaol() const { return bFaol; }
 	void MobilRoyxat();
 	void MobilAmal();
@@ -43,6 +46,9 @@ private:
 	void OrgatishChiz();
 	// sotuvchi oldida "E — Gaplashish" belgisi va suhbat oynasi (sotuvchi gapi)
 	void SotuvChiz();
+	// pul berish oynasi: hamyondagi kupyuralar, peshtaxta, "Mana ... so'm" (bola qancha berishini o'zi tanlaydi)
+	void TolovChiz();
+	TArray<TPair<FBox2D, int32>> TolovJoylari;   // tugma joyi -> suhbat tanlovi indeksi
 	// ro'yxat tugagach: chiqishga qaytish belgisi; yetib borganda - natija
 	void QaytishniTekshir();
 	void NatijaChiz();
